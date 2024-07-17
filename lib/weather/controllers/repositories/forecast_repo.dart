@@ -20,6 +20,8 @@ class ForecastRepo {
             "wind_speed_10m",
             "surface_pressure"
           ].join(","),
+          "hourly": ["temperature_2m"].join(","),
+          "forecast_days": 1,
         },
       ),
       (json) => Forecast.fromJson(json),
@@ -40,6 +42,8 @@ class ForecastRepo {
             "weather_code",
             "wind_speed_10m"
           ].join(","),
+          "hourly": ["temperature_2m"].join(","),
+          "forecast_days": 1,
         },
       ),
       (x) => Forecast.fromJson(x),

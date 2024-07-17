@@ -5,6 +5,8 @@ import 'package:weather/shared/utilities/controllers/location_controller.dart';
 import 'package:weather/shared/utilities/providers/device_provider.dart';
 import 'package:weather/weather/controllers/repositories/forecast_repo.dart';
 import 'package:weather/weather/models/forecast.dart';
+import 'package:weather/weather/models/weather_code.dart';
+import 'package:weather/weather/views/components/hour_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,9 +16,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  ForecastRepo forecastRepo = ForecastRepo();
-  LocationController locationController = LocationController();
+  final ScrollController _scrollController = ScrollController();
+  final LocationController locationController = LocationController();
+  final ForecastRepo forecastRepo = ForecastRepo();
+
   Forecast? _localForecast;
+  bool isPressingNewLocation = false;
 
   @override
   void initState() {
@@ -36,12 +41,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void getData() async {
-    print("Getting Data");
-    var data = await forecastRepo.getForecast();
-    print(data);
-  }
-
   void getCurrentPosition() async {
     Position position = Provider.of<DeviceProvider>(context, listen: false)
         .getCurrentLocation()!;
@@ -52,9 +51,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     print("Current location $data");
-
     setState(() {
       _localForecast = data;
+      _scrollController.jumpTo((75.0 + 8) * (DateTime.now().hour - 1));
     });
   }
 
@@ -69,80 +68,133 @@ class _HomeScreenState extends State<HomeScreen> {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("${_localForecast!.temperature.round()}º",
-                      style: Theme.of(context).textTheme.displayLarge),
-                  Text(_localForecast!.weatherCode.description,
-                      style: Theme.of(context)
-                          .textTheme
-                          .displayMedium!
-                          .copyWith(color: Colors.black45)),
+                  Text(
+                    "${_localForecast!.temperature.round()}º",
+                    style: Theme.of(context).textTheme.displayLarge,
+                  ),
+                  Text(
+                    _localForecast!.weatherCode.description,
+                    style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                          color: Colors.black45,
+                        ),
+                  ),
                 ],
               ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(
+              Icons.list,
+              size: 24,
+            ),
+          ),
+        ],
       ),
-      body: Center(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: AspectRatio(
-                      aspectRatio: 9 / 12,
-                      child: Material(
-                        borderRadius: BorderRadius.circular(12),
-                        color: _localForecast?.weatherCode.color ??
-                            Colors.blue.withOpacity(0.4),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
+      body: Padding(
+        padding: EdgeInsets.only(
+          top: 12,
+          bottom: MediaQuery.of(context).padding.bottom,
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Material(
+                  color: _localForecast?.weatherCode.color ??
+                      Colors.grey.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const SizedBox(
+                          height: 200,
+                          width: 200,
+                          child: Material(
+                            color: Colors.blue,
+                          ),
+                        ),
+                        Text(
+                          "${_localForecast?.temperature.round() ?? "XX"}º",
+                          style: Theme.of(context).textTheme.displayLarge,
+                        ),
+                        Text(
+                          _localForecast?.weatherCode.description ??
+                              WeatherCode.unknown.description,
+                        ),
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              const Expanded(
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: SizedBox(
-                                    height: 200,
-                                    width: 200,
-                                    child: Material(
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                ),
+                              weatherDetail(
+                                "Wind",
+                                "${_localForecast?.windSpeed.round() ?? "XX"}km/h",
                               ),
-                              IntrinsicHeight(
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    weatherDetail(
-                                      "Wind",
-                                      "${_localForecast?.windSpeed.round() ?? "XX"}km/h",
-                                    ),
-                                    const VerticalDivider(),
-                                    weatherDetail(
-                                      "Pressure",
-                                      "${_localForecast?.pressure.round() ?? "XX"} mbar",
-                                    ),
-                                    const VerticalDivider(),
-                                    weatherDetail(
-                                      "Humidity",
-                                      "${_localForecast?.humidity ?? "XX"}%",
-                                    )
-                                  ],
-                                ),
+                              const VerticalDivider(color: Colors.black54),
+                              weatherDetail(
+                                "Pressure",
+                                "${_localForecast?.pressure.round() ?? "XX"} mbar",
+                              ),
+                              const VerticalDivider(color: Colors.black54),
+                              weatherDetail(
+                                "Humidity",
+                                "${_localForecast?.humidity ?? "XX"}%",
                               ),
                             ],
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
-              ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 120,
+              child: ListView.separated(
+                shrinkWrap: true,
+                controller: _scrollController,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                itemCount: _localForecast?.hourlyTemperatures.length ?? 0,
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                itemBuilder: (context, index) => WeatherHourCard(
+                  _localForecast!.hourlyTemperatures.entries.elementAt(index),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget addNewLocation(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (details) => setState(() => isPressingNewLocation = true),
+      onTapUp: (details) => setState(() => isPressingNewLocation = false),
+      onTapCancel: () => setState(() => isPressingNewLocation = false),
+      child: Transform.scale(
+        scale: isPressingNewLocation ? 0.95 : 1,
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.grey,
+                width: 2,
+              ),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.add,
+                size: 40,
+              ),
             ),
           ),
         ),
