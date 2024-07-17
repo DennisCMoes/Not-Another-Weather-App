@@ -8,9 +8,10 @@ class Forecast {
   double windSpeed;
   double precipitation;
   int humidity;
+  double pressure;
 
   Forecast(this.latitude, this.longitude, this.temperature, this.weatherCode,
-      this.windSpeed, this.precipitation, this.humidity);
+      this.windSpeed, this.precipitation, this.humidity, this.pressure);
 
   factory Forecast.fromJson(Map<String, dynamic> json) {
     return Forecast(
@@ -21,6 +22,7 @@ class Forecast {
       json['current']['wind_speed_10m'],
       json['current']['precipitation'],
       json['current']['relative_humidity_2m'],
+      json['current']['surface_pressure'],
     );
   }
 

@@ -17,7 +17,8 @@ class ForecastRepo {
             "relative_humidity_2m",
             "precipitation",
             "weather_code",
-            "wind_speed_10m"
+            "wind_speed_10m",
+            "surface_pressure"
           ].join(","),
         },
       ),
