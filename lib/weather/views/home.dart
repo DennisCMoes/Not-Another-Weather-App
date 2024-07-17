@@ -21,16 +21,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    initialization();
-  }
+    DeviceProvider provider =
+        Provider.of<DeviceProvider>(context, listen: false);
 
-  void initialization() async {
-    Position position = await locationController.getCurrentPosition();
-    Provider.of<DeviceProvider>(context, listen: false)
-        .setCurrentLocation(position);
-    FlutterNativeSplash.remove();
-
-    getCurrentPosition();
+    provider.addListener(() {
+      if (provider.getCurrentLocation() != null) {
+        getCurrentPosition();
+      }
+    });
+    // initialization();
   }
 
   void getData() async {
@@ -47,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       position.latitude,
       position.longitude,
     );
-    print(data);
+    print("Current location $data");
   }
 
   @override
