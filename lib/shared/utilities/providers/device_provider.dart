@@ -7,10 +7,6 @@ class DeviceProvider extends ChangeNotifier {
 
   Position? _currentLocation;
 
-  DeviceProvider() {
-    initialization();
-  }
-
   void initialization() async {
     _currentLocation = await _locationController.getCurrentPosition();
     notifyListeners();
