@@ -1,8 +1,10 @@
+import 'package:weather/weather/models/weather_code.dart';
+
 class Forecast {
   double latitude;
   double longitude;
   double temperature;
-  int weatherCode;
+  WeatherCode weatherCode;
   double windSpeed;
   double precipitation;
   int humidity;
@@ -15,7 +17,7 @@ class Forecast {
       json['latitude'],
       json['longitude'],
       json['current']['temperature_2m'],
-      json['current']['weather_code'],
+      WeatherCode.fromCode(json['current']['weather_code']),
       json['current']['wind_speed_10m'],
       json['current']['precipitation'],
       json['current']['relative_humidity_2m'],
@@ -24,6 +26,6 @@ class Forecast {
 
   @override
   String toString() {
-    return "$temperatureº - [$latitude|$longitude]";
+    return "$temperatureº - [$latitude|$longitude] - ${weatherCode.description}";
   }
 }
