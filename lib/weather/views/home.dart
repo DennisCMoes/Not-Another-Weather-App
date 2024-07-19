@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:weather/shared/utilities/controllers/location_controller.dart';
 import 'package:weather/shared/utilities/providers/device_provider.dart';
 import 'package:weather/shared/views/sliding_drawer.dart';
+import 'package:weather/weather/controllers/providers/weather_provider.dart';
 import 'package:weather/weather/controllers/repositories/forecast_repo.dart';
 import 'package:weather/weather/models/forecast.dart';
 import 'package:weather/weather/views/components/forecast_card.dart';
@@ -17,7 +18,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final PageController _pageController = PageController();
   final LocationController locationController = LocationController();
   final ForecastRepo forecastRepo = ForecastRepo();
 
@@ -85,7 +85,9 @@ class _HomeScreenState extends State<HomeScreen> {
             PageView.builder(
               itemCount: 4,
               scrollDirection: Axis.vertical,
-              controller: _pageController,
+              // controller: _pageController,
+              controller: Provider.of<WeatherProvider>(context, listen: false)
+                  .pageController,
               onPageChanged: (int page) {
                 setState(() {
                   selectedPageIndex = page;

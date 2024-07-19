@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:weather/shared/utilities/providers/drawer_provider.dart';
+import 'package:weather/weather/controllers/providers/weather_provider.dart';
 
 class WeatherDrawer extends StatefulWidget {
   const WeatherDrawer({super.key});
@@ -13,27 +16,28 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Locations",
-                    style: Theme.of(context).textTheme.displayMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: 8,
-                    physics: const NeverScrollableScrollPhysics(),
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 12),
-                    itemBuilder: (context, index) => _weatherListTile(index),
-                  )
-                ],
-              ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: NavigationToolbar.kMiddleSpacing,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Locations",
+                  style: Theme.of(context).textTheme.displayLarge,
+                ),
+                const SizedBox(height: 12),
+                ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: 4,
+                  physics: const NeverScrollableScrollPhysics(),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) => _weatherListTile(index),
+                )
+              ],
             ),
           ),
         );
@@ -42,12 +46,24 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
   }
 
   Widget _weatherListTile(int index) {
+    void goToPage() {
+      Provider.of<WeatherProvider>(context, listen: false)
+          .pageController
+          .animateToPage(
+            index,
+            curve: Curves.easeInOut,
+            duration: const Duration(milliseconds: 600),
+          );
+
+      Provider.of<DrawerProvider>(context, listen: false).closeDrawer();
+    }
+
     return Material(
       color: Colors.blue,
       clipBehavior: Clip.hardEdge,
       borderRadius: const BorderRadius.all(Radius.circular(8)),
       child: InkWell(
-        onTap: () {},
+        onTap: goToPage,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(

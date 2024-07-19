@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:weather/shared/utilities/providers/drawer_provider.dart';
 import 'package:weather/weather/models/forecast.dart';
 import 'package:weather/weather/views/components/hour_card.dart';
 
@@ -63,10 +65,14 @@ class ForecastCardState extends State<ForecastCard> {
                               ],
                             ),
                     ),
-                    // IconButton(
-                    //   onPressed: () => Scaffold.of(context).openEndDrawer(),
-                    //   icon: const Icon(Icons.reorder),
-                    // ),
+                    IconButton(
+                      // onPressed: () => Scaffold.of(context).openEndDrawer(),
+                      onPressed: () {
+                        Provider.of<DrawerProvider>(context, listen: false)
+                            .openDrawer();
+                      },
+                      icon: const Icon(Icons.reorder),
+                    ),
                     // Text("Right")
                   ],
                 ),
