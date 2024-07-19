@@ -16,7 +16,7 @@ class SlidingDrawer extends StatefulWidget {
     super.key,
     required this.drawer,
     required this.child,
-    this.swipeSensitivity = 25,
+    this.swipeSensitivity = 15,
     this.drawerRatio = 0.8,
     this.overlayColor = Colors.black,
     this.overlayOpacity = 0.5,
