@@ -4,6 +4,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/shared/utilities/controllers/location_controller.dart';
 import 'package:weather/shared/utilities/providers/device_provider.dart';
+import 'package:weather/shared/utilities/providers/drawer_provider.dart';
+import 'package:weather/weather/controllers/providers/weather_provider.dart';
 import 'package:weather/weather/views/home.dart';
 
 void main() {
@@ -11,8 +13,12 @@ void main() {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => DeviceProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => DeviceProvider()),
+        ChangeNotifierProvider(create: (context) => DrawerProvider()),
+        ChangeNotifierProvider(create: (context) => WeatherProvider()),
+      ],
       child: const MyApp(),
     ),
   );

@@ -46,4 +46,13 @@ class Forecast {
   String toString() {
     return "$temperatureº - [$latitude|$longitude] - ${weatherCode.description}";
   }
+
+  static List<Forecast> sampleData() {
+    return [
+      Forecast(1, 1, 21.2, WeatherCode.clearSky, 12, 24, 64, 1019, {}),
+      Forecast(2, 2, 12.2, WeatherCode.slightRain, 12, 24, 64, 1019, {}),
+      Forecast(3, 3, 24.2, WeatherCode.clearSky, 12, 24, 64, 1019, {}),
+      Forecast(4, 4, 18.2, WeatherCode.overcast, 12, 24, 64, 1019, {}),
+    ];
+  }
 }

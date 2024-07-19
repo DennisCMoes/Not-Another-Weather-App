@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/shared/utilities/providers/drawer_provider.dart';
 import 'package:weather/weather/controllers/providers/weather_provider.dart';
+import 'package:weather/weather/models/forecast.dart';
 
 class WeatherDrawer extends StatefulWidget {
   const WeatherDrawer({super.key});
@@ -13,8 +14,8 @@ class WeatherDrawer extends StatefulWidget {
 class _WeatherDrawerState extends State<WeatherDrawer> {
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
+    return Consumer<WeatherProvider>(
+      builder: (context, state, child) {
         return SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
@@ -31,11 +32,12 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                 const SizedBox(height: 12),
                 ListView.separated(
                   shrinkWrap: true,
-                  itemCount: 4,
+                  itemCount: state.forecasts.length,
                   physics: const NeverScrollableScrollPhysics(),
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 12),
-                  itemBuilder: (context, index) => _weatherListTile(index),
+                  itemBuilder: (context, index) =>
+                      _weatherListTile(index, state.forecasts[index]),
                 )
               ],
             ),
@@ -45,7 +47,7 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
     );
   }
 
-  Widget _weatherListTile(int index) {
+  Widget _weatherListTile(int index, Forecast forecast) {
     void goToPage() {
       Provider.of<WeatherProvider>(context, listen: false)
           .pageController
@@ -59,7 +61,7 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
     }
 
     return Material(
-      color: Colors.blue,
+      color: forecast.weatherCode.colorScheme.mainColor,
       clipBehavior: Clip.hardEdge,
       borderRadius: const BorderRadius.all(Radius.circular(8)),
       child: InkWell(
@@ -75,17 +77,20 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                 children: [
                   Text(
                     "Amsterdam",
-                    style: Theme.of(context).textTheme.displayMedium,
+                    style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                        color: forecast.weatherCode.colorScheme.accentColor),
                   ),
                   Text(
-                    "Sunny",
-                    style: Theme.of(context).textTheme.displaySmall,
+                    forecast.weatherCode.description,
+                    style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                        color: forecast.weatherCode.colorScheme.accentColor),
                   )
                 ],
               ),
               Text(
-                "23º",
-                style: Theme.of(context).textTheme.displayMedium,
+                "${forecast.temperature.round()}º",
+                style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                    color: forecast.weatherCode.colorScheme.accentColor),
               )
             ],
           ),

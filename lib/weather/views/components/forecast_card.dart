@@ -49,8 +49,12 @@ class ForecastCardState extends State<ForecastCard> {
                               children: [
                                 Text(
                                   "${widget._forecast!.temperature.round()}º",
-                                  style:
-                                      Theme.of(context).textTheme.displayLarge,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displayLarge!
+                                      .copyWith(
+                                          color: widget._forecast!.weatherCode
+                                              .colorScheme.accentColor),
                                 ),
                                 Text(
                                   widget._forecast!.weatherCode.description
@@ -59,19 +63,24 @@ class ForecastCardState extends State<ForecastCard> {
                                       .textTheme
                                       .displaySmall!
                                       .copyWith(
-                                        color: Colors.black45,
+                                        color: widget._forecast!.weatherCode
+                                            .colorScheme.accentColor
+                                            .withOpacity(0.6),
                                       ),
                                 ),
                               ],
                             ),
                     ),
                     IconButton(
-                      // onPressed: () => Scaffold.of(context).openEndDrawer(),
                       onPressed: () {
                         Provider.of<DrawerProvider>(context, listen: false)
                             .openDrawer();
                       },
-                      icon: const Icon(Icons.reorder),
+                      icon: Icon(
+                        Icons.reorder,
+                        color: widget
+                            ._forecast!.weatherCode.colorScheme.accentColor,
+                      ),
                     ),
                     // Text("Right")
                   ],
@@ -159,9 +168,16 @@ class ForecastCardState extends State<ForecastCard> {
       children: [
         Text(
           value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: widget._forecast!.weatherCode.colorScheme.accentColor),
         ),
-        Text(description),
+        Text(
+          description,
+          style: TextStyle(
+              color: widget._forecast!.weatherCode.colorScheme.accentColor),
+        ),
       ],
     );
   }

@@ -62,53 +62,56 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SlidingDrawer(
-        // drawer: const Text("Hello"),
         drawer: const WeatherDrawer(),
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding:
-                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                child: const Text("End of the list"),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).padding.bottom),
-                child: const Text("End of the list"),
-              ),
-            ),
-            PageView.builder(
-              itemCount: 4,
-              scrollDirection: Axis.vertical,
-              // controller: _pageController,
-              controller: Provider.of<WeatherProvider>(context, listen: false)
-                  .pageController,
-              onPageChanged: (int page) {
-                setState(() {
-                  selectedPageIndex = page;
-                });
-              },
-              itemBuilder: (context, index) => ForecastCard(_localForecast),
-            ),
-            Positioned.fill(
-              right: 6,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    4,
-                    (index) => _indicator(index, index == selectedPageIndex),
+        child: Consumer<WeatherProvider>(
+          builder: (context, state, child) {
+            return Stack(
+              children: [
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).padding.top),
+                    child: const Text("End of the list"),
                   ),
                 ),
-              ),
-            )
-          ],
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).padding.bottom),
+                    child: const Text("End of the list"),
+                  ),
+                ),
+                PageView.builder(
+                  itemCount: state.forecasts.length,
+                  scrollDirection: Axis.vertical,
+                  controller: state.pageController,
+                  onPageChanged: (int page) {
+                    setState(() {
+                      selectedPageIndex = page;
+                    });
+                  },
+                  itemBuilder: (context, index) =>
+                      ForecastCard(state.forecasts[index]),
+                ),
+                Positioned.fill(
+                  right: 6,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        state.forecasts.length,
+                        (index) =>
+                            _indicator(index, index == selectedPageIndex),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            );
+          },
         ),
       ),
     );

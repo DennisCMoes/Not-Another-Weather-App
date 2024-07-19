@@ -35,65 +35,67 @@ class _SlidingDrawerState extends State<SlidingDrawer> {
     final height = MediaQuery.of(context).size.height;
     final drawerWidth = width * widget.drawerRatio;
 
-    return GestureDetector(
-      onHorizontalDragUpdate: (details) {
-        if (details.delta.dx > widget.swipeSensitivity) {
-          Provider.of<DrawerProvider>(context).openDrawer();
-        } else if (details.delta.dx < -widget.swipeSensitivity) {
-          Provider.of<DrawerProvider>(context).closeDrawer();
-        }
-      },
-      child: Consumer<DrawerProvider>(builder: (context, drawerState, child) {
-        return SizedBox(
-          width: width,
-          height: height,
-          child: Stack(
-            children: [
-              AnimatedPositioned(
-                width: drawerWidth,
-                height: height,
-                left: drawerState.isOpened ? 0 : -drawerWidth,
-                curve: widget.animationCurve,
-                duration: Duration(milliseconds: widget.animationDuration),
-                child: Container(
-                  color: Colors.white,
-                  child: widget.drawer,
+    return Consumer<DrawerProvider>(builder: (context, state, child) {
+      return GestureDetector(
+        onHorizontalDragUpdate: (details) {
+          if (details.delta.dx > widget.swipeSensitivity) {
+            state.openDrawer();
+          } else if (details.delta.dx < -widget.swipeSensitivity) {
+            state.closeDrawer();
+          }
+        },
+        child: Consumer<DrawerProvider>(builder: (context, drawerState, child) {
+          return SizedBox(
+            width: width,
+            height: height,
+            child: Stack(
+              children: [
+                AnimatedPositioned(
+                  width: drawerWidth,
+                  height: height,
+                  left: drawerState.isOpened ? 0 : -drawerWidth,
+                  curve: widget.animationCurve,
+                  duration: Duration(milliseconds: widget.animationDuration),
+                  child: Container(
+                    color: Colors.white,
+                    child: widget.drawer,
+                  ),
                 ),
-              ),
-              AnimatedPositioned(
-                height: height,
-                width: width,
-                left: drawerState.isOpened ? drawerWidth : 0,
-                duration: Duration(milliseconds: widget.animationDuration),
-                curve: widget.animationCurve,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    widget.child,
-                    AnimatedSwitcher(
-                      duration:
-                          Duration(milliseconds: widget.animationDuration),
-                      switchInCurve: widget.animationCurve,
-                      switchOutCurve: widget.animationCurve,
-                      child: drawerState.isOpened
-                          ? GestureDetector(
-                              onTap: () {
-                                drawerState.closeDrawer();
-                              },
-                              child: Container(
-                                color: widget.overlayColor
-                                    .withOpacity(widget.overlayOpacity),
-                              ),
-                            )
-                          : null,
-                    )
-                  ],
+                AnimatedPositioned(
+                  height: height,
+                  width: width,
+                  left: drawerState.isOpened ? drawerWidth : 0,
+                  duration: Duration(milliseconds: widget.animationDuration),
+                  curve: widget.animationCurve,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      widget.child,
+                      AnimatedSwitcher(
+                        duration:
+                            Duration(milliseconds: widget.animationDuration),
+                        switchInCurve: widget.animationCurve,
+                        switchOutCurve: widget.animationCurve,
+                        child: drawerState.isOpened
+                            ? GestureDetector(
+                                onTap: () {
+                                  drawerState.closeDrawer();
+                                },
+                                child: Container(
+                                  color: widget.overlayColor
+                                      .withOpacity(widget.overlayOpacity),
+                                ),
+                              )
+                            : null,
+                      )
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      }),
-    );
+              ],
+            ),
+          );
+        }),
+      );
+    });
   }
 }
