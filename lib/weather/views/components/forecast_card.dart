@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:weather/shared/utilities/providers/drawer_provider.dart';
 import 'package:weather/weather/models/forecast.dart';
 import 'package:weather/weather/models/geocoding.dart';
+import 'package:weather/weather/models/weather_code.dart';
 import 'package:weather/weather/views/components/hour_card.dart';
 
 class ForecastCard extends StatefulWidget {
@@ -25,7 +26,7 @@ class ForecastCardState extends State<ForecastCard> {
           top: 12,
           bottom: MediaQuery.of(context).padding.bottom,
         ),
-        child: Stack(
+        child: Column(
           children: [
             Padding(
               padding: EdgeInsets.only(
@@ -46,25 +47,20 @@ class ForecastCardState extends State<ForecastCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "${widget._geocoding.forecast!.temperature.round()}º",
+                                widget._geocoding.name,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .displayLarge!
+                                    .displayMedium!
                                     .copyWith(
-                                        color: widget
-                                            ._geocoding
-                                            .forecast!
-                                            .weatherCode
-                                            .colorScheme
-                                            .accentColor),
+                                      color: widget._geocoding.forecast!
+                                          .weatherCode.colorScheme.accentColor,
+                                    ),
                               ),
                               Text(
-                                widget._geocoding.forecast!.weatherCode
-                                    .description
-                                    .toUpperCase(),
+                                "${widget._geocoding.forecast!.temperature.round()}º ${widget._geocoding.forecast!.weatherCode.description}",
                                 style: Theme.of(context)
                                     .textTheme
-                                    .displaySmall!
+                                    .displayMedium!
                                     .copyWith(
                                       color: widget._geocoding.forecast!
                                           .weatherCode.colorScheme.accentColor
@@ -89,87 +85,91 @@ class ForecastCardState extends State<ForecastCard> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12.0,
-                  vertical: 24.0,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Stack(
                   children: <Widget>[
-                    Align(
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        height: 200,
-                        width: 200,
-                        child: Material(
-                          color: widget._geocoding.forecast?.weatherCode
-                              .colorScheme.accentColor,
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(18),
+                    Center(
+                      child: ClipPath(
+                        clipper: WeatherCode.getClipper(
+                            widget._geocoding.forecast!.weatherCode),
+                        child: SizedBox(
+                          width: 300,
+                          height: 300,
+                          child: RepaintBoundary(
+                            child: CustomScrollView(
+                              physics: const NeverScrollableScrollPhysics(),
+                              slivers: [
+                                SliverGrid(
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) => ClipOval(
+                                      child: Material(
+                                        color: widget
+                                            ._geocoding
+                                            .forecast!
+                                            .weatherCode
+                                            .colorScheme
+                                            .accentColor,
+                                      ),
+                                    ),
+                                    childCount: 400, // 20 * 20
+                                  ),
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 20,
+                                    crossAxisSpacing: 6,
+                                    mainAxisSpacing: 6,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(widget._geocoding.name),
-                          IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                weatherDetail(
-                                  "Wind",
-                                  "${widget._geocoding.forecast?.windSpeed.round() ?? "XX"}km/h",
-                                ),
-                                VerticalDivider(
-                                  color: widget._geocoding.forecast?.weatherCode
-                                      .colorScheme.accentColor
-                                      .withOpacity(0.6),
-                                ),
-                                weatherDetail(
-                                  "Pressure",
-                                  "${widget._geocoding.forecast?.pressure.round() ?? "XX"} mbar",
-                                ),
-                                VerticalDivider(
-                                  color: widget._geocoding.forecast?.weatherCode
-                                      .colorScheme.accentColor
-                                      .withOpacity(0.6),
-                                ),
-                                weatherDetail(
-                                  "Humidity",
-                                  "${widget._geocoding.forecast?.humidity ?? "XX"}%",
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
                   ],
                 ),
               ),
             ),
-            // const SizedBox(height: 12),
-            // SizedBox(
-            //   height: 120,
-            //   child: ListView.separated(
-            //     shrinkWrap: true,
-            //     controller: _scrollController,
-            //     scrollDirection: Axis.horizontal,
-            //     padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            //     itemCount: widget._forecast?.hourlyTemperatures.length ?? 0,
-            //     separatorBuilder: (context, index) => const SizedBox(width: 8),
-            //     itemBuilder: (context, index) => WeatherHourCard(
-            //       widget._forecast!.hourlyTemperatures.entries.elementAt(index),
-            //     ),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  weatherDetail(
+                    "Wind",
+                    "${widget._geocoding.forecast?.windSpeed.round() ?? "XX"}km/h",
+                  ),
+                  VerticalDivider(
+                    color: widget._geocoding.forecast?.weatherCode.colorScheme
+                        .accentColor
+                        .withOpacity(0.6),
+                  ),
+                  weatherDetail(
+                    "Pressure",
+                    "${widget._geocoding.forecast?.pressure.round() ?? "XX"} mbar",
+                  ),
+                  VerticalDivider(
+                    color: widget._geocoding.forecast?.weatherCode.colorScheme
+                        .accentColor
+                        .withOpacity(0.6),
+                  ),
+                  weatherDetail(
+                    "Humidity",
+                    "${widget._geocoding.forecast?.humidity ?? "XX"}%",
+                  ),
+                ],
+              ),
+            ),
+            // const SizedBox(height: 6),
+            // const SizedBox(
+            //   height: 150,
+            //   child: Material(
+            //     color: Colors.amber,
+            //     child: Text("Chart"),
             //   ),
-            // )
+            // ),
           ],
         ),
       ),

@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:weather/weather/models/colorscheme.dart';
+import 'package:weather/weather/views/clippers/circle_clipper.dart';
+import 'package:weather/weather/views/clippers/cloud_clipper.dart';
+import 'package:weather/weather/views/clippers/fog_clipper.dart';
+import 'package:weather/weather/views/clippers/rain_clipper.dart';
+import 'package:weather/weather/views/clippers/snow_clipper.dart';
+import 'package:weather/weather/views/clippers/sun_clipper.dart';
+import 'package:weather/weather/views/clippers/tunderstorm_clipper.dart';
 
 enum WeatherCode {
   // Sunny
@@ -58,5 +65,30 @@ enum WeatherCode {
     }
 
     return WeatherCode.unknown;
+  }
+
+  static CustomClipper<Path> getClipper(WeatherCode code) {
+    var sunnyCodes = [0];
+    var cloudsCodes = [1, 2, 3];
+    var fogCodes = [45, 46];
+    var rainCodes = [56, 57, 61, 63, 65, 66, 67, 80, 81, 82];
+    var snowCodes = [71, 72, 73, 77, 85, 86];
+    var thunderCodes = [95, 96];
+
+    if (sunnyCodes.contains(code.code)) {
+      return SunClipper();
+    } else if (cloudsCodes.contains(code.code)) {
+      return CloudClipper();
+    } else if (fogCodes.contains(code.code)) {
+      return FogClipper();
+    } else if (rainCodes.contains(code.code)) {
+      return RainClipper();
+    } else if (snowCodes.contains(code.code)) {
+      return CircleClipper();
+    } else if (thunderCodes.contains(code.code)) {
+      return ThunderstormClipper();
+    } else {
+      return CircleClipper();
+    }
   }
 }

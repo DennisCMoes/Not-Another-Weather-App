@@ -53,6 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: state.geocodings.length,
                   scrollDirection: Axis.vertical,
                   controller: state.pageController,
+                  clipBehavior: Clip.none,
                   onPageChanged: (int page) {
                     setState(() {
                       selectedPageIndex = page;
