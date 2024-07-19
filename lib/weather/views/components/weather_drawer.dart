@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:weather/shared/utilities/providers/drawer_provider.dart';
 import 'package:weather/weather/controllers/providers/weather_provider.dart';
 import 'package:weather/weather/models/forecast.dart';
+import 'package:weather/weather/models/geocoding.dart';
 
 class WeatherDrawer extends StatefulWidget {
   const WeatherDrawer({super.key});
@@ -32,13 +33,15 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                 const SizedBox(height: 12),
                 ListView.separated(
                   shrinkWrap: true,
-                  itemCount: state.forecasts.length,
+                  itemCount: state.geocodings.length,
                   physics: const NeverScrollableScrollPhysics(),
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 12),
                   itemBuilder: (context, index) =>
-                      _weatherListTile(index, state.forecasts[index]),
-                )
+                      _weatherListTile(index, state.geocodings[index]),
+                ),
+                const SizedBox(height: 12),
+                _addNewTile(),
               ],
             ),
           ),
@@ -47,7 +50,30 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
     );
   }
 
-  Widget _weatherListTile(int index, Forecast forecast) {
+  Widget _addNewTile() {
+    return Material(
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
+      clipBehavior: Clip.hardEdge,
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {},
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            border: Border.all(width: 1),
+          ),
+          child: const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _weatherListTile(int index, Geocoding geocoding) {
     void goToPage() {
       Provider.of<WeatherProvider>(context, listen: false)
           .pageController
@@ -61,7 +87,8 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
     }
 
     return Material(
-      color: forecast.weatherCode.colorScheme.mainColor,
+      color: geocoding.forecast?.weatherCode.colorScheme.mainColor ??
+          Colors.blueGrey,
       clipBehavior: Clip.hardEdge,
       borderRadius: const BorderRadius.all(Radius.circular(8)),
       child: InkWell(
@@ -76,21 +103,29 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Amsterdam",
+                    geocoding.name,
                     style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                        color: forecast.weatherCode.colorScheme.accentColor),
+                          color: geocoding.forecast?.weatherCode.colorScheme
+                                  .accentColor ??
+                              Colors.white,
+                        ),
                   ),
                   Text(
-                    forecast.weatherCode.description,
+                    geocoding.forecast?.weatherCode.description ?? "XX",
                     style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                        color: forecast.weatherCode.colorScheme.accentColor),
+                          color: geocoding.forecast?.weatherCode.colorScheme
+                                  .accentColor ??
+                              Colors.white,
+                        ),
                   )
                 ],
               ),
               Text(
-                "${forecast.temperature.round()}º",
+                "${geocoding.forecast?.temperature.round() ?? "XX"}º",
                 style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                    color: forecast.weatherCode.colorScheme.accentColor),
+                    color: geocoding
+                            .forecast?.weatherCode.colorScheme.accentColor ??
+                        Colors.white),
               )
             ],
           ),

@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 PageView.builder(
-                  itemCount: state.forecasts.length,
+                  itemCount: state.geocodings.length,
                   scrollDirection: Axis.vertical,
                   controller: state.pageController,
                   onPageChanged: (int page) {
@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     });
                   },
                   itemBuilder: (context, index) =>
-                      ForecastCard(state.forecasts[index]),
+                      ForecastCard(state.geocodings[index]),
                 ),
                 Positioned.fill(
                   right: 6,
@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
-                        state.forecasts.length,
+                        state.geocodings.length,
                         (index) =>
                             _indicator(index, index == selectedPageIndex),
                       ),
@@ -120,12 +120,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _indicator(int index, bool isActive) {
     bool isFirst = index == 0;
 
-    return SizedBox(
-      height: 16,
-      child: Icon(
-        isFirst ? Icons.near_me : Icons.circle,
-        color: isActive ? Colors.green : Colors.red,
-        size: isFirst ? 16 : 10,
+    return GestureDetector(
+      onTap: () {
+        Provider.of<WeatherProvider>(context, listen: false)
+            .pageController
+            .animateToPage(
+              index,
+              curve: Curves.easeInOut,
+              duration: const Duration(milliseconds: 600),
+            );
+      },
+      child: SizedBox(
+        height: 16,
+        child: Icon(
+          isFirst ? Icons.near_me : Icons.circle,
+          color: isActive ? Colors.white : Colors.grey.withOpacity(0.8),
+          size: isFirst ? 16 : 10,
+        ),
       ),
     );
   }
