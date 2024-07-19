@@ -42,11 +42,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initialization() async {
-    Position position = await _locationController.getCurrentPosition();
-
     if (!mounted) return;
-    Provider.of<DeviceProvider>(context, listen: false)
-        .setCurrentLocation(position);
+    Provider.of<WeatherProvider>(context, listen: false).initialization();
   }
 
   // This widget is the root of your application.

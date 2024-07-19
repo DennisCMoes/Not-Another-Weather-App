@@ -27,7 +27,6 @@ class ForecastCardState extends State<ForecastCard> {
         ),
         child: Stack(
           children: [
-            // TODO: The position of the icon button is off. It's to far up
             Padding(
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top,
@@ -115,35 +114,41 @@ class ForecastCardState extends State<ForecastCard> {
                     ),
                     Align(
                       alignment: Alignment.bottomCenter,
-                      child: IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            weatherDetail(
-                              "Wind",
-                              "${widget._geocoding.forecast?.windSpeed.round() ?? "XX"}km/h",
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(widget._geocoding.name),
+                          IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                weatherDetail(
+                                  "Wind",
+                                  "${widget._geocoding.forecast?.windSpeed.round() ?? "XX"}km/h",
+                                ),
+                                VerticalDivider(
+                                  color: widget._geocoding.forecast?.weatherCode
+                                      .colorScheme.accentColor
+                                      .withOpacity(0.6),
+                                ),
+                                weatherDetail(
+                                  "Pressure",
+                                  "${widget._geocoding.forecast?.pressure.round() ?? "XX"} mbar",
+                                ),
+                                VerticalDivider(
+                                  color: widget._geocoding.forecast?.weatherCode
+                                      .colorScheme.accentColor
+                                      .withOpacity(0.6),
+                                ),
+                                weatherDetail(
+                                  "Humidity",
+                                  "${widget._geocoding.forecast?.humidity ?? "XX"}%",
+                                ),
+                              ],
                             ),
-                            VerticalDivider(
-                              color: widget._geocoding.forecast?.weatherCode
-                                  .colorScheme.accentColor
-                                  .withOpacity(0.6),
-                            ),
-                            weatherDetail(
-                              "Pressure",
-                              "${widget._geocoding.forecast?.pressure.round() ?? "XX"} mbar",
-                            ),
-                            VerticalDivider(
-                              color: widget._geocoding.forecast?.weatherCode
-                                  .colorScheme.accentColor
-                                  .withOpacity(0.6),
-                            ),
-                            weatherDetail(
-                              "Humidity",
-                              "${widget._geocoding.forecast?.humidity ?? "XX"}%",
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     )
                   ],

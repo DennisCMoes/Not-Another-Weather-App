@@ -22,41 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final ForecastRepo forecastRepo = ForecastRepo();
 
   int selectedPageIndex = 0;
-
-  Forecast? _localForecast;
   bool isPressingNewLocation = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    DeviceProvider provider =
-        Provider.of<DeviceProvider>(context, listen: false);
-
-    provider.addListener(() {
-      if (provider.getCurrentLocation() != null) {
-        getCurrentPosition();
-      }
-    });
-
-    if (provider.getCurrentLocation() != null) {
-      getCurrentPosition();
-    }
-  }
-
-  void getCurrentPosition() async {
-    Position position = Provider.of<DeviceProvider>(context, listen: false)
-        .getCurrentLocation()!;
-
-    var data = await forecastRepo.getLocalForecast(
-      position.latitude,
-      position.longitude,
-    );
-
-    setState(() {
-      _localForecast = data;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
