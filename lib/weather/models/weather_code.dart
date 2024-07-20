@@ -67,7 +67,11 @@ enum WeatherCode {
     return WeatherCode.unknown;
   }
 
-  static CustomClipper<Path> getClipper(WeatherCode code) {
+  static CustomClipper<Path> getClipper(WeatherCode? code) {
+    if (code == null) {
+      return CircleClipper();
+    }
+
     var sunnyCodes = [0];
     var cloudsCodes = [1, 2, 3];
     var fogCodes = [45, 46];

@@ -36,20 +36,6 @@ class Geocoding {
       Geocoding(2791537, 'Mechelen', 51.02574, 4.47762, 'Belgium')
     ];
 
-    return items.map((var geocoding) {
-      geocoding.forecast = Forecast(
-        geocoding.latitude,
-        geocoding.longitude,
-        random.nextInt(10) + 15,
-        WeatherCode.values[random.nextInt(WeatherCode.values.length)],
-        random.nextDouble() * 100,
-        random.nextDouble() * 100,
-        random.nextInt(100),
-        random.nextDouble() * 150 + 900,
-        {},
-      );
-
-      return geocoding;
-    }).toList();
+    return items;
   }
 }

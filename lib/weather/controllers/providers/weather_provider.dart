@@ -12,7 +12,8 @@ class WeatherProvider extends ChangeNotifier {
   final LocationController _locationController = LocationController();
   final PageController _pageController = PageController();
   final List<Forecast> _forecasts = Forecast.sampleData();
-  final List<Geocoding> _geocodings = [];
+
+  List<Geocoding> _geocodings = [];
 
   PageController get pageController => _pageController;
 
@@ -21,7 +22,7 @@ class WeatherProvider extends ChangeNotifier {
   UnmodifiableListView<Geocoding> get geocodings =>
       UnmodifiableListView(_geocodings);
 
-  void initialization() async {
+  Future<void> initialization() async {
     Position position = await _locationController.getCurrentPosition();
     Geocoding current = Geocoding(
       1,
@@ -31,12 +32,26 @@ class WeatherProvider extends ChangeNotifier {
       'My location',
     );
 
-    Forecast forecast = await _forecastRepo.getLocalForecast(
-        position.latitude, position.longitude);
-    current.forecast = forecast;
+    _geocodings.addAll([current, ...Geocoding.sampleData()]);
+    notifyListeners();
+  }
 
-    _geocodings.add(current);
-    _geocodings.addAll(Geocoding.sampleData());
+  Future<void> updateGeocodingsWithForecasts() async {
+    _geocodings = await Future.wait(_geocodings.map((geo) async {
+      Forecast forecast =
+          await _forecastRepo.getLocalForecast(geo.latitude, geo.longitude);
+      geo.forecast = forecast;
+
+      return geo;
+    }).toList());
+
+    notifyListeners();
+  }
+
+  void moveGeocodings(int oldIndex, int newIndex) {
+    final item = _geocodings.removeAt(oldIndex);
+    _geocodings.insert(newIndex, item);
+
     notifyListeners();
   }
 }

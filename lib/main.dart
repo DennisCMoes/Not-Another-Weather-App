@@ -32,18 +32,24 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final LocationController _locationController = LocationController();
-
   @override
   void initState() {
     super.initState();
 
-    initialization().whenComplete(() => FlutterNativeSplash.remove());
+    initialization()
+        .whenComplete(() => initializeForecasts())
+        .whenComplete(() => FlutterNativeSplash.remove());
   }
 
   Future<void> initialization() async {
     if (!mounted) return;
-    Provider.of<WeatherProvider>(context, listen: false).initialization();
+    await Provider.of<WeatherProvider>(context, listen: false).initialization();
+  }
+
+  Future<void> initializeForecasts() async {
+    if (!mounted) return;
+    await Provider.of<WeatherProvider>(context, listen: false)
+        .updateGeocodingsWithForecasts();
   }
 
   // This widget is the root of your application.
