@@ -31,16 +31,25 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                   style: Theme.of(context).textTheme.displayLarge,
                 ),
                 const SizedBox(height: 12),
-                ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: state.geocodings.length,
-                  physics: const NeverScrollableScrollPhysics(),
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) =>
-                      _weatherListTile(index, state.geocodings[index]),
-                ),
+                state.geocodings.isNotEmpty
+                    ? _weatherListTile(0, state.geocodings[0])
+                    : const SizedBox.shrink(),
                 const SizedBox(height: 12),
+                ReorderableListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onReorder: (oldIndex, newIndex) {
+                    if (newIndex > oldIndex) {
+                      newIndex -= 1;
+                    }
+
+                    state.moveGeocodings(oldIndex + 1, newIndex + 1);
+                  },
+                  children: [
+                    for (int i = 1; i < state.geocodings.length; i++)
+                      _weatherListTile(i, state.geocodings[i]),
+                  ],
+                ),
                 _addNewTile(),
               ],
             ),
@@ -87,6 +96,7 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
     }
 
     return Material(
+      key: ValueKey(geocoding),
       color: geocoding.forecast?.weatherCode.colorScheme.mainColor ??
           Colors.blueGrey,
       clipBehavior: Clip.hardEdge,

@@ -11,14 +11,11 @@ class WeatherProvider extends ChangeNotifier {
   final ForecastRepo _forecastRepo = ForecastRepo();
   final LocationController _locationController = LocationController();
   final PageController _pageController = PageController();
-  final List<Forecast> _forecasts = Forecast.sampleData();
 
   List<Geocoding> _geocodings = [];
 
   PageController get pageController => _pageController;
 
-  UnmodifiableListView<Forecast> get forecasts =>
-      UnmodifiableListView(_forecasts);
   UnmodifiableListView<Geocoding> get geocodings =>
       UnmodifiableListView(_geocodings);
 

@@ -10,6 +10,14 @@ class Forecast {
   double precipitation;
   int humidity;
   double pressure;
+  double apparentTemperature;
+  int cloudCover;
+  int windDirection;
+  double windGusts;
+
+  DateTime sunrise;
+  DateTime sunset;
+
   Map<DateTime, double> hourlyTemperatures;
 
   Forecast(
@@ -21,38 +29,42 @@ class Forecast {
       this.precipitation,
       this.humidity,
       this.pressure,
+      this.apparentTemperature,
+      this.cloudCover,
+      this.windDirection,
+      this.windGusts,
+      this.sunrise,
+      this.sunset,
       this.hourlyTemperatures);
 
   factory Forecast.fromJson(Map<String, dynamic> json) {
     DateFormat format = DateFormat('yyyy-MM-ddThh:mm');
 
     return Forecast(
-        json['latitude'],
-        json['longitude'],
-        json['current']['temperature_2m'],
-        WeatherCode.fromCode(json['current']['weather_code']),
-        json['current']['wind_speed_10m'],
-        json['current']['precipitation'],
-        json['current']['relative_humidity_2m'],
-        json['current']['surface_pressure'],
-        Map.fromIterables(
-          List<String>.from(json['hourly']['time'])
-              .map((time) => format.parse(time)),
-          List<double>.from(json['hourly']['temperature_2m']),
-        ));
+      json['latitude'],
+      json['longitude'],
+      json['current']['temperature_2m'],
+      WeatherCode.fromCode(json['current']['weather_code']),
+      json['current']['wind_speed_10m'],
+      json['current']['precipitation'],
+      json['current']['relative_humidity_2m'],
+      json['current']['surface_pressure'],
+      json['current']['apparent_temperature'],
+      json['current']['cloud_cover'],
+      json['current']['wind_direction_10m'],
+      json['current']['wind_gusts_10m'],
+      format.parse(json['daily']['sunrise'][0]),
+      format.parse(json['daily']['sunset'][0]),
+      Map.fromIterables(
+        List<String>.from(json['hourly']['time'])
+            .map((time) => format.parse(time)),
+        List<double>.from(json['hourly']['temperature_2m']),
+      ),
+    );
   }
 
   @override
   String toString() {
     return "$temperatureº - [$latitude|$longitude] - ${weatherCode.description}";
-  }
-
-  static List<Forecast> sampleData() {
-    return [
-      Forecast(1, 1, 21.2, WeatherCode.clearSky, 12, 24, 64, 1019, {}),
-      Forecast(2, 2, 12.2, WeatherCode.slightRain, 12, 24, 64, 1019, {}),
-      Forecast(3, 3, 24.2, WeatherCode.clearSky, 12, 24, 64, 1019, {}),
-      Forecast(4, 4, 18.2, WeatherCode.overcast, 12, 24, 64, 1019, {}),
-    ];
   }
 }
