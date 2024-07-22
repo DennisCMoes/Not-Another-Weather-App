@@ -20,7 +20,10 @@ class ForecastCard extends StatefulWidget {
 }
 
 class ForecastCardState extends State<ForecastCard> {
-  final PageController _pageController = PageController(initialPage: 1);
+  final PageController _pageController = PageController(initialPage: 0);
+  final ScrollController _scrollController = ScrollController();
+
+  int _selectedSubPage = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -75,10 +78,41 @@ class ForecastCardState extends State<ForecastCard> {
             Expanded(
               child: PageView(
                 controller: _pageController,
+                onPageChanged: (value) =>
+                    setState(() => _selectedSubPage = value),
                 children: [
                   _pageOne(),
                   _pageTwo(),
                 ],
+              ),
+            ),
+            SizedBox(
+              height: 30,
+              width: double.infinity,
+              child: Center(
+                child: ListView.separated(
+                  controller: _scrollController,
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 2,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 12),
+                  itemBuilder: (context, index) => GestureDetector(
+                    onTap: () => _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    ),
+                    child: Text(
+                      "Page ${index + 1}",
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                            color: _selectedSubPage == index
+                                ? Colors.black
+                                : Colors.black45,
+                          ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -285,6 +319,7 @@ class ForecastCardState extends State<ForecastCard> {
       color: widget._geocoding.forecast?.weatherCode.colorScheme
               .darkenMainColor(0.1) ??
           Colors.blueGrey,
+      clipBehavior: Clip.hardEdge,
       child: Stack(
         children: [
           Padding(
@@ -369,12 +404,6 @@ class ForecastCardState extends State<ForecastCard> {
               ],
             ),
           ),
-          Expanded(
-            child: CustomPaint(
-              painter: SunPainter(currentTime: DateTime.now()),
-              child: Container(),
-            ),
-          ),
           Align(
             alignment: Alignment.bottomLeft,
             child: Column(
@@ -388,6 +417,10 @@ class ForecastCardState extends State<ForecastCard> {
                 ),
               ],
             ),
+          ),
+          CustomPaint(
+            painter: SunPainter(currentTime: DateTime.now()),
+            child: Container(),
           ),
         ],
       ),
