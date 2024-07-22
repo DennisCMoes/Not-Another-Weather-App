@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/shared/views/custom_multi_sized_grid.dart';
 import 'package:not_another_weather_app/weather/views/painters/line_chart.dart';
+import 'package:not_another_weather_app/weather/views/painters/sun_painter.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
@@ -364,7 +365,7 @@ class ForecastCardState extends State<ForecastCard> {
             alignment: Alignment.topRight,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 const Text("Sunrise"),
                 Text(
@@ -372,6 +373,12 @@ class ForecastCardState extends State<ForecastCard> {
                   style: Theme.of(context).textTheme.displaySmall,
                 ),
               ],
+            ),
+          ),
+          Expanded(
+            child: CustomPaint(
+              painter: SunPainter(currentTime: DateTime.now()),
+              child: Container(),
             ),
           ),
           Align(
