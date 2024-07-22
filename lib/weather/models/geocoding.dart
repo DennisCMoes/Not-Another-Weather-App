@@ -1,7 +1,7 @@
-import 'package:weather/weather/models/forecast.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'dart:math';
 
-import 'package:weather/weather/models/weather_code.dart';
+import 'package:not_another_weather_app/weather/models/weather_code.dart';
 
 class Geocoding {
   final int id;

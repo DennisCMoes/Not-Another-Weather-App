@@ -1,5 +1,5 @@
 import 'package:intl/intl.dart';
-import 'package:weather/weather/models/weather_code.dart';
+import 'package:not_another_weather_app/weather/models/weather_code.dart';
 
 class Forecast {
   double latitude;

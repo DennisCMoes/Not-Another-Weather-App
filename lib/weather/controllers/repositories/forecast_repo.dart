@@ -1,5 +1,5 @@
-import 'package:weather/shared/utilities/controllers/api_controller.dart';
-import 'package:weather/weather/models/forecast.dart';
+import 'package:not_another_weather_app/shared/utilities/controllers/api_controller.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 
 class ForecastRepo {
   final String _baseUrl = "https://api.open-meteo.com/v1";

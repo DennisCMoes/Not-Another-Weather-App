@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:weather/shared/utilities/controllers/location_controller.dart';
+import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
 
 class DeviceProvider extends ChangeNotifier {
   final LocationController _locationController = LocationController();

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:weather/shared/utilities/providers/drawer_provider.dart';
+import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 
 class SlidingDrawer extends StatefulWidget {
   final Widget drawer;

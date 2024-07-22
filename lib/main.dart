@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
-import 'package:weather/shared/utilities/controllers/location_controller.dart';
-import 'package:weather/shared/utilities/providers/device_provider.dart';
-import 'package:weather/shared/utilities/providers/drawer_provider.dart';
-import 'package:weather/weather/controllers/providers/weather_provider.dart';
-import 'package:weather/weather/views/home.dart';
+import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
+import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
+import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
+import 'package:not_another_weather_app/weather/views/home.dart';
 
 void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();

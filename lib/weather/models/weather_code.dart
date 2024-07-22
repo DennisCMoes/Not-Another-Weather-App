@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:weather/weather/models/colorscheme.dart';
-import 'package:weather/weather/views/clippers/circle_clipper.dart';
-import 'package:weather/weather/views/clippers/cloud_clipper.dart';
-import 'package:weather/weather/views/clippers/fog_clipper.dart';
-import 'package:weather/weather/views/clippers/rain_clipper.dart';
-import 'package:weather/weather/views/clippers/snow_clipper.dart';
-import 'package:weather/weather/views/clippers/sun_clipper.dart';
-import 'package:weather/weather/views/clippers/tunderstorm_clipper.dart';
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
+import 'package:not_another_weather_app/weather/views/clippers/circle_clipper.dart';
+import 'package:not_another_weather_app/weather/views/clippers/cloud_clipper.dart';
+import 'package:not_another_weather_app/weather/views/clippers/fog_clipper.dart';
+import 'package:not_another_weather_app/weather/views/clippers/rain_clipper.dart';
+import 'package:not_another_weather_app/weather/views/clippers/snow_clipper.dart';
+import 'package:not_another_weather_app/weather/views/clippers/sun_clipper.dart';
+import 'package:not_another_weather_app/weather/views/clippers/tunderstorm_clipper.dart';
 
 enum WeatherCode {
   // Sunny

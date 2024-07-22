@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:weather/shared/utilities/providers/drawer_provider.dart';
-import 'package:weather/weather/controllers/providers/weather_provider.dart';
-import 'package:weather/weather/models/forecast.dart';
-import 'package:weather/weather/models/geocoding.dart';
+import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
+import 'package:not_another_weather_app/weather/models/geocoding.dart';
 
 class WeatherDrawer extends StatefulWidget {
   const WeatherDrawer({super.key});

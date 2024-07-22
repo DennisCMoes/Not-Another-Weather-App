@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
-import 'package:weather/shared/utilities/controllers/location_controller.dart';
-import 'package:weather/shared/utilities/providers/device_provider.dart';
-import 'package:weather/shared/views/sliding_drawer.dart';
-import 'package:weather/weather/controllers/providers/weather_provider.dart';
-import 'package:weather/weather/controllers/repositories/forecast_repo.dart';
-import 'package:weather/weather/models/forecast.dart';
-import 'package:weather/weather/views/components/forecast_card.dart';
-import 'package:weather/weather/views/components/weather_drawer.dart';
+import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
+import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
+import 'package:not_another_weather_app/shared/views/sliding_drawer.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
+import 'package:not_another_weather_app/weather/views/components/forecast_card.dart';
+import 'package:not_another_weather_app/weather/views/components/weather_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

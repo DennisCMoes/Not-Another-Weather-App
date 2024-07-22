@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:weather/shared/utilities/providers/drawer_provider.dart';
-import 'package:weather/weather/models/forecast.dart';
-import 'package:weather/weather/models/geocoding.dart';
-import 'package:weather/weather/models/weather_code.dart';
-import 'package:weather/weather/views/components/hour_card.dart';
-import 'package:weather/weather/views/painters/compass_painter.dart';
+import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
+import 'package:not_another_weather_app/weather/models/geocoding.dart';
+import 'package:not_another_weather_app/weather/models/weather_code.dart';
+import 'package:not_another_weather_app/weather/views/components/hour_card.dart';
+import 'package:not_another_weather_app/weather/views/painters/compass_painter.dart';
 
 class ForecastCard extends StatefulWidget {
   final Geocoding _geocoding;
