@@ -20,7 +20,7 @@ class ForecastCard extends StatefulWidget {
 }
 
 class ForecastCardState extends State<ForecastCard> {
-  final PageController _pageController = PageController(initialPage: 0);
+  final PageController _pageController = PageController(initialPage: 1);
 
   @override
   Widget build(BuildContext context) {
