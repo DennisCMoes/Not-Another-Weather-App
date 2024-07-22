@@ -5,10 +5,8 @@ import 'package:not_another_weather_app/weather/views/painters/line_chart.dart';
 import 'package:not_another_weather_app/weather/views/painters/sun_painter.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
-import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/weather_code.dart';
-import 'package:not_another_weather_app/weather/views/components/hour_card.dart';
 import 'package:not_another_weather_app/weather/views/painters/compass_painter.dart';
 
 class ForecastCard extends StatefulWidget {
@@ -21,7 +19,7 @@ class ForecastCard extends StatefulWidget {
 }
 
 class ForecastCardState extends State<ForecastCard> {
-  final PageController _pageController = PageController(initialPage: 1);
+  final PageController _pageController = PageController(initialPage: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -43,40 +41,21 @@ class ForecastCardState extends State<ForecastCard> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Material(
-                    color: Colors.transparent,
-                    child: widget._geocoding.forecast == null
-                        ? Text("Loading",
-                            style: Theme.of(context).textTheme.displayLarge)
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget._geocoding.name,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .displayMedium!
-                                    .copyWith(
-                                      color: widget._geocoding.forecast!
-                                          .weatherCode.colorScheme.accentColor,
-                                    ),
+                  widget._geocoding.forecast == null
+                      ? Text("Loading",
+                          style: Theme.of(context).textTheme.displayLarge)
+                      : Text(
+                          widget._geocoding.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayMedium!
+                              .copyWith(
+                                color: widget._geocoding.forecast!.weatherCode
+                                    .colorScheme.accentColor,
                               ),
-                              Text(
-                                "${widget._geocoding.forecast!.temperature.round()}º ${widget._geocoding.forecast!.weatherCode.description}",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .displayMedium!
-                                    .copyWith(
-                                      color: widget._geocoding.forecast!
-                                          .weatherCode.colorScheme.accentColor
-                                          .withOpacity(0.6),
-                                    ),
-                              ),
-                            ],
-                          ),
-                  ),
+                        ),
                   IconButton(
                     onPressed: () {
                       Provider.of<DrawerProvider>(context, listen: false)
@@ -107,21 +86,17 @@ class ForecastCardState extends State<ForecastCard> {
     );
   }
 
-  Widget _weatherDetailItem(String description, String value) {
-    return Column(
+  Widget _weatherDetailItem(IconData icon, String value) {
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        Icon(icon),
+        const SizedBox(width: 4),
         Text(
           value,
           style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: widget
-                  ._geocoding.forecast?.weatherCode.colorScheme.accentColor),
-        ),
-        Text(
-          description,
-          style: TextStyle(
               color: widget
                   ._geocoding.forecast?.weatherCode.colorScheme.accentColor),
         ),
@@ -138,42 +113,52 @@ class ForecastCardState extends State<ForecastCard> {
             child: Stack(
               children: <Widget>[
                 Center(
-                  child: ClipPath(
-                    clipper: WeatherCode.getClipper(
-                        widget._geocoding.forecast?.weatherCode),
-                    child: SizedBox(
-                      width: 300,
-                      height: 300,
-                      child: RepaintBoundary(
-                        child: CustomScrollView(
-                          physics: const NeverScrollableScrollPhysics(),
-                          slivers: [
-                            SliverGrid(
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) => ClipOval(
-                                  child: Material(
-                                    color: widget
-                                            ._geocoding
-                                            .forecast
-                                            ?.weatherCode
-                                            .colorScheme
-                                            .accentColor ??
-                                        Colors.black,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ClipPath(
+                        clipper: WeatherCode.getClipper(
+                            widget._geocoding.forecast?.weatherCode),
+                        child: SizedBox(
+                          width: 300,
+                          height: 300,
+                          child: RepaintBoundary(
+                            child: CustomScrollView(
+                              physics: const NeverScrollableScrollPhysics(),
+                              slivers: [
+                                SliverGrid(
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) => ClipOval(
+                                      child: Material(
+                                        color: widget
+                                                ._geocoding
+                                                .forecast
+                                                ?.weatherCode
+                                                .colorScheme
+                                                .accentColor ??
+                                            Colors.black,
+                                      ),
+                                    ),
+                                    childCount: 400, // 20 * 20
                                   ),
-                                ),
-                                childCount: 400, // 20 * 20
-                              ),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 20,
-                                crossAxisSpacing: 6,
-                                mainAxisSpacing: 6,
-                              ),
-                            )
-                          ],
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 20,
+                                    crossAxisSpacing: 6,
+                                    mainAxisSpacing: 6,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      Text(
+                        widget._geocoding.forecast?.weatherCode.description ??
+                            "Unknown",
+                        style: Theme.of(context).textTheme.displayMedium,
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -181,30 +166,38 @@ class ForecastCardState extends State<ForecastCard> {
           ),
           IntrinsicHeight(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _weatherDetailItem(
-                  "Wind",
-                  "${widget._geocoding.forecast?.windSpeed.round() ?? "XX"}km/h",
+                IntrinsicWidth(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _weatherDetailItem(
+                        // "Wind",
+                        Icons.air,
+                        "${widget._geocoding.forecast?.windSpeed.round() ?? "XX"}km/h",
+                      ),
+                      _weatherDetailItem(
+                        // "Pressure",
+                        Icons.compress,
+                        "${widget._geocoding.forecast?.pressure.round() ?? "XX"}mbar",
+                      ),
+                      _weatherDetailItem(
+                        // "Humidity",
+                        Icons.opacity,
+                        "${widget._geocoding.forecast?.humidity ?? "XX"}%",
+                      ),
+                    ],
+                  ),
                 ),
-                VerticalDivider(
-                  color: widget
-                      ._geocoding.forecast?.weatherCode.colorScheme.accentColor
-                      .withOpacity(0.6),
-                ),
-                _weatherDetailItem(
-                  "Pressure",
-                  "${widget._geocoding.forecast?.pressure.round() ?? "XX"} mbar",
-                ),
-                VerticalDivider(
-                  color: widget
-                      ._geocoding.forecast?.weatherCode.colorScheme.accentColor
-                      .withOpacity(0.6),
-                ),
-                _weatherDetailItem(
-                  "Humidity",
-                  "${widget._geocoding.forecast?.humidity ?? "XX"}%",
+                Text(
+                  "${widget._geocoding.forecast?.temperature.round() ?? "XX"}º",
+                  style: Theme.of(context)
+                      .textTheme
+                      .displayLarge!
+                      .copyWith(fontSize: 128),
                 ),
               ],
             ),
