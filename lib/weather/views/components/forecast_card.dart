@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/shared/views/custom_multi_sized_grid.dart';
 import 'package:not_another_weather_app/weather/views/painters/line_chart.dart';
+import 'package:not_another_weather_app/weather/views/painters/pressure_gauge_painter.dart';
 import 'package:not_another_weather_app/weather/views/painters/sun_painter.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
@@ -19,7 +20,7 @@ class ForecastCard extends StatefulWidget {
 }
 
 class ForecastCardState extends State<ForecastCard> {
-  final PageController _pageController = PageController(initialPage: 0);
+  final PageController _pageController = PageController(initialPage: 1);
 
   @override
   Widget build(BuildContext context) {
@@ -255,8 +256,8 @@ class ForecastCardState extends State<ForecastCard> {
         id: 6,
         rowSpan: 2,
         colSpan: 2,
-        child: const Text("Child 7"),
-        label: "Air Pressure",
+        child: _pressureCard(),
+        label: "",
         icon: Icons.speed,
       ),
     ];
@@ -390,6 +391,13 @@ class ForecastCardState extends State<ForecastCard> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _pressureCard() {
+    return CustomPaint(
+      painter: PressureGaugePainter(pressure: 1015),
+      child: Container(),
     );
   }
 }
