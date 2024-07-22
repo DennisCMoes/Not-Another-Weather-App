@@ -14,11 +14,13 @@ class Forecast {
   int cloudCover;
   int windDirection;
   double windGusts;
+  int isDay;
 
   DateTime sunrise;
   DateTime sunset;
 
   Map<DateTime, double> hourlyTemperatures;
+  Map<DateTime, int> hourlyRainProbability;
 
   Forecast(
       this.latitude,
@@ -35,7 +37,9 @@ class Forecast {
       this.windGusts,
       this.sunrise,
       this.sunset,
-      this.hourlyTemperatures);
+      this.isDay,
+      this.hourlyTemperatures,
+      this.hourlyRainProbability);
 
   factory Forecast.fromJson(Map<String, dynamic> json) {
     DateFormat format = DateFormat('yyyy-MM-ddThh:mm');
@@ -55,10 +59,16 @@ class Forecast {
       json['current']['wind_gusts_10m'],
       format.parse(json['daily']['sunrise'][0]),
       format.parse(json['daily']['sunset'][0]),
+      json['current']['is_day'],
       Map.fromIterables(
         List<String>.from(json['hourly']['time'])
             .map((time) => format.parse(time)),
         List<double>.from(json['hourly']['temperature_2m']),
+      ),
+      Map.fromIterables(
+        List<String>.from(json['hourly']['time'])
+            .map((time) => format.parse(time)),
+        List<int>.from(json['hourly']['precipitation_probability']),
       ),
     );
   }

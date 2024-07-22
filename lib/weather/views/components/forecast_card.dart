@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:not_another_weather_app/shared/views/custom_multi_sized_grid.dart';
+import 'package:not_another_weather_app/weather/views/painters/line_chart.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
@@ -18,10 +20,10 @@ class ForecastCard extends StatefulWidget {
 }
 
 class ForecastCardState extends State<ForecastCard> {
+  final PageController _pageController = PageController(initialPage: 1);
+
   @override
   Widget build(BuildContext context) {
-    // PageView();
-
     return ColoredBox(
       color: widget._geocoding.forecast?.weatherCode.colorScheme.mainColor ??
           Colors.blueGrey,
@@ -91,6 +93,7 @@ class ForecastCardState extends State<ForecastCard> {
             ),
             Expanded(
               child: PageView(
+                controller: _pageController,
                 children: [
                   _pageOne(),
                   _pageTwo(),
@@ -211,50 +214,106 @@ class ForecastCardState extends State<ForecastCard> {
   }
 
   Widget _pageTwo() {
-    String formatTime(DateTime? dateTime) {
-      return dateTime == null
-          ? "Invalid time"
-          : DateFormat.Hm().format(dateTime);
-    }
+    List<GridItem> items = [
+      GridItem(
+        id: 1,
+        rowSpan: 1,
+        colSpan: 2,
+        child: _feelAndSightCard(
+            "${widget._geocoding.forecast?.apparentTemperature.round()}º",
+            Icons.thermostat),
+        label: "Apparent feel",
+      ),
+      GridItem(
+        id: 3,
+        rowSpan: 2,
+        colSpan: 2,
+        child: _compassCard(),
+        label: "Wind",
+        icon: Icons.air,
+      ),
+      GridItem(
+        id: 2,
+        rowSpan: 1,
+        colSpan: 2,
+        child: _feelAndSightCard(
+            "${widget._geocoding.forecast?.cloudCover ?? "XX"}%",
+            Icons.cloud_outlined),
+        label: "Cloud cover",
+      ),
+      GridItem(
+        id: 4,
+        rowSpan: 2,
+        colSpan: 4,
+        child: _rainForecastCard(),
+        label: "Rain forecast",
+        icon: Icons.water_drop_outlined,
+      ),
+      GridItem(
+        id: 5,
+        rowSpan: 2,
+        colSpan: 2,
+        child: _isDayCard(),
+        label: "",
+        icon: Icons.wb_sunny_outlined,
+      ),
+      GridItem(
+        id: 6,
+        rowSpan: 2,
+        colSpan: 2,
+        child: const Text("Child 7"),
+        label: "Air Pressure",
+        icon: Icons.speed,
+      ),
+    ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      // padding: const EdgeInsets.symmetric(horizontal: NavigationToolbar.kMiddleSpacing),
-      child: GridView(
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: CustomMultiChildLayout(
+        delegate: CustomMultiSizedGridDelegate(items, padding: 12),
+        children: items.map((item) {
+          return LayoutId(
+            id: item.id,
+            child: _forecastCardWrapper(
+              value: item.label!,
+              child: item.child,
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _forecastCardWrapper({required String value, required Widget child}) {
+    return Material(
+      borderRadius: BorderRadius.circular(6),
+      color: widget._geocoding.forecast?.weatherCode.colorScheme
+              .darkenMainColor(0.1) ??
+          Colors.blueGrey,
+      child: Stack(
         children: [
-          _forecastData(
-            "${widget._geocoding.forecast?.apparentTemperature.round() ?? "XX"}º",
-            Icons.thermostat,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Text(value),
+            ),
           ),
-          // _forecastData(
-          //   "${widget._geocoding.forecast?.windDirection ?? "XX"}º",
-          //   Icons.explore,
-          // ),
-          _compassCard(),
-          _forecastData(
-            "${widget._geocoding.forecast?.windGusts.round() ?? "XX"}km/h",
-            Icons.speed,
-          ),
-          _forecastData(
-            "${widget._geocoding.forecast?.cloudCover ?? "XX"}%",
-            Icons.filter_drama,
-          ),
-          _forecastData(
-            formatTime(widget._geocoding.forecast?.sunrise),
-            Icons.keyboard_arrow_up,
-          ),
-          _forecastData(
-            formatTime(widget._geocoding.forecast?.sunset),
-            Icons.keyboard_arrow_down,
-          ),
+          Center(child: child),
         ],
       ),
+    );
+  }
+
+  Widget _feelAndSightCard(String value, IconData icon) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(value, style: Theme.of(context).textTheme.displayLarge),
+        // const SizedBox(width: 4),
+        // Icon(icon, size: 32),
+      ],
     );
   }
 
@@ -281,26 +340,53 @@ class ForecastCardState extends State<ForecastCard> {
     );
   }
 
-  Widget _forecastData(String value, IconData icon) {
-    return Container(
-      decoration: BoxDecoration(
-        color: widget._geocoding.forecast?.weatherCode.colorScheme
-                .darkenMainColor(0.1) ??
-            Colors.blueGrey,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  Widget _rainForecastCard() {
+    return CustomPaint(
+      painter: LineChartPainter(
+          widget._geocoding.forecast?.hourlyRainProbability ?? {}),
+      child: Container(),
+    );
+  }
+
+  Widget _isDayCard() {
+    String formatTime(DateTime? dateTime) {
+      return dateTime == null
+          ? "Invalid time"
+          : DateFormat.Hm().format(dateTime);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          Icon(icon, size: 48),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                  color: widget._geocoding.forecast?.weatherCode.colorScheme
-                          .accentColor ??
-                      Colors.white,
+          Align(
+            alignment: Alignment.topRight,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Sunrise"),
+                Text(
+                  formatTime(widget._geocoding.forecast?.sunrise),
+                  style: Theme.of(context).textTheme.displaySmall,
                 ),
+              ],
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Sunset"),
+                Text(
+                  formatTime(widget._geocoding.forecast?.sunset),
+                  style: Theme.of(context).textTheme.displaySmall,
+                ),
+              ],
+            ),
           ),
         ],
       ),
