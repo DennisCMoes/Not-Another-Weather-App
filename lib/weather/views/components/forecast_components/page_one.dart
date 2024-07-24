@@ -13,7 +13,7 @@ class PageOne extends StatefulWidget {
 }
 
 class _PageOneState extends State<PageOne> {
-  bool isEditing = true;
+  bool isEditing = false;
 
   void toggleIsEditing() {
     setState(() {
@@ -40,43 +40,79 @@ class _PageOneState extends State<PageOne> {
             children: [
               Text("Replacing ${field.label.toLowerCase()}"),
               Expanded(
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: fieldList.length,
-                    itemBuilder: (context, index) {
-                      SelectableForecastFields forecastField = fieldList[index];
+                child: GridView.builder(
+                  itemCount: fieldList.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 21 / 9,
+                  ),
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).padding.bottom),
+                  itemBuilder: (context, index) {
+                    SelectableForecastFields forecastField = fieldList[index];
+                    bool alreadyIncluded;
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: InkWell(
-                          onTap: () {
-                            if (isMainField) {
-                              setState(() {
-                                widget.geocoding.selectedMainField =
-                                    forecastField;
-                              });
-                            } else {
-                              int index = widget.geocoding.selectedForecastItems
-                                  .indexOf(field);
+                    if (isMainField) {
+                      alreadyIncluded =
+                          widget.geocoding.selectedMainField == forecastField;
+                    } else {
+                      alreadyIncluded = widget.geocoding.selectedForecastItems
+                          .contains(forecastField);
+                    }
 
-                              setState(() {
-                                widget.geocoding.selectedForecastItems[index] =
-                                    forecastField;
-                              });
-                            }
+                    return Material(
+                      color:
+                          alreadyIncluded ? Colors.blue[200] : Colors.blue[800],
+                      borderRadius: BorderRadius.circular(8),
+                      child: InkWell(
+                        splashColor:
+                            alreadyIncluded ? Colors.transparent : null,
+                        highlightColor:
+                            alreadyIncluded ? Colors.transparent : null,
+                        onTap: () {
+                          if (alreadyIncluded) {
+                            return;
+                          }
 
-                            Navigator.of(context).pop();
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(forecastField.icon),
-                              Text(forecastField.label),
-                            ],
-                          ),
+                          if (isMainField) {
+                            setState(() {
+                              widget.geocoding.selectedMainField =
+                                  forecastField;
+                            });
+                          } else {
+                            int index = widget.geocoding.selectedForecastItems
+                                .indexOf(field);
+
+                            setState(() {
+                              widget.geocoding.selectedForecastItems[index] =
+                                  forecastField;
+                            });
+                          }
+
+                          Navigator.of(context).pop();
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(forecastField.icon,
+                                color: alreadyIncluded
+                                    ? Colors.white54
+                                    : Colors.white),
+                            Text(forecastField.label,
+                                style: TextStyle(
+                                    color: alreadyIncluded
+                                        ? Colors.white54
+                                        : Colors.white)),
+                          ],
                         ),
-                      );
-                    }),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
