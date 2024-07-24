@@ -27,7 +27,11 @@ class ForecastRepo {
             "wind_gusts_10m",
             "is_day",
           ].join(","),
-          "hourly": ["temperature_2m", "precipitation_probability"].join(","),
+          "hourly": [
+            "temperature_2m",
+            "precipitation_probability",
+            "precipitation"
+          ].join(","),
           "daily": ["sunrise", "sunset"].join(","),
         },
       ),
