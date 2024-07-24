@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/weather/models/weather_code.dart';
 
@@ -7,6 +8,26 @@ class HourlyWeatherData {
   final double rainInMM;
 
   HourlyWeatherData(this.temperature, this.rainProbability, this.rainInMM);
+}
+
+enum SelectableForecastFields {
+  temperature("Temperature", Icons.thermostat, true),
+  windSpeed("Wind speed", Icons.air, false),
+  precipitation("Precipitation", Icons.water_drop, false),
+  chainceOfRain("Chance of rain", Icons.umbrella, true),
+  sunrise("Sunrise", Icons.keyboard_arrow_up, false),
+  sunset("Sunset", Icons.keyboard_arrow_down, false),
+  humidity("Humidity", Icons.percent, true),
+  windDirection("Wind direction", Icons.directions, false),
+  windGusts("Wind gusts", Icons.speed, false),
+  cloudCover("Cloud cover", Icons.cloud, true);
+
+  const SelectableForecastFields(
+      this.label, this.icon, this.mainFieldAccessible);
+
+  final String label;
+  final IconData icon;
+  final bool mainFieldAccessible;
 }
 
 class Forecast {
@@ -103,6 +124,35 @@ class Forecast {
 
   Map<DateTime, double> get rainInMMs => hourlyWeatherData
       .map((dateTime, weather) => MapEntry(dateTime, weather.rainInMM));
+
+  dynamic getField(SelectableForecastFields field) {
+    DateFormat hourFormat = DateFormat("HH:MM");
+
+    switch (field) {
+      case SelectableForecastFields.temperature:
+        return "${temperature.round()}º";
+      case SelectableForecastFields.windSpeed:
+        return "${windSpeed.round()}km/h";
+      case SelectableForecastFields.precipitation:
+        return "${precipitation}mm";
+      case SelectableForecastFields.chainceOfRain:
+        return "${rainProbabilities.values.first}%";
+      case SelectableForecastFields.sunrise:
+        return hourFormat.format(sunrise);
+      case SelectableForecastFields.sunset:
+        return hourFormat.format(sunset);
+      case SelectableForecastFields.humidity:
+        return "$humidity%";
+      case SelectableForecastFields.windDirection:
+        return "$windDirectionº";
+      case SelectableForecastFields.windGusts:
+        return "${windGusts.round()}km/h";
+      case SelectableForecastFields.cloudCover:
+        return "$cloudCover%";
+      default:
+        return "Unknown";
+    }
+  }
 
   @override
   String toString() {

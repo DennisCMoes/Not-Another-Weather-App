@@ -1,7 +1,4 @@
 import 'package:not_another_weather_app/weather/models/forecast.dart';
-import 'dart:math';
-
-import 'package:not_another_weather_app/weather/models/weather_code.dart';
 
 class Geocoding {
   final int id;
@@ -11,6 +8,15 @@ class Geocoding {
   String country;
 
   Forecast? forecast;
+
+  SelectableForecastFields selectedMainField =
+      SelectableForecastFields.temperature;
+
+  List<SelectableForecastFields> selectedForecastItems = [
+    SelectableForecastFields.windSpeed,
+    SelectableForecastFields.precipitation,
+    SelectableForecastFields.chainceOfRain
+  ];
 
   Geocoding(this.id, this.name, this.latitude, this.longitude, this.country);
 
@@ -25,8 +31,6 @@ class Geocoding {
   }
 
   static List<Geocoding> sampleData() {
-    var random = Random();
-
     var items = [
       Geocoding(2759794, 'Amsterdam', 52.37403, 4.88969, "Netherlands"),
       Geocoding(2911298, 'Hamburg', 53.55073, 9.99302, 'Germany'),

@@ -95,7 +95,6 @@ class ForecastCardState extends State<ForecastCard> {
                                 .colorScheme.accentColor ??
                             Colors.grey),
                   ),
-                  // Text("Right")
                 ],
               ),
             ),
@@ -150,6 +149,7 @@ class ForecastCardState extends State<ForecastCard> {
                           ),
                           child: Text(
                             "Page ${index + 1}",
+                            // TODO: Change this to the accent color of the colorscheme
                             style: Theme.of(context)
                                 .textTheme
                                 .displaySmall!

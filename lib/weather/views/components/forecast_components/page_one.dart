@@ -1,11 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/weather_code.dart';
 
-class PageOne extends StatelessWidget {
+class PageOne extends StatefulWidget {
   final Geocoding geocoding;
 
   const PageOne({required this.geocoding, super.key});
+
+  @override
+  State<PageOne> createState() => _PageOneState();
+}
+
+class _PageOneState extends State<PageOne> {
+  bool isEditing = true;
+
+  void toggleIsEditing() {
+    setState(() {
+      isEditing = !isEditing;
+    });
+  }
+
+  void showSelectedFieldMenu(SelectableForecastFields field, bool isMainField) {
+    List<SelectableForecastFields> fieldList = isMainField
+        ? SelectableForecastFields.values
+            .where((e) => e.mainFieldAccessible == true)
+            .toList()
+        : SelectableForecastFields.values;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: Padding(
+          padding: const EdgeInsets.all(NavigationToolbar.kMiddleSpacing),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Replacing ${field.label.toLowerCase()}"),
+              Expanded(
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: fieldList.length,
+                    itemBuilder: (context, index) {
+                      SelectableForecastFields forecastField = fieldList[index];
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: InkWell(
+                          onTap: () {
+                            if (isMainField) {
+                              setState(() {
+                                widget.geocoding.selectedMainField =
+                                    forecastField;
+                              });
+                            } else {
+                              int index = widget.geocoding.selectedForecastItems
+                                  .indexOf(field);
+
+                              setState(() {
+                                widget.geocoding.selectedForecastItems[index] =
+                                    forecastField;
+                              });
+                            }
+
+                            Navigator.of(context).pop();
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(forecastField.icon),
+                              Text(forecastField.label),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +94,23 @@ class PageOne extends StatelessWidget {
           Expanded(
             child: Stack(
               children: <Widget>[
+                IconButton(
+                  onPressed: toggleIsEditing,
+                  icon: Icon(
+                    isEditing ? Icons.edit_off : Icons.edit,
+                    color: widget.geocoding.forecast?.weatherCode.colorScheme
+                            .accentColor ??
+                        Colors.grey,
+                  ),
+                  visualDensity: VisualDensity.compact,
+                ),
                 Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ClipPath(
                         clipper: WeatherCode.getClipper(
-                            geocoding.forecast?.weatherCode),
+                            widget.geocoding.forecast?.weatherCode),
                         child: SizedBox(
                           width: 300,
                           height: 300,
@@ -34,8 +122,12 @@ class PageOne extends StatelessWidget {
                                   delegate: SliverChildBuilderDelegate(
                                     (context, index) => ClipOval(
                                       child: Material(
-                                        color: geocoding.forecast?.weatherCode
-                                                .colorScheme.accentColor ??
+                                        color: widget
+                                                .geocoding
+                                                .forecast
+                                                ?.weatherCode
+                                                .colorScheme
+                                                .accentColor ??
                                             Colors.black,
                                       ),
                                     ),
@@ -54,9 +146,14 @@ class PageOne extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        geocoding.forecast?.weatherCode.description ??
+                        widget.geocoding.forecast?.weatherCode.description ??
                             "Unknown",
-                        style: Theme.of(context).textTheme.displayMedium,
+                        style:
+                            Theme.of(context).textTheme.displayMedium!.copyWith(
+                                  color: widget.geocoding.forecast?.weatherCode
+                                          .colorScheme.accentColor ??
+                                      Colors.white,
+                                ),
                       ),
                     ],
                   ),
@@ -72,33 +169,37 @@ class PageOne extends StatelessWidget {
               children: [
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _weatherDetailItem(
-                        // "Wind",
-                        Icons.air,
-                        "${geocoding.forecast?.windSpeed.round() ?? "XX"}km/h",
-                      ),
-                      _weatherDetailItem(
-                        // "Rain in MM",
-                        Icons.water_drop_outlined,
-                        "${geocoding.forecast?.getCurrentHourData().rainInMM ?? "XX"}mm",
-                      ),
-                      _weatherDetailItem(
-                          // "Chance of rain",
-                          Icons.umbrella,
-                          "${geocoding.forecast?.getCurrentHourData().rainProbability ?? "XX"}%"),
-                    ],
+                    children: widget.geocoding.selectedForecastItems
+                        .map((e) => _weatherDetailItem(context, e))
+                        .toList(),
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  "${geocoding.forecast?.temperature.round() ?? "XX"}º",
-                  style: Theme.of(context)
-                      .textTheme
-                      .displayLarge!
-                      .copyWith(fontSize: 128),
+                GestureDetector(
+                  onTap: () {
+                    if (isEditing) {
+                      showSelectedFieldMenu(
+                          widget.geocoding.selectedMainField, true);
+                    }
+                  },
+                  child: Container(
+                    decoration: isEditing
+                        ? BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.black, width: 1))
+                        : null,
+                    child: Text(
+                      "${widget.geocoding.forecast?.getField(widget.geocoding.selectedMainField) ?? "XX"}",
+                      style: Theme.of(context).textTheme.displayLarge!.copyWith(
+                            fontSize: 128,
+                            color: widget.geocoding.forecast?.weatherCode
+                                    .colorScheme.accentColor ??
+                                Colors.white,
+                          ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -108,20 +209,43 @@ class PageOne extends StatelessWidget {
     );
   }
 
-  Widget _weatherDetailItem(IconData icon, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(icon),
-        const SizedBox(width: 4),
-        Text(
-          value,
-          style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: geocoding.forecast?.weatherCode.colorScheme.accentColor),
+  // Widget _weatherDetailItem(BuildContext context, IconData icon, String value) {
+  Widget _weatherDetailItem(
+      BuildContext context, SelectableForecastFields field) {
+    return GestureDetector(
+      onTap: () {
+        if (isEditing) {
+          showSelectedFieldMenu(field, false);
+        }
+      },
+      child: Container(
+        decoration: isEditing
+            ? BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.black, width: 1))
+            : null,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              field.icon,
+              color: widget.geocoding.forecast?.weatherCode.colorScheme
+                      .accentColor ??
+                  Colors.white,
+            ),
+            Text(
+              widget.geocoding.forecast?.getField(field).toString() ?? "XX",
+              // field.label,
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: widget
+                      .geocoding.forecast?.weatherCode.colorScheme.accentColor),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
