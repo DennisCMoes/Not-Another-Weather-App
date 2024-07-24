@@ -156,5 +156,5 @@ class LineChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) =>
-      true; // TODO: Change this so that it only redraws on value changes
+      this != oldDelegate;
 }

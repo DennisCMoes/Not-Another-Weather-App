@@ -57,7 +57,8 @@ class SunPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+      oldDelegate != this;
 
   Offset getQuadraticBezierPoint(
       Offset start, Offset control, Offset end, double t) {

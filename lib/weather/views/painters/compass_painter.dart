@@ -65,5 +65,6 @@ class CompassPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+      oldDelegate != this;
 }
