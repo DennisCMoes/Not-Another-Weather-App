@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/weather_code.dart';
+import 'package:not_another_weather_app/weather/views/components/forecast_components/selectable_widget_grid.dart';
+import 'package:not_another_weather_app/weather/views/routes/widget_overlay.dart';
 
 class PageOne extends StatefulWidget {
   final Geocoding geocoding;
@@ -28,97 +30,18 @@ class _PageOneState extends State<PageOne> {
             .toList()
         : SelectableForecastFields.values;
 
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: Padding(
-          padding: const EdgeInsets.all(NavigationToolbar.kMiddleSpacing),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Replacing ${field.label.toLowerCase()}"),
-              Expanded(
-                child: GridView.builder(
-                  itemCount: fieldList.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 21 / 9,
-                  ),
-                  padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).padding.bottom),
-                  itemBuilder: (context, index) {
-                    SelectableForecastFields forecastField = fieldList[index];
-                    bool alreadyIncluded;
-
-                    if (isMainField) {
-                      alreadyIncluded =
-                          widget.geocoding.selectedMainField == forecastField;
-                    } else {
-                      alreadyIncluded = widget.geocoding.selectedForecastItems
-                          .contains(forecastField);
-                    }
-
-                    return Material(
-                      color:
-                          alreadyIncluded ? Colors.blue[200] : Colors.blue[800],
-                      borderRadius: BorderRadius.circular(8),
-                      child: InkWell(
-                        splashColor:
-                            alreadyIncluded ? Colors.transparent : null,
-                        highlightColor:
-                            alreadyIncluded ? Colors.transparent : null,
-                        onTap: () {
-                          if (alreadyIncluded) {
-                            return;
-                          }
-
-                          if (isMainField) {
-                            setState(() {
-                              widget.geocoding.selectedMainField =
-                                  forecastField;
-                            });
-                          } else {
-                            int index = widget.geocoding.selectedForecastItems
-                                .indexOf(field);
-
-                            setState(() {
-                              widget.geocoding.selectedForecastItems[index] =
-                                  forecastField;
-                            });
-                          }
-
-                          Navigator.of(context).pop();
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(forecastField.icon,
-                                color: alreadyIncluded
-                                    ? Colors.white54
-                                    : Colors.white),
-                            Text(forecastField.label,
-                                style: TextStyle(
-                                    color: alreadyIncluded
-                                        ? Colors.white54
-                                        : Colors.white)),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+    Navigator.of(context).push(
+      WidgetOverlay(
+        overlayChild: SelectableWidgetGrid(
+          geocoding: widget.geocoding,
+          fieldToReplace: field,
+          fields: fieldList,
+          isMainField: isMainField,
         ),
       ),
     );
+
+    return;
   }
 
   @override

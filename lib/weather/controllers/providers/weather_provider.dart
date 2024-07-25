@@ -51,4 +51,18 @@ class WeatherProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  void changeSelectedMainField(
+      Geocoding selectedGeocoding, SelectableForecastFields field) {
+    int index = _geocodings.indexOf(selectedGeocoding);
+    _geocodings[index].selectedMainField = field;
+    notifyListeners();
+  }
+
+  void replaceSelectedForecastItem(
+      Geocoding selectedGeocoding, SelectableForecastFields field, int index) {
+    int geoIndex = _geocodings.indexOf(selectedGeocoding);
+    _geocodings[geoIndex].selectedForecastItems[index] = field;
+    notifyListeners();
+  }
 }
