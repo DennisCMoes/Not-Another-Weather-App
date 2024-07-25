@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/views/components/forecast_components/page_one.dart';
 import 'package:not_another_weather_app/weather/views/components/forecast_components/page_two.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +16,7 @@ class ForecastCard extends StatefulWidget {
 }
 
 class ForecastCardState extends State<ForecastCard> {
-  final PageController _pageController = PageController(initialPage: 0);
+  late PageController _pageController;
   final ScrollController _scrollController = ScrollController();
   final PageController _subPageController = PageController();
 
@@ -24,6 +25,10 @@ class ForecastCardState extends State<ForecastCard> {
   @override
   void initState() {
     super.initState();
+
+    _selectedSubPage = widget._geocoding.selectedPage;
+    _pageController =
+        PageController(initialPage: widget._geocoding.selectedPage);
     _subPageController.addListener(_scrollToSelectedPage);
   }
 
@@ -47,6 +52,11 @@ class ForecastCardState extends State<ForecastCard> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+  }
+
+  void _onSubPageScroll(int index) {
+    Provider.of<WeatherProvider>(context, listen: false)
+        .changeSelectedPage(widget._geocoding, index);
   }
 
   @override
@@ -102,12 +112,13 @@ class ForecastCardState extends State<ForecastCard> {
               child: PageView(
                 controller: _pageController,
                 onPageChanged: (value) {
+                  _onSubPageScroll(value);
+
                   setState(() {
                     _selectedSubPage = value;
                   });
                 },
                 children: [
-                  // pageOne(),
                   PageOne(geocoding: widget._geocoding),
                   PageTwo(
                     geocoding: widget._geocoding,

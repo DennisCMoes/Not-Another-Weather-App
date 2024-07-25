@@ -9,6 +9,8 @@ class Geocoding {
 
   Forecast? forecast;
 
+  int selectedPage = 0;
+
   SelectableForecastFields selectedMainField =
       SelectableForecastFields.temperature;
 
