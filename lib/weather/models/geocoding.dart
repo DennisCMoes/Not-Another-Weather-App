@@ -44,4 +44,9 @@ class Geocoding {
 
     return items;
   }
+
+  @override
+  String toString() {
+    return "$country - $name";
+  }
 }

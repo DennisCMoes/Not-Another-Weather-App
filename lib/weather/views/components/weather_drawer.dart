@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
-import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 
 class WeatherDrawer extends StatefulWidget {
@@ -13,16 +13,49 @@ class WeatherDrawer extends StatefulWidget {
 }
 
 class _WeatherDrawerState extends State<WeatherDrawer> {
+  final FocusNode _focusNode = FocusNode();
+  final TextEditingController _textEditingController = TextEditingController();
+  final GeocodingRepo _geocodingRepo = GeocodingRepo();
+
+  List<Geocoding> searchedGeocodings = [];
+
+  bool isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+
+    super.dispose();
+  }
+
+  void _searchGeocodings(String searchValue) async {
+    var results = await _geocodingRepo.getGeocodings(searchValue);
+
+    setState(() {
+      searchedGeocodings = results;
+    });
+  }
+
+  void _onFocusChange() {
+    setState(() {
+      isSearching = _focusNode.hasFocus;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<WeatherProvider>(
       builder: (context, state, child) {
         return SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: NavigationToolbar.kMiddleSpacing,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -30,27 +63,48 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                   "Locations",
                   style: Theme.of(context).textTheme.displayLarge,
                 ),
-                const SizedBox(height: 12),
-                state.geocodings.isNotEmpty
-                    ? _weatherListTile(0, state.geocodings[0])
-                    : const SizedBox.shrink(),
-                const SizedBox(height: 12),
-                ReorderableListView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  onReorder: (oldIndex, newIndex) {
-                    if (newIndex > oldIndex) {
-                      newIndex -= 1;
-                    }
-
-                    state.moveGeocodings(oldIndex + 1, newIndex + 1);
-                  },
-                  children: [
-                    for (int i = 1; i < state.geocodings.length; i++)
-                      _weatherListTile(i, state.geocodings[i]),
-                  ],
+                TextField(
+                  focusNode: _focusNode,
+                  controller: _textEditingController,
+                  onChanged: _searchGeocodings,
+                  onTapOutside: (event) =>
+                      FocusScope.of(context).requestFocus(FocusNode()),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                    hintText: "Enter a city name",
+                  ),
                 ),
-                _addNewTile(),
+                Builder(
+                  builder: (context) {
+                    if (searchedGeocodings.isNotEmpty) {
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: searchedGeocodings.length,
+                        itemBuilder: (context, index) => _weatherListTile(
+                            index, searchedGeocodings[index], true),
+                      );
+                    } else {
+                      return ReorderableListView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        header: state.geocodings.isNotEmpty
+                            ? _weatherListTile(0, state.geocodings[0])
+                            : const SizedBox.shrink(),
+                        onReorder: (oldIndex, newIndex) {
+                          if (newIndex > oldIndex) {
+                            newIndex -= 1;
+                          }
+
+                          state.moveGeocodings(oldIndex + 1, newIndex + 1);
+                        },
+                        children: [
+                          for (int i = 1; i < state.geocodings.length; i++)
+                            _weatherListTile(i, state.geocodings[i])
+                        ],
+                      );
+                    }
+                  },
+                ),
               ],
             ),
           ),
@@ -59,40 +113,25 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
     );
   }
 
-  Widget _addNewTile() {
-    return Material(
-      borderRadius: const BorderRadius.all(Radius.circular(8)),
-      clipBehavior: Clip.hardEdge,
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {},
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            border: Border.all(width: 1),
-          ),
-          child: const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(
-              child: Icon(Icons.add),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _weatherListTile(int index, Geocoding geocoding,
+      [bool isSearching = false]) {
+    void onClick() {
+      if (isSearching) {
+        _textEditingController.clear();
+        setState(() {
+          searchedGeocodings = [];
+        });
+      } else {
+        Provider.of<WeatherProvider>(context, listen: false)
+            .pageController
+            .animateToPage(
+              index,
+              curve: Curves.easeInOut,
+              duration: const Duration(milliseconds: 600),
+            );
 
-  Widget _weatherListTile(int index, Geocoding geocoding) {
-    void goToPage() {
-      Provider.of<WeatherProvider>(context, listen: false)
-          .pageController
-          .animateToPage(
-            index,
-            curve: Curves.easeInOut,
-            duration: const Duration(milliseconds: 600),
-          );
-
-      Provider.of<DrawerProvider>(context, listen: false).closeDrawer();
+        Provider.of<DrawerProvider>(context, listen: false).closeDrawer();
+      }
     }
 
     return Material(
@@ -100,43 +139,53 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
       color: geocoding.forecast?.weatherCode.colorScheme.mainColor ??
           Colors.blueGrey,
       clipBehavior: Clip.hardEdge,
-      borderRadius: const BorderRadius.all(Radius.circular(8)),
       child: InkWell(
-        onTap: goToPage,
+        onTap: onClick,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    geocoding.name,
-                    style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                          color: geocoding.forecast?.weatherCode.colorScheme
-                                  .accentColor ??
-                              Colors.white,
-                        ),
-                  ),
-                  Text(
-                    geocoding.forecast?.weatherCode.description ?? "XX",
-                    style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                          color: geocoding.forecast?.weatherCode.colorScheme
-                                  .accentColor ??
-                              Colors.white,
-                        ),
-                  )
-                ],
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      geocoding.name,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          Theme.of(context).textTheme.displayMedium!.copyWith(
+                                color: geocoding.forecast?.weatherCode
+                                        .colorScheme.accentColor ??
+                                    Colors.white,
+                              ),
+                    ),
+                    Text(
+                      isSearching
+                          ? geocoding.country
+                          : geocoding.forecast?.weatherCode.description ?? "XX",
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                            color: geocoding.forecast?.weatherCode.colorScheme
+                                    .accentColor ??
+                                Colors.white,
+                          ),
+                    ),
+                  ],
+                ),
               ),
-              Text(
-                "${geocoding.forecast?.temperature.round() ?? "XX"}º",
-                style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                    color: geocoding
-                            .forecast?.weatherCode.colorScheme.accentColor ??
-                        Colors.white),
-              )
+              isSearching
+                  ? const SizedBox.shrink()
+                  : Text(
+                      "${geocoding.forecast?.temperature.round() ?? "XX"}º",
+                      style: Theme.of(context)
+                          .textTheme
+                          .displayMedium!
+                          .copyWith(
+                              color: geocoding.forecast?.weatherCode.colorScheme
+                                      .accentColor ??
+                                  Colors.white),
+                    )
             ],
           ),
         ),

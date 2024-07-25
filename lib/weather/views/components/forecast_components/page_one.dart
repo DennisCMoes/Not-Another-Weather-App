@@ -151,7 +151,6 @@ class _PageOneState extends State<PageOne> {
     );
   }
 
-  // Widget _weatherDetailItem(BuildContext context, IconData icon, String value) {
   Widget _weatherDetailItem(
       BuildContext context, SelectableForecastFields field) {
     return GestureDetector(
@@ -161,6 +160,7 @@ class _PageOneState extends State<PageOne> {
         }
       },
       child: Container(
+        width: 100,
         decoration: widget.isEditing
             ? BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
