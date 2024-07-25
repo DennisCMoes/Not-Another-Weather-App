@@ -7,22 +7,15 @@ import 'package:not_another_weather_app/weather/views/routes/widget_overlay.dart
 
 class PageOne extends StatefulWidget {
   final Geocoding geocoding;
+  final bool isEditing;
 
-  const PageOne({required this.geocoding, super.key});
+  const PageOne({required this.geocoding, required this.isEditing, super.key});
 
   @override
   State<PageOne> createState() => _PageOneState();
 }
 
 class _PageOneState extends State<PageOne> {
-  bool isEditing = false;
-
-  void toggleIsEditing() {
-    setState(() {
-      isEditing = !isEditing;
-    });
-  }
-
   void showSelectedFieldMenu(SelectableForecastFields field, bool isMainField) {
     List<SelectableForecastFields> fieldList = isMainField
         ? SelectableForecastFields.values
@@ -53,16 +46,6 @@ class _PageOneState extends State<PageOne> {
           Expanded(
             child: Stack(
               children: <Widget>[
-                IconButton(
-                  onPressed: toggleIsEditing,
-                  icon: Icon(
-                    isEditing ? Icons.edit_off : Icons.edit,
-                    color: widget.geocoding.forecast?.weatherCode.colorScheme
-                            .accentColor ??
-                        Colors.grey,
-                  ),
-                  visualDensity: VisualDensity.compact,
-                ),
                 Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -138,13 +121,13 @@ class _PageOneState extends State<PageOne> {
                 const SizedBox(width: 12),
                 GestureDetector(
                   onTap: () {
-                    if (isEditing) {
+                    if (widget.isEditing) {
                       showSelectedFieldMenu(
                           widget.geocoding.selectedMainField, true);
                     }
                   },
                   child: Container(
-                    decoration: isEditing
+                    decoration: widget.isEditing
                         ? BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: Colors.black, width: 1))
@@ -173,12 +156,12 @@ class _PageOneState extends State<PageOne> {
       BuildContext context, SelectableForecastFields field) {
     return GestureDetector(
       onTap: () {
-        if (isEditing) {
+        if (widget.isEditing) {
           showSelectedFieldMenu(field, false);
         }
       },
       child: Container(
-        decoration: isEditing
+        decoration: widget.isEditing
             ? BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.black, width: 1))

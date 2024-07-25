@@ -17,10 +17,14 @@ class ForecastCard extends StatefulWidget {
 
 class ForecastCardState extends State<ForecastCard> {
   late PageController _pageController;
+
   final ScrollController _scrollController = ScrollController();
   final PageController _subPageController = PageController();
 
+  final List<String> _subPageButtonLabels = ["Summary", "Details"];
+
   int _selectedSubPage = 0;
+  bool isEditing = false;
 
   @override
   void initState() {
@@ -61,6 +65,12 @@ class ForecastCardState extends State<ForecastCard> {
 
   @override
   Widget build(BuildContext context) {
+    void toggleIsEditing() {
+      setState(() {
+        isEditing = !isEditing;
+      });
+    }
+
     return ColoredBox(
       color: widget._geocoding.forecast?.weatherCode.colorScheme.mainColor ??
           Colors.blueGrey,
@@ -103,7 +113,7 @@ class ForecastCardState extends State<ForecastCard> {
                     icon: Icon(Icons.reorder,
                         color: widget._geocoding.forecast?.weatherCode
                                 .colorScheme.accentColor ??
-                            Colors.grey),
+                            Colors.black),
                   ),
                 ],
               ),
@@ -119,63 +129,72 @@ class ForecastCardState extends State<ForecastCard> {
                   });
                 },
                 children: [
-                  PageOne(geocoding: widget._geocoding),
+                  PageOne(
+                    geocoding: widget._geocoding,
+                    isEditing: isEditing,
+                  ),
                   PageTwo(
                     geocoding: widget._geocoding,
                   ),
-                  // _pageTwo(),
                 ],
               ),
             ),
             SizedBox(
-              height: 30,
+              height: 50,
               width: double.infinity,
-              child: LayoutBuilder(builder: (context, constraints) {
-                return Center(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 2,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) => GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () {
-                        _pageController.animateToPage(
-                          index,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        width: constraints.maxWidth / 2,
-                        // color: Colors.blue,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          transform: Matrix4.translationValues(
-                            (index - _selectedSubPage) * 20.0,
-                            0,
-                            0,
-                          ),
-                          child: Text(
-                            "Page ${index + 1}",
-                            // TODO: Change this to the accent color of the colorscheme
-                            style: Theme.of(context)
-                                .textTheme
-                                .displaySmall!
-                                .copyWith(
-                                  color: _selectedSubPage == index
-                                      ? Colors.black
-                                      : Colors.black45,
-                                ),
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      onPressed: toggleIsEditing,
+                      icon: Icon(
+                        isEditing ? Icons.edit_off : Icons.edit,
+                        color: widget._geocoding.forecast?.weatherCode
+                                .colorScheme.accentColor ??
+                            Colors.black,
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(
+                        2,
+                        (index) => GestureDetector(
+                          onTap: () {
+                            _pageController.animateToPage(
+                              index,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            transform: _selectedSubPage == index
+                                ? Matrix4.identity()
+                                : (Matrix4.identity()..scale(0.9)),
+                            child: Text(
+                              _subPageButtonLabels[index],
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .displaySmall!
+                                  .copyWith(
+                                    color: _selectedSubPage == index
+                                        ? Colors.black
+                                        : Colors.black45,
+                                  ),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                );
-              }),
+                ],
+              ),
             ),
           ],
         ),
