@@ -98,4 +98,12 @@ class WeatherProvider extends ChangeNotifier {
       debugPrint("Error: Geocoding not found.");
     }
   }
+
+  void addGeocoding(Geocoding geocoding) async {
+    final Forecast forecast = await _forecastRepo.getLocalForecast(
+        geocoding.latitude, geocoding.longitude);
+    geocoding.forecast = forecast;
+    _geocodings.add(geocoding);
+    notifyListeners();
+  }
 }

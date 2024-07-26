@@ -118,9 +118,14 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
     void onClick() {
       if (isSearching) {
         _textEditingController.clear();
+
         setState(() {
           searchedGeocodings = [];
         });
+
+        Provider.of<WeatherProvider>(context, listen: false)
+            .addGeocoding(geocoding);
+        Provider.of<DrawerProvider>(context, listen: false).closeDrawer();
       } else {
         Provider.of<WeatherProvider>(context, listen: false)
             .pageController
