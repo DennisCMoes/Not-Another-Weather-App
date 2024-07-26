@@ -6,7 +6,7 @@ class WidgetOverlay extends ModalRoute<void> {
   WidgetOverlay({required this.overlayChild});
 
   @override
-  Color? get barrierColor => Colors.black.withOpacity(0.7);
+  Color? get barrierColor => Colors.black.withOpacity(0.6);
 
   @override
   bool get barrierDismissible => true;

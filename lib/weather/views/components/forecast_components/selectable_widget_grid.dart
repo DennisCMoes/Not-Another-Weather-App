@@ -21,7 +21,28 @@ class SelectableWidgetGrid extends StatefulWidget {
   State<SelectableWidgetGrid> createState() => _SelectableWidgetGridState();
 }
 
-class _SelectableWidgetGridState extends State<SelectableWidgetGrid> {
+class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -36,11 +57,10 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid> {
             children: [
               Text(
                 "Replacing ${widget.fieldToReplace.label}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .displayMedium!
+                    .copyWith(color: Colors.white),
               ),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -49,32 +69,34 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid> {
             ],
           ),
           const SizedBox(height: 12),
-          Expanded(
-            child: GridView.builder(
-              shrinkWrap: true,
-              itemCount: widget.fields.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 16 / 9,
-              ),
-              itemBuilder: (context, index) {
-                SelectableForecastFields forecastField = widget.fields[index];
-                bool alreadyIncluded;
+          GridView.builder(
+            shrinkWrap: true,
+            itemCount: widget.fields.length,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 16 / 9,
+            ),
+            itemBuilder: (context, index) {
+              SelectableForecastFields forecastField = widget.fields[index];
+              bool alreadyIncluded;
 
-                if (widget.isMainField) {
-                  alreadyIncluded =
-                      widget.geocoding.selectedMainField == forecastField;
-                } else {
-                  alreadyIncluded = widget.geocoding.selectedForecastItems
-                      .contains(forecastField);
-                }
+              if (widget.isMainField) {
+                alreadyIncluded =
+                    widget.geocoding.selectedMainField == forecastField;
+              } else {
+                alreadyIncluded = widget.geocoding.selectedForecastItems
+                    .contains(forecastField);
+              }
 
-                return Material(
-                  color: alreadyIncluded ? Colors.blue[200] : Colors.blue[800],
-                  borderRadius: BorderRadius.circular(8),
+              return AnimatedBuilder(
+                animation: _animationController,
+                child: Material(
                   clipBehavior: Clip.hardEdge,
+                  color: alreadyIncluded ? Colors.white60 : Colors.white,
+                  borderRadius: BorderRadius.circular(8),
                   child: InkWell(
                     splashColor: alreadyIncluded ? Colors.transparent : null,
                     highlightColor: alreadyIncluded ? Colors.transparent : null,
@@ -104,20 +126,55 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(forecastField.icon,
+                            size: 28,
+                            weight: 500,
                             color: alreadyIncluded
-                                ? Colors.white54
-                                : Colors.white),
-                        Text(forecastField.label,
-                            style: TextStyle(
-                                color: alreadyIncluded
-                                    ? Colors.white54
-                                    : Colors.white)),
+                                ? Colors.black45
+                                : Colors.black),
+                        Text(
+                          forecastField.label,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: alreadyIncluded
+                                  ? Colors.black45
+                                  : Colors.black),
+                        ),
                       ],
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+                builder: (context, child) {
+                  final animation = Tween<Offset>(
+                          begin: const Offset(0, 0.1), end: Offset.zero)
+                      .animate(CurvedAnimation(
+                    parent: _animationController,
+                    curve: Interval(
+                      index / widget.fields.length,
+                      1.0,
+                      curve: Curves.easeOut,
+                    ),
+                  ));
+
+                  final opacity = Tween<double>(begin: 0.0, end: 1.0)
+                      .animate(CurvedAnimation(
+                    parent: _animationController,
+                    curve: Interval(
+                      (index / widget.fields.length),
+                      1.0,
+                      curve: Curves.easeIn,
+                    ),
+                  ));
+
+                  return SlideTransition(
+                    position: animation,
+                    child: FadeTransition(
+                      opacity: opacity,
+                      child: child,
+                    ),
+                  );
+                },
+              );
+            },
           )
         ],
       ),

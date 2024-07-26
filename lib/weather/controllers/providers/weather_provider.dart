@@ -33,7 +33,6 @@ class WeatherProvider extends ChangeNotifier {
       notifyListeners();
 
       // await getStoredGeocodings();
-      // notifyListeners();
     } catch (ex) {
       debugPrint("Error during initialization: $ex");
     }
@@ -41,9 +40,8 @@ class WeatherProvider extends ChangeNotifier {
 
   Future<void> getStoredGeocodings() async {
     try {
-      _geocodings.addAll(Geocoding.sampleData());
-
-      final updatedGeocodings = await Future.wait(_geocodings.map((geo) async {
+      final updatedGeocodings =
+          await Future.wait(Geocoding.sampleData().map((geo) async {
         final forecast =
             await _forecastRepo.getLocalForecast(geo.latitude, geo.longitude);
 

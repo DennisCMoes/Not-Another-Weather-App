@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:instant/instant.dart';
 import 'package:not_another_weather_app/weather/models/weather_code.dart';
 
 class HourlyWeatherData {
@@ -20,7 +21,9 @@ enum SelectableForecastFields {
   humidity("Humidity", Icons.percent, true),
   windDirection("Wind direction", Icons.directions, false),
   windGusts("Wind gusts", Icons.speed, false),
-  cloudCover("Cloud cover", Icons.cloud, true);
+  cloudCover("Cloud cover", Icons.cloud, true),
+  isDay("Day or night", Icons.access_time, false),
+  localTime("Local time", Icons.circle, false);
 
   const SelectableForecastFields(
       this.label, this.icon, this.mainFieldAccessible);
@@ -33,6 +36,7 @@ enum SelectableForecastFields {
 class Forecast {
   double latitude;
   double longitude;
+  String timezome;
   double temperature;
   WeatherCode weatherCode;
   double windSpeed;
@@ -53,6 +57,7 @@ class Forecast {
   Forecast(
       this.latitude,
       this.longitude,
+      this.timezome,
       this.temperature,
       this.weatherCode,
       this.windSpeed,
@@ -92,6 +97,7 @@ class Forecast {
     return Forecast(
       json['latitude'],
       json['longitude'],
+      json['timezone_abbreviation'],
       json['current']['temperature_2m'],
       WeatherCode.fromCode(json['current']['weather_code']),
       json['current']['wind_speed_10m'],
@@ -126,7 +132,7 @@ class Forecast {
       .map((dateTime, weather) => MapEntry(dateTime, weather.rainInMM));
 
   dynamic getField(SelectableForecastFields field) {
-    DateFormat hourFormat = DateFormat("HH:MM");
+    DateFormat hourFormat = DateFormat("HH:mm");
 
     switch (field) {
       case SelectableForecastFields.temperature:
@@ -149,6 +155,10 @@ class Forecast {
         return "${windGusts.round()}km/h";
       case SelectableForecastFields.cloudCover:
         return "$cloudCover%";
+      case SelectableForecastFields.isDay:
+        return "It is ${isDay == 1 ? "day" : "night"}";
+      case SelectableForecastFields.localTime:
+        return hourFormat.format(curDateTimeByZone(zone: timezome));
       default:
         return "Unknown";
     }

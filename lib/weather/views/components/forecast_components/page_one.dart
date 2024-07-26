@@ -176,6 +176,7 @@ class _PageOneState extends State<PageOne> {
                       .accentColor ??
                   Colors.white,
             ),
+            const SizedBox(width: 6),
             Text(
               widget.geocoding.forecast?.getField(field).toString() ?? "XX",
               // field.label,
