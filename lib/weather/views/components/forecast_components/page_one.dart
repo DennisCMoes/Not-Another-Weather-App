@@ -179,7 +179,6 @@ class _PageOneState extends State<PageOne> {
             const SizedBox(width: 6),
             Text(
               widget.geocoding.forecast?.getField(field).toString() ?? "XX",
-              // field.label,
               style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,

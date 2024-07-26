@@ -25,7 +25,8 @@ class WeatherProvider extends ChangeNotifier {
     try {
       final Position position = await _locationController.getCurrentPosition();
       _geocodings.add(Geocoding(1, "My location", position.latitude,
-          position.longitude, 'My location'));
+          position.longitude, 'My location',
+          isCurrentLocation: true));
       notifyListeners();
 
       _geocodings[0].forecast = await _forecastRepo.getLocalForecast(
@@ -99,11 +100,26 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  void addGeocoding(Geocoding geocoding) async {
+  Future<void> addGeocoding(Geocoding geocoding) async {
+    _geocodings.add(geocoding);
+    notifyListeners();
+
     final Forecast forecast = await _forecastRepo.getLocalForecast(
         geocoding.latitude, geocoding.longitude);
     geocoding.forecast = forecast;
-    _geocodings.add(geocoding);
+
+    _geocodings[_geocodings.length - 1] = geocoding;
     notifyListeners();
+  }
+
+  void removeGeocoding(Geocoding geocoding) {
+    int geoIndex = _geocodings.indexOf(geocoding);
+
+    if (geoIndex != -1) {
+      _geocodings.removeAt(geoIndex);
+      notifyListeners();
+    } else {
+      debugPrint("Error: Geocoding not found");
+    }
   }
 }

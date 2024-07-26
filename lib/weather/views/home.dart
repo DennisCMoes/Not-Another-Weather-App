@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
-import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/shared/views/sliding_drawer.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
-import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/views/components/forecast_card.dart';
 import 'package:not_another_weather_app/weather/views/components/weather_drawer.dart';
 
@@ -43,6 +40,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Color getBackgroundColor() {
+      WeatherProvider provider =
+          Provider.of<WeatherProvider>(context, listen: false);
+      PageController? pageController = provider.pageController;
+
+      int pageIndex = 0;
+
+      if (pageController.positions.isNotEmpty) {
+        pageIndex = pageController.page?.toInt() ?? 0;
+      }
+
+      if (provider.geocodings.isEmpty) {
+        return Colors.blueGrey;
+      } else {
+        return provider.geocodings[pageIndex].forecast?.weatherCode.colorScheme
+                .mainColor ??
+            Colors.blueGrey;
+      }
+    }
+
     return Scaffold(
       body: FutureBuilder(
         future: _initialization,

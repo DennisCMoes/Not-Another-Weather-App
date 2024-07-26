@@ -59,10 +59,6 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Locations",
-                  style: Theme.of(context).textTheme.displayLarge,
-                ),
                 TextField(
                   focusNode: _focusNode,
                   controller: _textEditingController,
@@ -115,7 +111,22 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
 
   Widget _weatherListTile(int index, Geocoding geocoding,
       [bool isSearching = false]) {
-    void onClick() {
+    final WeatherProvider weatherProvider =
+        Provider.of<WeatherProvider>(context, listen: false);
+    final DrawerProvider drawerProvider =
+        Provider.of<DrawerProvider>(context, listen: false);
+
+    void scrollToPage(int pageIndex) {
+      Provider.of<WeatherProvider>(context, listen: false)
+          .pageController
+          .animateToPage(
+            pageIndex,
+            curve: Curves.easeInOut,
+            duration: const Duration(milliseconds: 600),
+          );
+    }
+
+    void onClick() async {
       if (isSearching) {
         _textEditingController.clear();
 
@@ -123,23 +134,16 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
           searchedGeocodings = [];
         });
 
-        Provider.of<WeatherProvider>(context, listen: false)
-            .addGeocoding(geocoding);
-        Provider.of<DrawerProvider>(context, listen: false).closeDrawer();
+        weatherProvider.addGeocoding(geocoding);
+        scrollToPage(weatherProvider.geocodings.length - 1);
+        drawerProvider.closeDrawer();
       } else {
-        Provider.of<WeatherProvider>(context, listen: false)
-            .pageController
-            .animateToPage(
-              index,
-              curve: Curves.easeInOut,
-              duration: const Duration(milliseconds: 600),
-            );
-
-        Provider.of<DrawerProvider>(context, listen: false).closeDrawer();
+        scrollToPage(index);
+        drawerProvider.closeDrawer();
       }
     }
 
-    return Material(
+    Widget listChild = Material(
       key: ValueKey(geocoding),
       color: geocoding.forecast?.weatherCode.colorScheme.mainColor ??
           Colors.blueGrey,
@@ -196,5 +200,24 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
         ),
       ),
     );
+
+    if (geocoding.isCurrentLocation) {
+      return listChild;
+    } else {
+      return Dismissible(
+        direction: DismissDirection.endToStart,
+        behavior: HitTestBehavior.translucent,
+        key: ValueKey(geocoding),
+        background: const Material(
+          color: Colors.red,
+          child: Icon(Icons.delete),
+        ),
+        onDismissed: (direction) {
+          Provider.of<WeatherProvider>(context, listen: false)
+              .removeGeocoding(geocoding);
+        },
+        child: listChild,
+      );
+    }
   }
 }

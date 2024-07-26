@@ -2,6 +2,8 @@ import 'package:not_another_weather_app/weather/models/forecast.dart';
 
 class Geocoding {
   final int id;
+  final bool isCurrentLocation;
+
   String name;
   double latitude;
   double longitude;
@@ -20,7 +22,8 @@ class Geocoding {
     SelectableForecastFields.chainceOfRain
   ];
 
-  Geocoding(this.id, this.name, this.latitude, this.longitude, this.country);
+  Geocoding(this.id, this.name, this.latitude, this.longitude, this.country,
+      {this.isCurrentLocation = false});
 
   factory Geocoding.fromJson(Map<String, dynamic> json) {
     return Geocoding(
