@@ -12,37 +12,51 @@ class WeatherProvider extends ChangeNotifier {
   final LocationController _locationController = LocationController();
   final PageController _pageController = PageController();
 
-  List<Geocoding> _geocodings = [];
+  final List<Geocoding> _geocodings = [];
 
   PageController get pageController => _pageController;
+
+  Geocoding get currentLocation => _geocodings[0];
 
   UnmodifiableListView<Geocoding> get geocodings =>
       UnmodifiableListView(_geocodings);
 
   Future<void> initialization() async {
-    Position position = await _locationController.getCurrentPosition();
-    Geocoding current = Geocoding(
-      1,
-      "My location",
-      position.latitude,
-      position.longitude,
-      'My location',
-    );
+    try {
+      final Position position = await _locationController.getCurrentPosition();
+      _geocodings.add(Geocoding(1, "My location", position.latitude,
+          position.longitude, 'My location'));
+      notifyListeners();
 
-    _geocodings.addAll([current, ...Geocoding.sampleData()]);
-    notifyListeners();
+      _geocodings[0].forecast = await _forecastRepo.getLocalForecast(
+          position.latitude, position.longitude);
+      notifyListeners();
+
+      // await getStoredGeocodings();
+      // notifyListeners();
+    } catch (ex) {
+      debugPrint("Error during initialization: $ex");
+    }
   }
 
-  Future<void> updateGeocodingsWithForecasts() async {
-    _geocodings = await Future.wait(_geocodings.map((geo) async {
-      Forecast forecast =
-          await _forecastRepo.getLocalForecast(geo.latitude, geo.longitude);
-      geo.forecast = forecast;
+  Future<void> getStoredGeocodings() async {
+    try {
+      _geocodings.addAll(Geocoding.sampleData());
 
-      return geo;
-    }).toList());
+      final updatedGeocodings = await Future.wait(_geocodings.map((geo) async {
+        final forecast =
+            await _forecastRepo.getLocalForecast(geo.latitude, geo.longitude);
 
-    notifyListeners();
+        geo.forecast = forecast;
+        return geo;
+      }).toList());
+
+      _geocodings.addAll(updatedGeocodings);
+
+      notifyListeners();
+    } catch (ex) {
+      debugPrint("Error getting the stored geocodings: $ex");
+    }
   }
 
   void moveGeocodings(int oldIndex, int newIndex) {
@@ -55,20 +69,35 @@ class WeatherProvider extends ChangeNotifier {
   void changeSelectedMainField(
       Geocoding selectedGeocoding, SelectableForecastFields field) {
     int index = _geocodings.indexOf(selectedGeocoding);
-    _geocodings[index].selectedMainField = field;
-    notifyListeners();
+
+    if (index != -1) {
+      _geocodings[index].selectedMainField = field;
+      notifyListeners();
+    } else {
+      debugPrint("Error: Geocoding not found.");
+    }
   }
 
   void replaceSelectedForecastItem(
       Geocoding selectedGeocoding, SelectableForecastFields field, int index) {
     int geoIndex = _geocodings.indexOf(selectedGeocoding);
-    _geocodings[geoIndex].selectedForecastItems[index] = field;
-    notifyListeners();
+
+    if (geoIndex != -1 && index != -1) {
+      _geocodings[geoIndex].selectedForecastItems[index] = field;
+      notifyListeners();
+    } else {
+      debugPrint("Error: Geocoding not found.");
+    }
   }
 
   void changeSelectedPage(Geocoding selectedGeocoding, int index) {
     int geoIndex = _geocodings.indexOf(selectedGeocoding);
-    _geocodings[geoIndex].selectedPage = index;
-    notifyListeners();
+
+    if (geoIndex != -1 && index != -1) {
+      _geocodings[geoIndex].selectedPage = index;
+      notifyListeners();
+    } else {
+      debugPrint("Error: Geocoding not found.");
+    }
   }
 }

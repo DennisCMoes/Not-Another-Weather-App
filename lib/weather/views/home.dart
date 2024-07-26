@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
@@ -18,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late Future<void> _initialization;
+
   final LocationController locationController = LocationController();
   final ForecastRepo forecastRepo = ForecastRepo();
 
@@ -25,61 +28,88 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isPressingNewLocation = false;
 
   @override
+  void initState() {
+    super.initState();
+    _initialization = initialize();
+  }
+
+  Future<void> initialize() async {
+    final weatherProvider =
+        Provider.of<WeatherProvider>(context, listen: false);
+    await weatherProvider.initialization();
+    // await weatherProvider.getStoredGeocodings();
+    FlutterNativeSplash.remove();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SlidingDrawer(
-        drawer: const WeatherDrawer(),
-        child: Consumer<WeatherProvider>(
-          builder: (context, state, child) {
-            return Stack(
-              children: [
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).padding.top),
-                    child: const Text("End of the list"),
-                  ),
+      body: FutureBuilder(
+        future: _initialization,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            return _buildHomeScreen();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildHomeScreen() {
+    return SlidingDrawer(
+      drawer: const WeatherDrawer(),
+      child: Consumer<WeatherProvider>(
+        builder: (context, state, child) {
+          return Stack(
+            children: [
+              Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding:
+                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  child: const Text("End of the list"),
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).padding.bottom),
-                    child: const Text("End of the list"),
-                  ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).padding.bottom),
+                  child: const Text("End of the list"),
                 ),
-                PageView.builder(
-                  itemCount: state.geocodings.length,
-                  scrollDirection: Axis.vertical,
-                  controller: state.pageController,
-                  clipBehavior: Clip.none,
-                  onPageChanged: (int page) {
-                    setState(() {
-                      selectedPageIndex = page;
-                    });
-                  },
-                  itemBuilder: (context, index) =>
-                      ForecastCard(state.geocodings[index]),
-                ),
-                Positioned.fill(
-                  right: 6,
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        state.geocodings.length,
-                        (index) =>
-                            _indicator(index, index == selectedPageIndex),
-                      ),
+              ),
+              PageView(
+                scrollDirection: Axis.vertical,
+                controller: state.pageController,
+                clipBehavior: Clip.none,
+                onPageChanged: (page) {
+                  setState(() {
+                    selectedPageIndex = page;
+                  });
+                },
+                children: [
+                  for (int i = 0; i < state.geocodings.length; i++)
+                    ForecastCard(state.geocodings[i]),
+                ],
+              ),
+              Positioned.fill(
+                right: 6,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      state.geocodings.length,
+                      (index) => _indicator(index, index == selectedPageIndex),
                     ),
                   ),
-                )
-              ],
-            );
-          },
-        ),
+                ),
+              )
+            ],
+          );
+        },
       ),
     );
   }
