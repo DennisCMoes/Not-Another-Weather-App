@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/views/components/forecast_components/page_one.dart';
 import 'package:not_another_weather_app/weather/views/components/forecast_components/page_two.dart';
@@ -104,16 +105,25 @@ class ForecastCardState extends State<ForecastCard> {
                                     .colorScheme.accentColor,
                               ),
                         ),
-                  IconButton(
-                    onPressed: () {
-                      Provider.of<DrawerProvider>(context, listen: false)
-                          .openDrawer();
-                    },
-                    visualDensity: VisualDensity.compact,
-                    icon: Icon(Icons.reorder,
-                        color: widget._geocoding.forecast?.weatherCode
-                                .colorScheme.accentColor ??
-                            Colors.black),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Provider.of<DeviceProvider>(context).hasInternet
+                          ? const SizedBox.shrink()
+                          : const Icon(
+                              Icons.signal_wifi_connected_no_internet_4),
+                      IconButton(
+                        onPressed: () {
+                          Provider.of<DrawerProvider>(context, listen: false)
+                              .openDrawer();
+                        },
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(Icons.reorder,
+                            color: widget._geocoding.forecast?.weatherCode
+                                    .colorScheme.accentColor ??
+                                Colors.black),
+                      ),
+                    ],
                   ),
                 ],
               ),

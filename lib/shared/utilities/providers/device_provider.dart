@@ -5,7 +5,10 @@ import 'package:not_another_weather_app/shared/utilities/controllers/location_co
 class DeviceProvider extends ChangeNotifier {
   final LocationController _locationController = LocationController();
 
+  bool _hasInternet = false;
   Position? _currentLocation;
+
+  bool get hasInternet => _hasInternet;
 
   void initialization() async {
     _currentLocation = await _locationController.getCurrentPosition();
@@ -19,5 +22,10 @@ class DeviceProvider extends ChangeNotifier {
 
   Position? getCurrentLocation() {
     return _currentLocation;
+  }
+
+  void setHasInternet(bool hasInternet) {
+    _hasInternet = hasInternet;
+    notifyListeners();
   }
 }

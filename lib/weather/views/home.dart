@@ -1,5 +1,7 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
 import 'package:not_another_weather_app/shared/views/sliding_drawer.dart';
@@ -27,6 +29,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+
+    Connectivity().onConnectivityChanged.listen((event) {
+      print(event);
+      Provider.of<DeviceProvider>(context, listen: false)
+          .setHasInternet(!event.contains(ConnectivityResult.none));
+    });
+
     _initialization = initialize();
   }
 
