@@ -42,43 +42,5 @@ class LargeCompass extends StatelessWidget {
         ),
       ],
     );
-
-    // return LayoutBuilder(builder: (context, constraints) {
-    //   return Stack(
-    //     children: [
-    //       Align(
-    //         alignment: Alignment.topLeft,
-    //         child: Column(
-    //           children: [
-    //             Text(
-    //                 "Wind speed: ${geocoding.forecast?.windSpeed.round() ?? 0.0}"),
-    //             Text(
-    //                 "Wind gusts: ${geocoding.forecast?.windGusts.round() ?? 0.0}"),
-    //           ],
-    //         ),
-    //       ),
-    //       Align(
-    //         alignment: Alignment.centerRight,
-    //         child: SizedBox(
-    //           width: constraints.maxWidth * 0.6,
-    //           child: CustomPaint(
-    //             painter: CompassPainter(
-    //               angle: geocoding.forecast?.windDirection.toDouble() ?? 0.0,
-    //               ringColor:
-    //                   geocoding.forecast?.weatherCode.colorScheme.accentColor ??
-    //                       Colors.white,
-    //             ),
-    //             child: Center(
-    //               child: Text(
-    //                 "${geocoding.forecast?.windDirection ?? "XX"}º",
-    //                 style: Theme.of(context).textTheme.displayMedium,
-    //               ),
-    //             ),
-    //           ),
-    //         ),
-    //       ),
-    //     ],
-    //   );
-    // });
   }
 }
