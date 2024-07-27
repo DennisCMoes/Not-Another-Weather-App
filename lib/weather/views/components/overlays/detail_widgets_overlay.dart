@@ -55,6 +55,20 @@ class _DetailWidgetsOverlayState extends State<DetailWidgetsOverlay> {
               ],
             ),
           ),
+          _sectionTitle(
+            label: "Widget type",
+            child: GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 6,
+                mainAxisSpacing: 6,
+              ),
+              itemCount: WidgetType.values.length,
+              itemBuilder: (context, index) =>
+                  _widgetType(WidgetType.values[index]),
+            ),
+          ),
         ],
       ),
     );
@@ -103,6 +117,33 @@ class _DetailWidgetsOverlayState extends State<DetailWidgetsOverlay> {
                 size.toString().toTitleCase(),
                 style: Theme.of(context).textTheme.displaySmall,
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _widgetType(WidgetType type) {
+    bool isType = widget.selectedWidget.type == type;
+
+    void setType() {
+      Provider.of<WeatherProvider>(context, listen: false)
+          .changeGeocodingType(widget.geocoding, widget.selectedWidget, type);
+      Navigator.of(context).pop();
+    }
+
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: 1 / 1,
+        child: Material(
+          clipBehavior: Clip.hardEdge,
+          borderRadius: BorderRadius.circular(8),
+          color: isType ? Colors.white60 : Colors.white,
+          child: InkWell(
+            onTap: setType,
+            child: Center(
+              child: Text(type.toString().toTitleCase()),
             ),
           ),
         ),

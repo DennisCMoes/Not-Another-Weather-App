@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum WidgetSize {
   small(2, 1),
   medium(2, 2),
@@ -15,9 +17,31 @@ enum WidgetSize {
   String toString() => name;
 }
 
+enum WidgetType {
+  compass(),
+  sunriseSunset(),
+  genericText();
+
+  @override
+  String toString() => name;
+}
+
 class WidgetItem {
   final int id;
-  WidgetSize size;
 
-  WidgetItem({required this.id, required this.size});
+  WidgetSize size;
+  WidgetType type;
+
+  WidgetItem({required this.id, required this.size, required this.type});
+
+  Widget getWidget() {
+    switch (type) {
+      case WidgetType.compass:
+        return const Text("Compass");
+      case WidgetType.sunriseSunset:
+        return const Text("Sunrise and or Sunset");
+      default:
+        return const Text("Generic");
+    }
+  }
 }

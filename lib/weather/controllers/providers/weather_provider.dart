@@ -139,4 +139,20 @@ class WeatherProvider extends ChangeNotifier {
       debugPrint("Error: Geocoding not found");
     }
   }
+
+  void changeGeocodingType(
+      Geocoding geocoding, WidgetItem item, WidgetType type) {
+    int geoIndex = _geocodings.indexOf(geocoding);
+
+    if (geoIndex != -1) {
+      _geocodings[geoIndex]
+          .detailWidgets
+          .singleWhere((element) => element.id == item.id)
+          .type = type;
+
+      notifyListeners();
+    } else {
+      debugPrint("Error: Geocoding not found");
+    }
+  }
 }

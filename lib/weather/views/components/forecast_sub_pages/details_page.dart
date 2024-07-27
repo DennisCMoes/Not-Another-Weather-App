@@ -56,7 +56,7 @@ class _PageTwoState extends State<PageTwo> {
                       openWidgetDetail(widget.geocoding.detailWidgets[i]);
                     }
                   },
-                  child: Center(child: Text((i + 1).toString())),
+                  child: widget.geocoding.detailWidgets[i].getWidget(),
                 ),
               ),
             ),

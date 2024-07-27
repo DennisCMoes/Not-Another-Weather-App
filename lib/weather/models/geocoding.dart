@@ -24,12 +24,12 @@ class Geocoding {
   ];
 
   List<WidgetItem> detailWidgets = [
-    WidgetItem(id: 1, size: WidgetSize.medium),
-    WidgetItem(id: 2, size: WidgetSize.small),
-    WidgetItem(id: 3, size: WidgetSize.small),
-    WidgetItem(id: 4, size: WidgetSize.large),
-    WidgetItem(id: 5, size: WidgetSize.medium),
-    WidgetItem(id: 6, size: WidgetSize.medium),
+    WidgetItem(id: 1, size: WidgetSize.medium, type: WidgetType.compass),
+    WidgetItem(id: 2, size: WidgetSize.small, type: WidgetType.genericText),
+    WidgetItem(id: 3, size: WidgetSize.small, type: WidgetType.genericText),
+    WidgetItem(id: 4, size: WidgetSize.large, type: WidgetType.sunriseSunset),
+    WidgetItem(id: 5, size: WidgetSize.medium, type: WidgetType.genericText),
+    WidgetItem(id: 6, size: WidgetSize.medium, type: WidgetType.genericText),
   ];
 
   Geocoding(this.id, this.name, this.latitude, this.longitude, this.country,
