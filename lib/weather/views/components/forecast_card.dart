@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
-import 'package:not_another_weather_app/weather/views/components/forecast_sub_pages/summary_page.dart';
-import 'package:not_another_weather_app/weather/views/components/forecast_sub_pages/details_page.dart';
+import 'package:not_another_weather_app/weather/views/components/sub_pages/summary_page.dart';
+import 'package:not_another_weather_app/weather/views/components/sub_pages/details_page.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
@@ -145,6 +145,7 @@ class ForecastCardState extends State<ForecastCard> {
                   ),
                   PageTwo(
                     geocoding: widget._geocoding,
+                    isEditing: isEditing,
                   ),
                 ],
               ),
