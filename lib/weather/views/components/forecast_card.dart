@@ -104,12 +104,9 @@ class ForecastCardState extends State<ForecastCard> {
                 child: PageView(
                   controller: state.subPageController,
                   onPageChanged: (index) => state.setSubPageIndex(index),
-                  children: [
-                    const SummaryPage(),
-                    PageTwo(
-                      geocoding: state.geocoding,
-                      isEditing: state.isEditing,
-                    ),
+                  children: const <Widget>[
+                    SummaryPage(),
+                    PageTwo(),
                   ],
                 ),
               ),

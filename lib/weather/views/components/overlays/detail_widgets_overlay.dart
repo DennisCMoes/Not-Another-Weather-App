@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/extensions/title_case.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
-import 'package:not_another_weather_app/weather/models/geocoding.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:provider/provider.dart';
 
 class DetailWidgetsOverlay extends StatefulWidget {
-  final Geocoding geocoding;
   final WidgetItem selectedWidget;
 
-  const DetailWidgetsOverlay(this.geocoding, this.selectedWidget, {super.key});
+  const DetailWidgetsOverlay(this.selectedWidget, {super.key});
 
   @override
   State<DetailWidgetsOverlay> createState() => _DetailWidgetsOverlayState();
@@ -18,60 +16,62 @@ class DetailWidgetsOverlay extends StatefulWidget {
 class _DetailWidgetsOverlayState extends State<DetailWidgetsOverlay> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: NavigationToolbar.kMiddleSpacing),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Widget: ${widget.selectedWidget.id}",
-                style: Theme.of(context)
-                    .textTheme
-                    .displayMedium!
-                    .copyWith(color: Colors.white),
-              ),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close, color: Colors.white),
-              )
-            ],
-          ),
-          _sectionTitle(
-            label: "Widget size",
-            child: Row(
+    return Consumer<CurrentGeocodingProvider>(builder: (context, state, child) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: NavigationToolbar.kMiddleSpacing),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _widgetSize(WidgetSize.small),
-                const SizedBox(width: 6),
-                _widgetSize(WidgetSize.medium),
-                const SizedBox(width: 6),
-                _widgetSize(WidgetSize.large),
+                Text(
+                  "Widget: ${widget.selectedWidget.id}",
+                  style: Theme.of(context)
+                      .textTheme
+                      .displayMedium!
+                      .copyWith(color: Colors.white),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close, color: Colors.white),
+                )
               ],
             ),
-          ),
-          _sectionTitle(
-            label: "Widget type",
-            child: GridView.builder(
-              shrinkWrap: true,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 6,
-                mainAxisSpacing: 6,
+            _sectionTitle(
+              label: "Widget size",
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _widgetSize(state, WidgetSize.small),
+                  const SizedBox(width: 6),
+                  _widgetSize(state, WidgetSize.medium),
+                  const SizedBox(width: 6),
+                  _widgetSize(state, WidgetSize.large),
+                ],
               ),
-              itemCount: WidgetType.values.length,
-              itemBuilder: (context, index) =>
-                  _widgetType(WidgetType.values[index]),
             ),
-          ),
-        ],
-      ),
-    );
+            _sectionTitle(
+              label: "Widget type",
+              child: GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 6,
+                  mainAxisSpacing: 6,
+                ),
+                itemCount: WidgetType.values.length,
+                itemBuilder: (context, index) =>
+                    _widgetType(state, WidgetType.values[index]),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _sectionTitle({required String label, required Widget child}) {
@@ -91,15 +91,11 @@ class _DetailWidgetsOverlayState extends State<DetailWidgetsOverlay> {
     );
   }
 
-  Widget _widgetSize(WidgetSize size) {
+  Widget _widgetSize(CurrentGeocodingProvider provider, WidgetSize size) {
     bool isSize = widget.selectedWidget.size == size;
 
     void setSize() {
-      Provider.of<WeatherProvider>(context, listen: false).changeGeocodingSize(
-        widget.geocoding,
-        widget.selectedWidget,
-        size,
-      );
+      provider.setGeocodingSize(widget.selectedWidget, size);
       Navigator.of(context).pop();
     }
 
@@ -124,12 +120,11 @@ class _DetailWidgetsOverlayState extends State<DetailWidgetsOverlay> {
     );
   }
 
-  Widget _widgetType(WidgetType type) {
+  Widget _widgetType(CurrentGeocodingProvider provider, WidgetType type) {
     bool isType = widget.selectedWidget.type == type;
 
     void setType() {
-      Provider.of<WeatherProvider>(context, listen: false)
-          .changeGeocodingType(widget.geocoding, widget.selectedWidget, type);
+      provider.setGeocodingType(widget.selectedWidget, type);
       Navigator.of(context).pop();
     }
 
