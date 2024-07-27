@@ -1,4 +1,5 @@
 import 'package:not_another_weather_app/weather/models/forecast.dart';
+import 'package:not_another_weather_app/weather/models/widget_item.dart';
 
 class Geocoding {
   final int id;
@@ -11,7 +12,7 @@ class Geocoding {
 
   Forecast? forecast;
 
-  int selectedPage = 0;
+  int selectedPage = 1;
 
   SelectableForecastFields selectedMainField =
       SelectableForecastFields.temperature;
@@ -20,6 +21,15 @@ class Geocoding {
     SelectableForecastFields.windSpeed,
     SelectableForecastFields.precipitation,
     SelectableForecastFields.chainceOfRain
+  ];
+
+  List<WidgetItem> detailWidgets = [
+    WidgetItem(id: 1, size: WidgetSize.medium),
+    WidgetItem(id: 2, size: WidgetSize.small),
+    WidgetItem(id: 3, size: WidgetSize.small),
+    WidgetItem(id: 4, size: WidgetSize.large),
+    WidgetItem(id: 5, size: WidgetSize.medium),
+    WidgetItem(id: 6, size: WidgetSize.medium),
   ];
 
   Geocoding(this.id, this.name, this.latitude, this.longitude, this.country,

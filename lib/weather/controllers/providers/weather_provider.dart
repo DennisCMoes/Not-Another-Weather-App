@@ -6,6 +6,7 @@ import 'package:not_another_weather_app/shared/utilities/controllers/location_co
 import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
+import 'package:not_another_weather_app/weather/models/widget_item.dart';
 
 class WeatherProvider extends ChangeNotifier {
   final ForecastRepo _forecastRepo = ForecastRepo();
@@ -117,6 +118,22 @@ class WeatherProvider extends ChangeNotifier {
 
     if (geoIndex != -1) {
       _geocodings.removeAt(geoIndex);
+      notifyListeners();
+    } else {
+      debugPrint("Error: Geocoding not found");
+    }
+  }
+
+  void changeGeocodingSize(
+      Geocoding geocoding, WidgetItem item, WidgetSize size) {
+    int geoIndex = _geocodings.indexOf(geocoding);
+
+    if (geoIndex != -1) {
+      _geocodings[geoIndex]
+          .detailWidgets
+          .singleWhere((element) => element.id == item.id)
+          .size = size;
+
       notifyListeners();
     } else {
       debugPrint("Error: Geocoding not found");

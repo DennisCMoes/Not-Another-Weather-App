@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/shared/views/custom_multi_sized_grid.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
+import 'package:not_another_weather_app/weather/models/widget_item.dart';
+import 'package:not_another_weather_app/weather/views/components/overlays/detail_widgets_overlay.dart';
 import 'package:not_another_weather_app/weather/views/painters/compass_painter.dart';
 import 'package:not_another_weather_app/weather/views/painters/line_chart.dart';
 import 'package:not_another_weather_app/weather/views/painters/pressure_gauge_painter.dart';
 import 'package:not_another_weather_app/weather/views/painters/sun_painter.dart';
+import 'package:not_another_weather_app/weather/views/routes/widget_overlay.dart';
 
 class PageTwo extends StatefulWidget {
   final Geocoding geocoding;
+  final bool isEditing;
 
-  const PageTwo({required this.geocoding, super.key});
+  const PageTwo({required this.geocoding, required this.isEditing, super.key});
 
   @override
   State<PageTwo> createState() => _PageTwoState();
@@ -19,72 +24,43 @@ class PageTwo extends StatefulWidget {
 class _PageTwoState extends State<PageTwo> {
   @override
   Widget build(BuildContext context) {
-    List<GridItem> items = [
-      GridItem(
-        id: 1,
-        rowSpan: 1,
-        colSpan: 2,
-        child: _feelAndSightCard(
-            "${widget.geocoding.forecast?.apparentTemperature.round()}º",
-            Icons.thermostat),
-        label: "Apparent feel",
-      ),
-      GridItem(
-        id: 3,
-        rowSpan: 2,
-        colSpan: 2,
-        child: _compassCard(),
-        label: "Wind",
-        icon: Icons.air,
-      ),
-      GridItem(
-        id: 2,
-        rowSpan: 1,
-        colSpan: 2,
-        child: _feelAndSightCard(
-            "${widget.geocoding.forecast?.cloudCover ?? "XX"}%",
-            Icons.cloud_outlined),
-        label: "Cloud cover",
-      ),
-      GridItem(
-        id: 4,
-        rowSpan: 2,
-        colSpan: 4,
-        child: _rainForecastCard(),
-        label: "Rain forecast",
-        icon: Icons.water_drop_outlined,
-      ),
-      GridItem(
-        id: 5,
-        rowSpan: 2,
-        colSpan: 2,
-        child: _isDayCard(),
-        label: "",
-        icon: Icons.wb_sunny_outlined,
-      ),
-      GridItem(
-        id: 6,
-        rowSpan: 2,
-        colSpan: 2,
-        child: _pressureCard(),
-        label: "",
-        icon: Icons.speed,
-      ),
-    ];
+    void openWidgetDetail(WidgetItem selectedWidget) {
+      Navigator.of(context).push(WidgetOverlay(
+        overlayChild: DetailWidgetsOverlay(widget.geocoding, selectedWidget),
+      ));
+    }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: CustomMultiChildLayout(
-        delegate: CustomMultiSizedGridDelegate(items, padding: 12),
-        children: items.map((item) {
-          return LayoutId(
-            id: item.id,
-            child: _forecastCardWrapper(
-              value: item.label!,
-              child: item.child,
+      padding: const EdgeInsets.symmetric(
+          horizontal: NavigationToolbar.kMiddleSpacing),
+      child: StaggeredGrid.count(
+        axisDirection: AxisDirection.down,
+        crossAxisCount: 4,
+        crossAxisSpacing: 6,
+        mainAxisSpacing: 6,
+        children: [
+          for (int i = 0; i < widget.geocoding.detailWidgets.length; i++)
+            StaggeredGridTile.count(
+              crossAxisCellCount:
+                  widget.geocoding.detailWidgets[i].size.colSpan,
+              mainAxisCellCount: widget.geocoding.detailWidgets[i].size.rowSpan,
+              child: Material(
+                color: Colors.blue[900],
+                borderRadius: BorderRadius.circular(12),
+                clipBehavior: Clip.hardEdge,
+                child: InkWell(
+                  splashColor: widget.isEditing ? null : Colors.transparent,
+                  highlightColor: widget.isEditing ? null : Colors.transparent,
+                  onTap: () {
+                    if (widget.isEditing) {
+                      openWidgetDetail(widget.geocoding.detailWidgets[i]);
+                    }
+                  },
+                  child: Center(child: Text((i + 1).toString())),
+                ),
+              ),
             ),
-          );
-        }).toList(),
+        ],
       ),
     );
   }

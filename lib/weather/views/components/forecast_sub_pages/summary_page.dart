@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/weather_code.dart';
-import 'package:not_another_weather_app/weather/views/components/selectable_widget_grid.dart';
+import 'package:not_another_weather_app/weather/views/components/overlays/selectable_widget_grid.dart';
 import 'package:not_another_weather_app/weather/views/routes/widget_overlay.dart';
 
 class PageOne extends StatefulWidget {
@@ -153,6 +153,7 @@ class _PageOneState extends State<PageOne> {
 
   Widget _weatherDetailItem(
       BuildContext context, SelectableForecastFields field) {
+    // TODO: Change to InkWell for pressure animation
     return GestureDetector(
       onTap: () {
         if (widget.isEditing) {
