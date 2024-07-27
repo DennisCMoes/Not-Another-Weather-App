@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
 import 'package:not_another_weather_app/shared/views/sliding_drawer.dart';
@@ -117,7 +118,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 children: [
                   for (int i = 0; i < state.geocodings.length; i++)
-                    ForecastCard(state.geocodings[i]),
+                    ChangeNotifierProvider(
+                      create: (context) =>
+                          CurrentGeocodingProvider(state.geocodings[i]),
+                      child: const ForecastCard(),
+                    ),
                 ],
               ),
               Positioned.fill(
