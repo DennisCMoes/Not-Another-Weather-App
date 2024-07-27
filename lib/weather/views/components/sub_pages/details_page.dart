@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
-import 'package:not_another_weather_app/shared/views/custom_multi_sized_grid.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/detail_widgets_overlay.dart';
@@ -56,7 +55,8 @@ class _PageTwoState extends State<PageTwo> {
                       openWidgetDetail(widget.geocoding.detailWidgets[i]);
                     }
                   },
-                  child: widget.geocoding.detailWidgets[i].getWidget(),
+                  child: widget.geocoding.detailWidgets[i]
+                      .getWidget(widget.geocoding),
                 ),
               ),
             ),
