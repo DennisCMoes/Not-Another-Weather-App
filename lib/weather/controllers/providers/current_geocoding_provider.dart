@@ -44,9 +44,20 @@ class CurrentGeocodingProvider extends ChangeNotifier {
   /// Replaces the [oldField] with [newField] in the list of selected forecast items and notifies it's listeners
   void replaceSecondaryField(
       SelectableForecastFields oldField, SelectableForecastFields newField) {
-    int index = geocoding.selectedForecastItems.indexOf(oldField);
-    geocoding.selectedForecastItems[index] = newField;
-    notifyListeners();
+    int oldFieldIndex = geocoding.selectedForecastItems.indexOf(oldField);
+    int newFieldIndex = geocoding.selectedForecastItems.indexOf(newField);
+
+    if (oldFieldIndex != -1) {
+      if (newFieldIndex != -1) {
+        // Swap the fields
+        geocoding.selectedForecastItems[newFieldIndex] = oldField;
+      }
+
+      geocoding.selectedForecastItems[oldFieldIndex] = newField;
+      notifyListeners();
+    } else {
+      debugPrint("Error: Old field not found");
+    }
   }
 
   /// Sets the size of the widget item identified by [item] to [size] and notifies it's listeners

@@ -16,7 +16,8 @@ class SummaryPage extends StatefulWidget {
 class _SummaryPageState extends State<SummaryPage> {
   late CurrentGeocodingProvider _geocodingProvider;
 
-  void showSelectedFieldMenu(SelectableForecastFields field, bool isMainField) {
+  void _showSelectedFieldMenu(
+      SelectableForecastFields field, bool isMainField) {
     List<SelectableForecastFields> fieldList = isMainField
         ? SelectableForecastFields.values
             .where((e) => e.mainFieldAccessible == true)
@@ -129,7 +130,7 @@ class _SummaryPageState extends State<SummaryPage> {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: state.geocoding.selectedForecastItems
                           .map((e) => _weatherDetailItem(context, state, e))
                           .toList(),
@@ -139,7 +140,7 @@ class _SummaryPageState extends State<SummaryPage> {
                   GestureDetector(
                     onTap: () {
                       if (state.isEditing) {
-                        showSelectedFieldMenu(
+                        _showSelectedFieldMenu(
                             state.geocoding.selectedMainField, true);
                       }
                     },
@@ -178,13 +179,14 @@ class _SummaryPageState extends State<SummaryPage> {
       CurrentGeocodingProvider provider, SelectableForecastFields field) {
     // TODO: Change to InkWell for pressure animation
     return GestureDetector(
+      key: ValueKey(field),
       onTap: () {
         if (provider.isEditing) {
-          showSelectedFieldMenu(field, false);
+          _showSelectedFieldMenu(field, false);
         }
       },
       child: Container(
-        width: 100,
+        width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(

@@ -80,64 +80,10 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
                 ),
                 itemBuilder: (context, index) {
                   SelectableForecastFields forecastField = widget.fields[index];
-                  bool alreadyIncluded;
-
-                  if (widget.isMainField) {
-                    alreadyIncluded =
-                        state.geocoding.selectedMainField == forecastField;
-                  } else {
-                    alreadyIncluded = state.geocoding.selectedForecastItems
-                        .contains(forecastField);
-                  }
 
                   return AnimatedBuilder(
                     animation: _animationController,
-                    child: Material(
-                      clipBehavior: Clip.hardEdge,
-                      color: alreadyIncluded ? Colors.white60 : Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      child: InkWell(
-                        splashColor:
-                            alreadyIncluded ? Colors.transparent : null,
-                        highlightColor:
-                            alreadyIncluded ? Colors.transparent : null,
-                        onTap: () {
-                          if (alreadyIncluded) {
-                            return;
-                          }
-
-                          if (widget.isMainField) {
-                            state.setMainField(forecastField);
-                          } else {
-                            state.replaceSecondaryField(
-                                widget.fieldToReplace, forecastField);
-                          }
-
-                          Navigator.of(context).pop();
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(forecastField.icon,
-                                size: 28,
-                                weight: 500,
-                                color: alreadyIncluded
-                                    ? Colors.black45
-                                    : Colors.black),
-                            Text(
-                              forecastField.label,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: alreadyIncluded
-                                      ? Colors.black45
-                                      : Colors.black),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    child: _fieldCard(state, forecastField),
                     builder: (context, child) {
                       final animation = Tween<Offset>(
                               begin: const Offset(0, 0.1), end: Offset.zero)
@@ -175,6 +121,78 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
           ),
         );
       },
+    );
+  }
+
+  Widget _fieldCard(CurrentGeocodingProvider provider,
+      SelectableForecastFields forecastField) {
+    int index = provider.geocoding.selectedForecastItems.indexOf(forecastField);
+    bool isCurrentField = forecastField == widget.fieldToReplace;
+
+    return Stack(
+      alignment: Alignment.center,
+      fit: StackFit.expand,
+      clipBehavior: Clip.none,
+      children: [
+        Material(
+          clipBehavior: Clip.hardEdge,
+          color: isCurrentField ? Colors.white60 : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(
+            splashColor: isCurrentField ? Colors.transparent : null,
+            highlightColor: isCurrentField ? Colors.transparent : null,
+            onTap: () {
+              if (isCurrentField) {
+                return;
+              }
+
+              if (widget.isMainField) {
+                provider.setMainField(forecastField);
+              } else {
+                provider.replaceSecondaryField(
+                    widget.fieldToReplace, forecastField);
+              }
+
+              Navigator.of(context).pop();
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(forecastField.icon,
+                    size: 28,
+                    weight: 500,
+                    color: isCurrentField ? Colors.black45 : Colors.black),
+                Text(
+                  forecastField.label,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: isCurrentField ? Colors.black45 : Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        index != -1 && !widget.isMainField
+            ? Positioned(
+                right: -10,
+                top: -10,
+                child: Material(
+                  color: Colors.blue,
+                  shape: const CircleBorder(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      (index + 1).toString(),
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              )
+            : const SizedBox.shrink(),
+      ],
     );
   }
 }

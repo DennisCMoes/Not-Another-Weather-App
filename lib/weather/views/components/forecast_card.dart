@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/summary_page.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/details_page.dart';
 import 'package:provider/provider.dart';
@@ -30,11 +29,6 @@ class ForecastCardState extends State<ForecastCard> {
   void dispose() {
     _geocodingProvider.dispose();
     super.dispose();
-  }
-
-  void _onSubPageScroll(int index) {
-    Provider.of<WeatherProvider>(context, listen: false)
-        .changeSelectedPage(_geocodingProvider.geocoding, index);
   }
 
   @override
@@ -104,10 +98,7 @@ class ForecastCardState extends State<ForecastCard> {
                 child: PageView(
                   controller: state.subPageController,
                   onPageChanged: (index) => state.setSubPageIndex(index),
-                  children: const <Widget>[
-                    SummaryPage(),
-                    PageTwo(),
-                  ],
+                  children: const <Widget>[SummaryPage(), PageTwo()],
                 ),
               ),
               SizedBox(

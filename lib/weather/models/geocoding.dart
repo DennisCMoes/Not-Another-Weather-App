@@ -20,7 +20,8 @@ class Geocoding {
   List<SelectableForecastFields> selectedForecastItems = [
     SelectableForecastFields.windSpeed,
     SelectableForecastFields.precipitation,
-    SelectableForecastFields.chainceOfRain
+    SelectableForecastFields.chainceOfRain,
+    SelectableForecastFields.cloudCover
   ];
 
   List<WidgetItem> detailWidgets = [
