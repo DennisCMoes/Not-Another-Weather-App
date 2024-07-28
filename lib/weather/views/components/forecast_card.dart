@@ -27,7 +27,7 @@ class ForecastCardState extends State<ForecastCard> {
 
   @override
   void dispose() {
-    _geocodingProvider.dispose();
+    // _geocodingProvider.dispose();
     super.dispose();
   }
 
