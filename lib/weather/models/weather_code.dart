@@ -9,44 +9,59 @@ import 'package:not_another_weather_app/weather/views/clippers/tunderstorm_clipp
 
 enum WeatherCode {
   // Sunny
-  clearSky(0, "Clear Sky", WeatherColorScheme.dandelion),
+  clearSky(0, "Clear Sky", WeatherColorScheme.clearAndSunny),
 
   // Cloudy
-  mainlyClear(1, "Mainly clear", WeatherColorScheme.gray),
-  partlyCloudy(2, "Partly clouded", WeatherColorScheme.gray),
-  overcast(3, "Overcast", WeatherColorScheme.gray),
+  mainlyClear(1, "Mainly clear", WeatherColorScheme.cloudy),
+  partlyCloudy(2, "Partly clouded", WeatherColorScheme.partlyCloudyDay),
+  overcast(3, "Overcast", WeatherColorScheme.overcast),
 
   // Fog
-  fog(45, "Fog", WeatherColorScheme.gray),
-  rimeFog(46, "Depositing rime fog", WeatherColorScheme.gray),
+  fog(45, "Fog", WeatherColorScheme.fog),
+  rimeFog(48, "Depositing rime fog", WeatherColorScheme.fog),
+
+  // Drizzle
+  lightDrizzle(51, "Light drizzle", WeatherColorScheme.rain),
+  moderateDrizzle(53, "Moderate drizzle", WeatherColorScheme.rain),
+  denseDrizzle(55, "Dense drizzle", WeatherColorScheme.rain),
+
+  // Freezing drizzle
+  lightFreezingDrizzle(
+      56, "Light freezing drizzle", WeatherColorScheme.lightRain),
+  heavyFreezingDrizzle(
+      57, "Heavy freezing drizzle", WeatherColorScheme.lightRain),
 
   // Rain
-  lightDrizzle(56, "Light freezing drizzle", WeatherColorScheme.cuttyShart),
-  heavyDrizzle(57, "Heavy freezing drizzle", WeatherColorScheme.cuttyShart),
-  slightRain(61, "Slight rain", WeatherColorScheme.cuttyShart),
-  moderateRain(63, "Moderate rain", WeatherColorScheme.cuttyShart),
-  heavyRain(65, "Heavy rain", WeatherColorScheme.cuttyShart),
-  lighFreezingRain(66, "Light freezing rain", WeatherColorScheme.cuttyShart),
-  heavyFreezingRain(67, "Heavy freezing rain", WeatherColorScheme.cuttyShart),
+  slightRain(61, "Slight rain", WeatherColorScheme.rain),
+  moderateRain(63, "Moderate rain", WeatherColorScheme.rain),
+  heavyRain(65, "Heavy rain", WeatherColorScheme.rain),
+
+  // Freezing rain
+  lighFreezingRain(66, "Light freezing rain", WeatherColorScheme.rain),
+  heavyFreezingRain(67, "Heavy freezing rain", WeatherColorScheme.rain),
 
   // Snow
-  slightSnowFall(71, "Slight snow fall", WeatherColorScheme.silver),
-  moderateSnowFall(72, "Moderate snow fall", WeatherColorScheme.silver),
-  heavySnowFall(73, "Heavy snow fall", WeatherColorScheme.silver),
-  snowGrains(77, "Snow grains", WeatherColorScheme.silver),
+  slightSnowFall(71, "Slight snow fall", WeatherColorScheme.snow),
+  moderateSnowFall(72, "Moderate snow fall", WeatherColorScheme.snow),
+  heavySnowFall(73, "Heavy snow fall", WeatherColorScheme.snow),
+  snowGrains(77, "Snow grains", WeatherColorScheme.snow),
 
-  // Rain
-  slightRainShower(80, "Slight rain shower", WeatherColorScheme.cuttyShart),
-  moderateRainShower(81, "Moderate rain shower", WeatherColorScheme.cuttyShart),
-  violentRainShower(82, "Violent rain shower", WeatherColorScheme.cuttyShart),
+  // Rain showers
+  slightRainShower(80, "Slight rain shower", WeatherColorScheme.rain),
+  moderateRainShower(81, "Moderate rain shower", WeatherColorScheme.rain),
+  violentRainShower(82, "Violent rain shower", WeatherColorScheme.rain),
 
-  // Snow
-  slightSnowShower(85, "Slight snow shower", WeatherColorScheme.silver),
-  heavySnowShower(86, "Heavy snow shower", WeatherColorScheme.silver),
+  // Snow showers
+  slightSnowShower(85, "Slight snow shower", WeatherColorScheme.snow),
+  heavySnowShower(86, "Heavy snow shower", WeatherColorScheme.snow),
 
   // Thunder
-  thunderstorm(95, "Thunderstorm", WeatherColorScheme.gray),
-  thunderstormWithHail(96, "Thunderstorm", WeatherColorScheme.gray),
+  slightOrModerateThunderstorm(
+      95, "Thunderstorm", WeatherColorScheme.thunderstorm),
+  slightThunderstormWithHail(
+      96, "Thunderstorm", WeatherColorScheme.thunderstorm),
+  moderateThunderstormWithHail(
+      99, "Thunderstorm", WeatherColorScheme.thunderstorm),
 
   unknown(-1, "Something went wrong", WeatherColorScheme.gray);
 

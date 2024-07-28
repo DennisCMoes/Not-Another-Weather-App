@@ -15,13 +15,13 @@ enum SelectableForecastFields {
   temperature("Temperature", Icons.thermostat, true),
   windSpeed("Wind speed", Icons.air, false),
   precipitation("Precipitation", Icons.water_drop, false),
-  chainceOfRain("Chance of rain", Icons.umbrella, true),
+  chainceOfRain("Chance of rain", Icons.umbrella, false),
   sunrise("Sunrise", Icons.keyboard_arrow_up, false),
   sunset("Sunset", Icons.keyboard_arrow_down, false),
   humidity("Humidity", Icons.percent, true),
   windDirection("Wind direction", Icons.directions, false),
   windGusts("Wind gusts", Icons.speed, false),
-  cloudCover("Cloud cover", Icons.cloud, true),
+  cloudCover("Cloud cover", Icons.cloud, false),
   isDay("Day or night", Icons.access_time, false),
   localTime("Local time", Icons.circle, false);
 
