@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
-import 'package:not_another_weather_app/weather/views/components/detail_widgets/compass/large_compass.dart';
-import 'package:not_another_weather_app/weather/views/components/detail_widgets/compass/medium_compass.dart';
-import 'package:not_another_weather_app/weather/views/components/detail_widgets/compass/small_compass.dart';
-import 'package:not_another_weather_app/weather/views/components/detail_widgets/sunrise_sunset/large_sunset_sunrise.dart';
-import 'package:not_another_weather_app/weather/views/components/detail_widgets/sunrise_sunset/medium_sunset_sunrise.dart';
-import 'package:not_another_weather_app/weather/views/components/detail_widgets/sunrise_sunset/small_sunset_sunrise.dart';
+import 'package:not_another_weather_app/weather/views/components/detail_widgets/compass_widget.dart';
+import 'package:not_another_weather_app/weather/views/components/detail_widgets/sunrise_sunset_widget.dart';
 
 enum WidgetSize {
   small(2, 1),
@@ -44,23 +40,9 @@ class WidgetItem {
   Widget getWidget(Geocoding geocoding) {
     switch (type) {
       case WidgetType.compass:
-        switch (size) {
-          case WidgetSize.small:
-            return SmallCompass(geocoding: geocoding);
-          case WidgetSize.medium:
-            return MediumCompass(geocoding: geocoding);
-          case WidgetSize.large:
-            return LargeCompass(geocoding: geocoding);
-        }
+        return CompassWidget(size: size);
       case WidgetType.sunriseSunset:
-        switch (size) {
-          case WidgetSize.small:
-            return SmallSunsetSunrise(geocoding: geocoding);
-          case WidgetSize.medium:
-            return MediumSunsetSunrise(geocoding: geocoding);
-          case WidgetSize.large:
-            return LargeSunsetSunrise(geocoding: geocoding);
-        }
+        return SunriseSunsetWidget(size: size);
       case WidgetType.genericText:
         return const Text("Generic");
     }
