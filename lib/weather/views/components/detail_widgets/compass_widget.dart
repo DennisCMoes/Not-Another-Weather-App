@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:not_another_weather_app/weather/views/painters/compass_painter.dart';
 import 'package:provider/provider.dart';
@@ -36,16 +37,19 @@ class CompassWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CurrentGeocodingProvider>(
       builder: (context, state, child) {
+        HourlyWeatherData? weatherData = state.geocoding.forecast
+            ?.getCurrentHourData(state.selectedHour.hour);
+
         switch (size) {
           case WidgetSize.small:
-            return _small(context, state);
+            return _small(context, state, weatherData);
           case WidgetSize.medium:
-            return _compass(context, state);
+            return _compass(context, state, weatherData);
           case WidgetSize.large:
             return Row(
               children: [
-                Expanded(child: _details(context, state)),
-                Expanded(child: _compass(context, state)),
+                Expanded(child: _details(context, state, weatherData)),
+                Expanded(child: _compass(context, state, weatherData)),
               ],
             );
         }
@@ -53,21 +57,23 @@ class CompassWidget extends StatelessWidget {
     );
   }
 
-  Widget _small(BuildContext context, CurrentGeocodingProvider provider) {
+  Widget _small(BuildContext context, CurrentGeocodingProvider provider,
+      HourlyWeatherData? weatherData) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Icon(Icons.directions),
         Text(
-          "${provider.geocoding.forecast?.windDirection ?? "XX"}º",
+          "${weatherData?.windDirection ?? "XX"}º",
           style: Theme.of(context).textTheme.displayMedium,
         )
       ],
     );
   }
 
-  Widget _details(BuildContext context, CurrentGeocodingProvider provider) {
+  Widget _details(BuildContext context, CurrentGeocodingProvider provider,
+      HourlyWeatherData? weatherData) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
@@ -78,21 +84,18 @@ class CompassWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               const Text("Wind speed"),
-              Text(
-                  "${provider.geocoding.forecast?.windSpeed.round() ?? 0.0} km/h",
+              Text("${weatherData?.windSpeed.round() ?? 0.0} km/h",
                   style: Theme.of(context).textTheme.displayMedium),
             ],
           ),
           Divider(
-            color: provider
-                    .geocoding.forecast?.weatherCode.colorScheme.accentColor ??
+            color: weatherData?.weatherCode.colorScheme.accentColor ??
                 Colors.white,
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                  "${provider.geocoding.forecast?.windGusts.round() ?? 0.0} km/h",
+              Text("${weatherData?.windGusts.round() ?? 0.0} km/h",
                   style: Theme.of(context).textTheme.displayMedium),
               const Text("Wind gusts")
             ],
@@ -102,27 +105,22 @@ class CompassWidget extends StatelessWidget {
     );
   }
 
-  Widget _compass(BuildContext context, CurrentGeocodingProvider provider) {
+  Widget _compass(BuildContext context, CurrentGeocodingProvider provider,
+      HourlyWeatherData? weatherData) {
     return CustomPaint(
       painter: CompassPainter(
-        direction: provider.geocoding.forecast?.windDirection.toDouble() ?? 0.0,
-        colorScheme: provider.geocoding.forecast?.weatherCode.colorScheme ??
-            WeatherColorScheme.gray,
+        direction: weatherData?.windDirection.toDouble() ?? 0.0,
+        colorScheme:
+            weatherData?.weatherCode.colorScheme ?? WeatherColorScheme.gray,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Text("${provider.geocoding.forecast?.windDirection ?? "XX"}",
-          //     style: Theme.of(context).textTheme.displayMedium!.copyWith(
-          //         color: provider.geocoding.forecast?.weatherCode.colorScheme
-          //                 .accentColor ??
-          //             Colors.white)),
           Text(
-            getHeading(provider.geocoding.forecast?.windDirection ?? 0),
+            getHeading(weatherData?.windDirection ?? 0),
             style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                color: provider.geocoding.forecast?.weatherCode.colorScheme
-                        .accentColor ??
+                color: weatherData?.weatherCode.colorScheme.accentColor ??
                     Colors.white),
           ),
         ],

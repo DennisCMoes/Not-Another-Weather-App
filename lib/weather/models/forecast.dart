@@ -5,10 +5,27 @@ import 'package:not_another_weather_app/weather/models/weather_code.dart';
 
 class HourlyWeatherData {
   final double temperature;
+  final double apparentTemperature;
+  final int humidity;
   final int rainProbability;
   final double rainInMM;
+  final WeatherCode weatherCode;
+  final int cloudCover;
+  final double windSpeed;
+  final int windDirection;
+  final double windGusts;
 
-  HourlyWeatherData(this.temperature, this.rainProbability, this.rainInMM);
+  HourlyWeatherData(
+      this.temperature,
+      this.apparentTemperature,
+      this.humidity,
+      this.rainProbability,
+      this.rainInMM,
+      this.weatherCode,
+      this.cloudCover,
+      this.windSpeed,
+      this.windDirection,
+      this.windGusts);
 }
 
 enum SelectableForecastFields {
@@ -37,16 +54,7 @@ class Forecast {
   double latitude;
   double longitude;
   String timezome;
-  double temperature;
-  WeatherCode weatherCode;
-  double windSpeed;
-  double precipitation;
-  int humidity;
   double pressure;
-  double apparentTemperature;
-  int cloudCover;
-  int windDirection;
-  double windGusts;
   int isDay;
 
   DateTime sunrise;
@@ -54,43 +62,37 @@ class Forecast {
 
   Map<DateTime, HourlyWeatherData> hourlyWeatherData;
 
-  Forecast(
-      this.latitude,
-      this.longitude,
-      this.timezome,
-      this.temperature,
-      this.weatherCode,
-      this.windSpeed,
-      this.precipitation,
-      this.humidity,
-      this.pressure,
-      this.apparentTemperature,
-      this.cloudCover,
-      this.windDirection,
-      this.windGusts,
-      this.sunrise,
-      this.sunset,
-      this.isDay,
-      this.hourlyWeatherData);
+  Forecast(this.latitude, this.longitude, this.timezome, this.pressure,
+      this.sunrise, this.sunset, this.isDay, this.hourlyWeatherData);
 
   factory Forecast.fromJson(Map<String, dynamic> json) {
-    DateFormat format = DateFormat('yyyy-MM-ddThh:mm');
-
-    var times = List<String>.from(json['hourly']['time'])
+    DateFormat format = DateFormat('yyyy-MM-ddTHH:mm');
+    List<DateTime> times = List<String>.from(json['hourly']['time'])
         .map((time) => format.parse(time))
         .toList();
-    var temperatures = List<double>.from(json['hourly']['temperature_2m']);
-    var rainProbabilities =
-        List<int>.from(json['hourly']['precipitation_probability']);
-    var rainAmounts = List<double>.from(json['hourly']['precipitation']);
+
+    Map<String, List<dynamic>> dataMap = {};
+
+    (json['hourly'] as Map<String, dynamic>).forEach((key, value) {
+      if (key != 'time') {
+        dataMap[key] = List<dynamic>.from(value);
+      }
+    });
 
     Map<DateTime, HourlyWeatherData> hourlyWeatherData = {};
 
     for (int i = 0; i < times.length; i++) {
       hourlyWeatherData[times[i]] = HourlyWeatherData(
-        temperatures[i],
-        rainProbabilities[i],
-        rainAmounts[i],
+        dataMap['temperature_2m']![i],
+        dataMap['apparent_temperature']![i],
+        dataMap['relative_humidity_2m']![i],
+        dataMap['precipitation_probability']![i],
+        dataMap['precipitation']![i],
+        WeatherCode.fromCode(dataMap['weather_code']![i]),
+        dataMap['cloud_cover']![i],
+        dataMap['wind_speed_10m']![i],
+        dataMap['wind_direction_10m']![i],
+        dataMap['wind_gusts_10m']![i],
       );
     }
 
@@ -98,16 +100,7 @@ class Forecast {
       json['latitude'],
       json['longitude'],
       json['timezone_abbreviation'],
-      json['current']['temperature_2m'],
-      WeatherCode.fromCode(json['current']['weather_code']),
-      json['current']['wind_speed_10m'],
-      json['current']['precipitation'],
-      json['current']['relative_humidity_2m'],
       json['current']['surface_pressure'],
-      json['current']['apparent_temperature'],
-      json['current']['cloud_cover'],
-      json['current']['wind_direction_10m'],
-      json['current']['wind_gusts_10m'],
       format.parse(json['daily']['sunrise'][0]),
       format.parse(json['daily']['sunset'][0]),
       json['current']['is_day'],
@@ -115,46 +108,38 @@ class Forecast {
     );
   }
 
-  HourlyWeatherData getCurrentHourData() {
+  HourlyWeatherData getCurrentHourData([int? hour]) {
     DateTime now = DateTime.now();
     DateTime startOfCurrentHour =
-        DateTime(now.year, now.month, now.day, now.hour);
+        DateTime(now.year, now.month, now.day, hour ?? now.hour);
     return hourlyWeatherData[startOfCurrentHour]!;
   }
 
-  Map<DateTime, double> get temperatures => hourlyWeatherData
-      .map((dateTime, weather) => MapEntry(dateTime, weather.temperature));
-
-  Map<DateTime, int> get rainProbabilities => hourlyWeatherData
-      .map((dateTime, weather) => MapEntry(dateTime, weather.rainProbability));
-
-  Map<DateTime, double> get rainInMMs => hourlyWeatherData
-      .map((dateTime, weather) => MapEntry(dateTime, weather.rainInMM));
-
-  dynamic getField(SelectableForecastFields field) {
+  dynamic getField(SelectableForecastFields field, [int? hour]) {
     DateFormat hourFormat = DateFormat("HH:mm");
+    HourlyWeatherData currentHourData = getCurrentHourData(hour);
 
     switch (field) {
       case SelectableForecastFields.temperature:
-        return "${temperature.round()}º";
+        return "${currentHourData.temperature.round()}º";
       case SelectableForecastFields.windSpeed:
-        return "${windSpeed.round()}km/h";
+        return "${currentHourData.windSpeed.round()}km/h";
       case SelectableForecastFields.precipitation:
-        return "${precipitation}mm";
+        return "${currentHourData.rainInMM}mm";
       case SelectableForecastFields.chainceOfRain:
-        return "${rainProbabilities.values.first}%";
+        return "${currentHourData.rainProbability}%";
       case SelectableForecastFields.sunrise:
         return hourFormat.format(sunrise);
       case SelectableForecastFields.sunset:
         return hourFormat.format(sunset);
       case SelectableForecastFields.humidity:
-        return "$humidity%";
+        return "${currentHourData.humidity}%";
       case SelectableForecastFields.windDirection:
-        return "$windDirectionº";
+        return "${currentHourData.windDirection}º";
       case SelectableForecastFields.windGusts:
-        return "${windGusts.round()}km/h";
+        return "${currentHourData.windGusts.round()}km/h";
       case SelectableForecastFields.cloudCover:
-        return "$cloudCover%";
+        return "${currentHourData.cloudCover}%";
       case SelectableForecastFields.isDay:
         return "It is ${isDay == 1 ? "day" : "night"}";
       case SelectableForecastFields.localTime:
@@ -166,6 +151,6 @@ class Forecast {
 
   @override
   String toString() {
-    return "$temperatureº - [$latitude|$longitude] - ${weatherCode.description}";
+    return "${getCurrentHourData().temperature}º - [$latitude|$longitude] - ${getCurrentHourData().weatherCode.description}";
   }
 }

@@ -11,12 +11,14 @@ class CurrentGeocodingProvider extends ChangeNotifier {
 
   bool _isEditing = false;
   int _subPageIndex = 0;
+  DateTime _selectedHour = DateTime.now();
 
   CurrentGeocodingProvider(this.geocoding);
 
   bool get isEditing => _isEditing;
   int get subPageIndex => _subPageIndex;
   PageController get subPageController => _pageController;
+  DateTime get selectedHour => _selectedHour;
 
   /// Checks if the given [index] is the current page.
   ///
@@ -32,6 +34,13 @@ class CurrentGeocodingProvider extends ChangeNotifier {
   /// Sets the sub-page index to [index] and notifies it's listeners
   void setSubPageIndex(int index) {
     _subPageIndex = index;
+    notifyListeners();
+  }
+
+  /// Sets the selected hour to [hour] and notifies it's listeners
+  void setSelectedHour(int hour) {
+    DateTime now = DateTime.now();
+    _selectedHour = DateTime(now.year, now.month, now.day, hour);
     notifyListeners();
   }
 

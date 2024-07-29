@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:not_another_weather_app/weather/views/painters/sun_painter.dart';
 import 'package:provider/provider.dart';
@@ -62,7 +63,10 @@ class SunriseSunsetWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 const Text("Sunrise"),
-                Text(formatTime(provider.geocoding.forecast?.sunrise)),
+                Text(
+                  formatTime(provider.geocoding.forecast?.sunrise),
+                  style: Theme.of(context).textTheme.displaySmall,
+                ),
               ],
             ),
           ),
@@ -73,12 +77,22 @@ class SunriseSunsetWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text("Sunset"),
-                Text(formatTime(provider.geocoding.forecast?.sunset)),
+                Text(
+                  formatTime(provider.geocoding.forecast?.sunset),
+                  style: Theme.of(context).textTheme.displaySmall,
+                ),
               ],
             ),
           ),
           CustomPaint(
-            painter: SunPainter(currentTime: DateTime.now()),
+            painter: SunPainter(
+              currentTime: DateTime.now(),
+              colorScheme: provider.geocoding.forecast
+                      ?.getCurrentHourData(provider.selectedHour.hour)
+                      .weatherCode
+                      .colorScheme ??
+                  WeatherColorScheme.gray,
+            ),
             child: Container(),
           ),
         ],

@@ -5,6 +5,7 @@ import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:provider/provider.dart';
 
 class DetailWidgetsOverlay extends StatefulWidget {
+  // TODO: Look into if we can move the selectedWidget to the provider
   final WidgetItem selectedWidget;
 
   const DetailWidgetsOverlay(this.selectedWidget, {super.key});

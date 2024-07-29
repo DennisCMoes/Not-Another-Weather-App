@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/detail_widgets_overlay.dart';
 import 'package:not_another_weather_app/weather/views/routes/widget_overlay.dart';
@@ -45,6 +47,9 @@ class _PageTwoState extends State<PageTwo> {
 
     return Consumer<CurrentGeocodingProvider>(
       builder: (context, state, child) {
+        HourlyWeatherData? currentHourData = state.geocoding.forecast
+            ?.getCurrentHourData(state.selectedHour.hour);
+
         return Padding(
           padding: const EdgeInsets.symmetric(
               horizontal: NavigationToolbar.kMiddleSpacing, vertical: 6),
@@ -65,8 +70,9 @@ class _PageTwoState extends State<PageTwo> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         width: 2,
-                        color: state.geocoding.forecast?.weatherCode.colorScheme
-                                .darkenMainColor(0.1) ??
+                        color: currentHourData
+                                ?.weatherCode.colorScheme.mainColor
+                                .darkenColor(0.1) ??
                             Colors.white,
                       ),
                     ),

@@ -1,26 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 
 import 'dart:math';
-import 'dart:ui';
+
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 
 class SunPainter extends CustomPainter {
-  final Paint linePaint = Paint()
-    ..color = Colors.blue
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.0;
-
-  final Paint pointPaint = Paint()
-    ..color = Colors.blue
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 10.0;
-
-  final Paint sunPaint = Paint()
-    ..color = Colors.yellow
-    ..style = PaintingStyle.fill;
-
   final DateTime currentTime;
+  final WeatherColorScheme colorScheme;
 
-  SunPainter({required this.currentTime});
+  SunPainter({required this.currentTime, required this.colorScheme});
 
   double calculateSunPositionAngle(DateTime time) {
     // Convert the current time to a value between 0 and 1, where 0 is 6 AM and 1 is 6 PM
@@ -33,6 +22,20 @@ class SunPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final Paint linePaint = Paint()
+      ..color = colorScheme.mainColor.darkenColor(0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    final Paint pointPaint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10.0;
+
+    final Paint sunPaint = Paint()
+      ..color = Colors.yellow
+      ..style = PaintingStyle.fill;
+
     final drawableHeight = size.height;
     final drawableWidth = size.width;
 

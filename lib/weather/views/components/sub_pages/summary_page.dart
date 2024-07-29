@@ -24,6 +24,7 @@ class _SummaryPageState extends State<SummaryPage> {
             .toList()
         : SelectableForecastFields.values;
 
+    // TODO: Return the value via the pop function
     Navigator.of(context).push(
       WidgetOverlay(
         overlayChild: ChangeNotifierProvider.value(
@@ -55,129 +56,138 @@ class _SummaryPageState extends State<SummaryPage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<CurrentGeocodingProvider>(
-      builder: (context, state, child) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: Stack(
-                children: <Widget>[
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ClipPath(
-                          clipper: WeatherCode.getClipper(
-                              state.geocoding.forecast?.weatherCode),
-                          child: SizedBox(
-                            width: 300,
-                            height: 300,
-                            child: RepaintBoundary(
-                              child: CustomScrollView(
-                                physics: const NeverScrollableScrollPhysics(),
-                                slivers: [
-                                  SliverGrid(
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, index) => ClipOval(
-                                        child: Material(
-                                          color: state
-                                                  .geocoding
-                                                  .forecast
-                                                  ?.weatherCode
-                                                  .colorScheme
-                                                  .accentColor ??
-                                              Colors.black,
+      builder: (context, state, child) {
+        HourlyWeatherData? currentHourData = state.geocoding.forecast
+            ?.getCurrentHourData(state.selectedHour.hour);
+        Forecast? currentForecast = state.geocoding.forecast;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Column(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: <Widget>[
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ClipPath(
+                            clipper: WeatherCode.getClipper(
+                                currentHourData?.weatherCode ??
+                                    WeatherCode.unknown),
+                            child: SizedBox(
+                              width: 300,
+                              height: 300,
+                              child: RepaintBoundary(
+                                child: CustomScrollView(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  slivers: [
+                                    SliverGrid(
+                                      delegate: SliverChildBuilderDelegate(
+                                        (context, index) => ClipOval(
+                                          child: Material(
+                                            color: currentHourData?.weatherCode
+                                                    .colorScheme.accentColor ??
+                                                Colors.black,
+                                          ),
                                         ),
+                                        childCount: 400, // 20 * 20
                                       ),
-                                      childCount: 400, // 20 * 20
-                                    ),
-                                    gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 20,
-                                      crossAxisSpacing: 6,
-                                      mainAxisSpacing: 6,
-                                    ),
-                                  )
-                                ],
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 20,
+                                        crossAxisSpacing: 6,
+                                        mainAxisSpacing: 6,
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Text(
-                          state.geocoding.forecast?.weatherCode.description ??
-                              "Unknown",
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayMedium!
-                              .copyWith(
-                                color: state.geocoding.forecast?.weatherCode
-                                        .colorScheme.accentColor ??
-                                    Colors.white,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: state.geocoding.selectedForecastItems
-                          .map((e) => _weatherDetailItem(context, state, e))
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: () {
-                      if (state.isEditing) {
-                        _showSelectedFieldMenu(
-                            state.geocoding.selectedMainField, true);
-                      }
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: state.isEditing
-                              ? Colors.black
-                              : Colors.transparent,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        "${state.geocoding.forecast?.getField(state.geocoding.selectedMainField) ?? "XX"}",
-                        style:
-                            Theme.of(context).textTheme.displayLarge!.copyWith(
-                                  fontSize: 128,
-                                  color: state.geocoding.forecast?.weatherCode
-                                          .colorScheme.accentColor ??
+                          Text(
+                            currentHourData?.weatherCode.description ??
+                                "Unknown",
+                            style: Theme.of(context)
+                                .textTheme
+                                .displayMedium!
+                                .copyWith(
+                                  color: state.geocoding.forecast
+                                          ?.getCurrentHourData()
+                                          .weatherCode
+                                          .colorScheme
+                                          .accentColor ??
                                       Colors.white,
                                 ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: state.geocoding.selectedForecastItems
+                            .map((e) => _weatherDetailItem(context, state, e))
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        if (state.isEditing) {
+                          _showSelectedFieldMenu(
+                              state.geocoding.selectedMainField, true);
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: state.isEditing
+                                ? Colors.black
+                                : Colors.transparent,
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          "${currentForecast?.getField(state.geocoding.selectedMainField, state.selectedHour.hour) ?? "XX"}",
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayLarge!
+                              .copyWith(
+                                  fontSize: 128,
+                                  color: currentHourData?.weatherCode
+                                          .colorScheme.accentColor ??
+                                      Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _weatherDetailItem(BuildContext context,
       CurrentGeocodingProvider provider, SelectableForecastFields field) {
-    // TODO: Change to InkWell for pressure animation
+    HourlyWeatherData? currentHour = provider.geocoding.forecast
+        ?.getCurrentHourData(provider.selectedHour.hour);
+
     return GestureDetector(
       key: ValueKey(field),
       onTap: () {
@@ -200,18 +210,19 @@ class _SummaryPageState extends State<SummaryPage> {
           children: [
             Icon(
               field.icon,
-              color: provider.geocoding.forecast?.weatherCode.colorScheme
-                      .accentColor ??
+              color: currentHour?.weatherCode.colorScheme.accentColor ??
                   Colors.white,
             ),
             const SizedBox(width: 6),
             Text(
-              provider.geocoding.forecast?.getField(field).toString() ?? "XX",
+              provider.geocoding.forecast
+                      ?.getField(field, provider.selectedHour.hour)
+                      .toString() ??
+                  "XX",
               style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: provider
-                      .geocoding.forecast?.weatherCode.colorScheme.accentColor),
+                  color: currentHour?.weatherCode.colorScheme.accentColor),
             ),
           ],
         ),

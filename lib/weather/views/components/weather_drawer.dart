@@ -145,7 +145,11 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
 
     Widget listChild = Material(
       key: ValueKey(geocoding),
-      color: geocoding.forecast?.weatherCode.colorScheme.mainColor ??
+      color: geocoding.forecast
+              ?.getCurrentHourData()
+              .weatherCode
+              .colorScheme
+              .mainColor ??
           Colors.blueGrey,
       clipBehavior: Clip.hardEdge,
       child: InkWell(
@@ -165,17 +169,27 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                       overflow: TextOverflow.ellipsis,
                       style:
                           Theme.of(context).textTheme.displayMedium!.copyWith(
-                                color: geocoding.forecast?.weatherCode
-                                        .colorScheme.accentColor ??
+                                color: geocoding.forecast
+                                        ?.getCurrentHourData()
+                                        .weatherCode
+                                        .colorScheme
+                                        .accentColor ??
                                     Colors.white,
                               ),
                     ),
                     Text(
                       isSearching
                           ? geocoding.country
-                          : geocoding.forecast?.weatherCode.description ?? "XX",
+                          : geocoding.forecast
+                                  ?.getCurrentHourData()
+                                  .weatherCode
+                                  .description ??
+                              "XX",
                       style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                            color: geocoding.forecast?.weatherCode.colorScheme
+                            color: geocoding.forecast
+                                    ?.getCurrentHourData()
+                                    .weatherCode
+                                    .colorScheme
                                     .accentColor ??
                                 Colors.white,
                           ),
@@ -186,12 +200,15 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
               isSearching
                   ? const SizedBox.shrink()
                   : Text(
-                      "${geocoding.forecast?.temperature.round() ?? "XX"}º",
+                      "${geocoding.forecast?.getCurrentHourData().temperature.round() ?? "XX"}º",
                       style: Theme.of(context)
                           .textTheme
                           .displayMedium!
                           .copyWith(
-                              color: geocoding.forecast?.weatherCode.colorScheme
+                              color: geocoding.forecast
+                                      ?.getCurrentHourData()
+                                      .weatherCode
+                                      .colorScheme
                                       .accentColor ??
                                   Colors.white),
                     )

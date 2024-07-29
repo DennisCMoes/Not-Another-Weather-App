@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
@@ -64,7 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
       if (provider.geocodings.isEmpty) {
         return Colors.blueGrey;
       } else {
-        return provider.geocodings[pageIndex].forecast?.weatherCode.colorScheme
+        return provider.geocodings[pageIndex].forecast
+                ?.getCurrentHourData()
+                .weatherCode
+                .colorScheme
                 .mainColor ??
             Colors.blueGrey;
       }
@@ -112,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 controller: state.pageController,
                 clipBehavior: Clip.none,
                 onPageChanged: (page) {
+                  HapticFeedback.mediumImpact();
                   setState(() {
                     selectedPageIndex = page;
                   });
@@ -126,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               Positioned.fill(
-                right: 6,
+                // right: 0,
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Column(
