@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 
 /// A custom painter for drawing a compass with a needle indicating a direction
@@ -15,7 +16,7 @@ class CompassPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint circlePaint = Paint()
-      ..color = colorScheme.accentColor.withOpacity(0.4)
+      ..color = colorScheme.mainColor.darkenColor(0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
@@ -25,11 +26,11 @@ class CompassPainter extends CustomPainter {
       ..strokeWidth = 2.0;
 
     final Paint endCirclePaint = Paint()
-      ..color = colorScheme.darkenMainColor(0.07)
+      ..color = colorScheme.mainColor.darkenColor(0.05)
       ..style = PaintingStyle.fill;
 
     final Paint tickPaint = Paint()
-      ..color = colorScheme.accentColor.withOpacity(0.4)
+      ..color = colorScheme.mainColor.darkenColor(0.2)
       ..strokeWidth = 1.5;
 
     final Paint needleCirclePaint = Paint()
@@ -66,13 +67,13 @@ class CompassPainter extends CustomPainter {
     // Draw the needle
     final Offset needleStart =
         _calculatePoint(center, radius - 12, direction + 180);
-    final Offset needleEnd = _calculatePoint(center, radius - 22, direction);
+    final Offset needleEnd = _calculatePoint(center, radius - 27, direction);
     canvas.drawLine(needleStart, needleEnd, needlePaint);
 
     // Draw the end circle
     const double endCircleRadius = 7;
     final Offset endCircleCenter =
-        _calculatePoint(center, radius - endCircleRadius - 10, direction);
+        _calculatePoint(center, radius - endCircleRadius - 15, direction);
     canvas.drawCircle(endCircleCenter, endCircleRadius, needleCirclePaint);
 
     // Draw the arrowhead
