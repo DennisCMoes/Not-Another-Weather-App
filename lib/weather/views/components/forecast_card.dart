@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
+import 'package:not_another_weather_app/weather/views/components/slider/hour_slider_thumb_shape.dart';
+import 'package:not_another_weather_app/weather/views/components/slider/hour_slider_track_shape.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/summary_page.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/details_page.dart';
 import 'package:provider/provider.dart';
@@ -137,14 +140,46 @@ class ForecastCardState extends State<ForecastCard> {
                     children: const <Widget>[SummaryPage(), PageTwo()],
                   ),
                 ),
-                SizedBox(
-                  height: 12,
-                  child: Slider(
-                    value: _currentSliderValue,
-                    max: 23,
-                    divisions: 23,
-                    label: _currentSliderValue.round().toString(),
-                    onChanged: onChangeSelectedHour,
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderThemeData(
+                            thumbColor: currentHourData
+                                ?.weatherCode.colorScheme.mainColor
+                                .darkenColor(0.4),
+                            activeTrackColor: currentHourData
+                                ?.weatherCode.colorScheme.mainColor
+                                .darkenColor(0.1),
+                            trackShape: HourSliderTrackShape(),
+                            thumbShape: HourSliderThumbShape(),
+                            // tickMarkShape: HourSliderTickShape(),
+                          ),
+                          child: Slider(
+                            value: _currentSliderValue,
+                            max: 23,
+                            divisions: 23,
+                            onChanged: onChangeSelectedHour,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed:
+                            _currentSliderValue.toInt() == DateTime.now().hour
+                                ? null
+                                : () => onChangeSelectedHour(
+                                    DateTime.now().hour.toDouble()),
+                        visualDensity: VisualDensity.compact,
+                        disabledColor: currentHourData
+                            ?.weatherCode.colorScheme.accentColor
+                            .withOpacity(0.4),
+                        color: currentHourData
+                            ?.weatherCode.colorScheme.accentColor,
+                        icon: const Icon(Icons.restore),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(
