@@ -114,7 +114,7 @@ class ForecastCardState extends State<ForecastCard> {
                                       ),
                                 ),
                                 Text(
-                                  "Today at ${state.selectedHour.hour}",
+                                  state.getSelectedHourDescription(),
                                   style: Theme.of(context)
                                       .textTheme
                                       .displaySmall!

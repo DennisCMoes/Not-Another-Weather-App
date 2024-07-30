@@ -13,7 +13,7 @@ enum WeatherColorScheme {
   partlyCloudy(ColorPair(Color(0xFF87CEEB), Color(0xFF000000)),
       ColorPair(Color(0xFF2F4F4F), Color(0xFFFFFFFF))),
   overcast(ColorPair(Color(0xFF708090), Color(0xFF000000)),
-      ColorPair(Color(0xFF53595E), Color(0xFFFFFFFF))),
+      ColorPair(Color(0xFF2C2F32), Color(0xFFFFFFFF))),
   drizzle(ColorPair(Color(0xFFA4C3D8), Color(0xFF000000)),
       ColorPair(Color(0xFFA4C3D8), Color(0xFF000000))),
   rain(ColorPair(Color(0xFF587176), Color(0xFF000000)),

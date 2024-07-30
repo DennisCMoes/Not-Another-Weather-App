@@ -87,6 +87,25 @@ class CurrentGeocodingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Returns a string representing the selected hour relative to the current day
+  ///
+  /// If the `selectedHour` is on the same day as the current date, the string will be in the format
+  /// "Today at {hour}". Otherwise, it will be "Tomorrow at {hour}"
+  ///
+  /// Returns a string indicating the relative day and hour
+  String getSelectedHourDescription() {
+    return DateUtils.isSameDay(DateTime.now(), selectedHour)
+        ? "Today at ${selectedHour.hour}"
+        : "Tomorrow at ${selectedHour.hour}";
+  }
+
+  /// Returns a color scheme based on the weather forecast and selected hour
+  ///
+  /// If no forecast data is available, return a default color scheme of purple and white.
+  /// Otherwise, it determines if the `selectedHour` falls within the daytime and retrieves
+  /// the appropriate color scheme based on the weather conditions for that hour.
+  ///
+  /// Return a `ColorPair` representing the color scheme for the selected hour's weather conditions.
   ColorPair getWeatherColorScheme() {
     Forecast? forecast = geocoding.forecast;
 

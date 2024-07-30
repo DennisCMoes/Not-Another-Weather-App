@@ -13,7 +13,7 @@ class ForecastRepo {
           "latitude": latitude,
           "longitude": longitude,
           "timezone": "auto",
-          "forecast_days": 1,
+          "forecast_days": 2,
           "current": [
             "surface_pressure",
             "is_day",

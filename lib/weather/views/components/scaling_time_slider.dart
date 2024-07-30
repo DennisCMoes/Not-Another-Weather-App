@@ -59,7 +59,7 @@ class _ScalingTimeSliderState extends State<ScalingTimeSlider> {
   @override
   Widget build(BuildContext context) {
     return PageView.builder(
-      itemCount: 24,
+      itemCount: 48,
       controller: _timeController,
       onPageChanged: _onPageChanged,
       itemBuilder: (context, index) {
