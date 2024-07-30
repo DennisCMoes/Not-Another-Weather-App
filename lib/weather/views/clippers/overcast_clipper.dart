@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CloudClipper extends CustomClipper<Path> {
+class OvercastClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     return Path()

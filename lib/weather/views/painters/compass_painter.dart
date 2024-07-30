@@ -7,39 +7,39 @@ import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 /// A custom painter for drawing a compass with a needle indicating a direction
 class CompassPainter extends CustomPainter {
   final double direction;
-  final WeatherColorScheme colorScheme;
+  final ColorPair colorPair;
 
-  CompassPainter({required this.direction, required this.colorScheme});
+  CompassPainter({required this.direction, required this.colorPair});
 
   double get rotation => -2 * pi * (direction / 360);
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint circlePaint = Paint()
-      ..color = colorScheme.mainColor.darkenColor(0.2)
+      ..color = colorPair.main.darkenColor(0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
     final Paint needlePaint = Paint()
-      ..color = colorScheme.accentColor
+      ..color = colorPair.accent
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
     final Paint endCirclePaint = Paint()
-      ..color = colorScheme.mainColor.darkenColor(0.05)
+      ..color = colorPair.main.darkenColor(0.05)
       ..style = PaintingStyle.fill;
 
     final Paint tickPaint = Paint()
-      ..color = colorScheme.mainColor.darkenColor(0.2)
+      ..color = colorPair.main.darkenColor(0.2)
       ..strokeWidth = 1.5;
 
     final Paint needleCirclePaint = Paint()
-      ..color = colorScheme.accentColor
+      ..color = colorPair.accent
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.0;
 
     final Paint needleArrowheadPaint = Paint()
-      ..color = colorScheme.accentColor
+      ..color = colorPair.accent
       ..style = PaintingStyle.fill;
 
     double radius = min(size.width / 2.2, size.height / 2.2);
@@ -112,7 +112,7 @@ class CompassPainter extends CustomPainter {
       text: TextSpan(
         text: direction,
         style: TextStyle(
-          color: colorScheme.accentColor.withOpacity(0.6),
+          color: colorPair.accent.withOpacity(0.6),
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),

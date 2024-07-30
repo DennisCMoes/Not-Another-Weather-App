@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
@@ -145,12 +146,13 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
 
     Widget listChild = Material(
       key: ValueKey(geocoding),
-      color: geocoding.forecast
-              ?.getCurrentHourData()
-              .weatherCode
-              .colorScheme
-              .mainColor ??
-          Colors.blueGrey,
+      // color: geocoding.forecast
+      //         ?.getCurrentHourData()
+      //         .weatherCode
+      //         .colorScheme
+      //         .getMainColor() ??
+      //     Colors.blueGrey,
+      color: Colors.blueGrey, // TODO: Change this
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: onClick,
@@ -167,14 +169,16 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                     Text(
                       geocoding.name,
                       overflow: TextOverflow.ellipsis,
-                      style:
-                          Theme.of(context).textTheme.displayMedium!.copyWith(
-                                color: geocoding.forecast
-                                        ?.getCurrentHourData()
-                                        .weatherCode
-                                        .colorScheme
-                                        .accentColor ??
-                                    Colors.white,
+                      style: Theme.of(context)
+                          .textTheme
+                          .displayMedium!
+                          .copyWith(color: Colors.blueGrey // TODO: CHANGE THIS
+                              // color: geocoding.forecast
+                              //         ?.getCurrentHourData()
+                              //         .weatherCode
+                              //         .colorScheme
+                              //         .getAccentColor() ??
+                              //     Colors.white,
                               ),
                     ),
                     Text(
@@ -185,14 +189,17 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                                   .weatherCode
                                   .description ??
                               "XX",
-                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                            color: geocoding.forecast
-                                    ?.getCurrentHourData()
-                                    .weatherCode
-                                    .colorScheme
-                                    .accentColor ??
-                                Colors.white,
-                          ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .displaySmall!
+                          .copyWith(color: Colors.blueGrey // TODO: CHANGE THIS
+                              // color: geocoding.forecast
+                              //         ?.getCurrentHourData()
+                              //         .weatherCode
+                              //         .colorScheme
+                              //         .getAccentColor() ??
+                              //     Colors.white,
+                              ),
                     ),
                   ],
                 ),
@@ -204,14 +211,14 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                       style: Theme.of(context)
                           .textTheme
                           .displayMedium!
-                          .copyWith(
-                              color: geocoding.forecast
-                                      ?.getCurrentHourData()
-                                      .weatherCode
-                                      .colorScheme
-                                      .accentColor ??
-                                  Colors.white),
-                    )
+                          .copyWith(color: Colors.blueGrey) // TODO: CHANGE THIS
+                      // color: geocoding.forecast
+                      //         ?.getCurrentHourData()
+                      //         .weatherCode
+                      //         .colorScheme
+                      //         .getAccentColor() ??
+                      //     Colors.white),
+                      )
             ],
           ),
         ),

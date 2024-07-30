@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
@@ -84,5 +85,20 @@ class CurrentGeocodingProvider extends ChangeNotifier {
     geocoding.detailWidgets.singleWhere((widget) => widget.id == item.id).type =
         type;
     notifyListeners();
+  }
+
+  ColorPair getWeatherColorScheme() {
+    Forecast? forecast = geocoding.forecast;
+
+    if (forecast == null) {
+      return const ColorPair(Colors.purple, Colors.white);
+    }
+
+    bool isInTheDay = selectedHour.isBefore(forecast.sunset) &&
+        selectedHour.isAfter(forecast.sunrise);
+    HourlyWeatherData weatherData =
+        forecast.getCurrentHourData(selectedHour.hour);
+
+    return weatherData.weatherCode.colorScheme.getColorPair(isInTheDay);
   }
 }

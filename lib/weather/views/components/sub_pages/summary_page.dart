@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
-import 'package:not_another_weather_app/weather/models/weather_code.dart';
+import 'package:not_another_weather_app/weather/models/weather_clipper.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/selectable_widget_grid.dart';
 import 'package:not_another_weather_app/weather/views/routes/widget_overlay.dart';
 import 'package:provider/provider.dart';
@@ -73,9 +73,9 @@ class _SummaryPageState extends State<SummaryPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ClipPath(
-                            clipper: WeatherCode.getClipper(
-                                currentHourData?.weatherCode ??
-                                    WeatherCode.unknown),
+                            clipper: currentForecast?.getClipperOfHour(
+                                    state.selectedHour.hour) ??
+                                WeatherClipper.unknown.getClipper(),
                             child: SizedBox(
                               width: 300,
                               height: 300,
@@ -87,9 +87,9 @@ class _SummaryPageState extends State<SummaryPage> {
                                       delegate: SliverChildBuilderDelegate(
                                         (context, index) => ClipOval(
                                           child: Material(
-                                            color: currentHourData?.weatherCode
-                                                    .colorScheme.accentColor ??
-                                                Colors.black,
+                                            color: state
+                                                .getWeatherColorScheme()
+                                                .accent,
                                           ),
                                         ),
                                         childCount: 400, // 20 * 20
@@ -113,12 +113,7 @@ class _SummaryPageState extends State<SummaryPage> {
                                 .textTheme
                                 .displayMedium!
                                 .copyWith(
-                                  color: state.geocoding.forecast
-                                          ?.getCurrentHourData()
-                                          .weatherCode
-                                          .colorScheme
-                                          .accentColor ??
-                                      Colors.white,
+                                  color: state.getWeatherColorScheme().accent,
                                 ),
                           ),
                         ],
@@ -177,19 +172,17 @@ class _SummaryPageState extends State<SummaryPage> {
                         );
                       },
                       child: Text(
-                        "${currentForecast?.getField(state.geocoding.selectedMainField, state.selectedHour.hour) ?? "XX"}",
-                        key: ValueKey(currentForecast?.getField(
-                            state.geocoding.selectedMainField,
-                            state.selectedHour.hour)),
-                        style: Theme.of(context)
-                            .textTheme
-                            .displayLarge!
-                            .copyWith(
+                          "${currentForecast?.getField(state.geocoding.selectedMainField, state.selectedHour.hour) ?? "XX"}",
+                          key: ValueKey(currentForecast?.getField(
+                              state.geocoding.selectedMainField,
+                              state.selectedHour.hour)),
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayLarge!
+                              .copyWith(
                                 fontSize: 128,
-                                color: currentHourData
-                                        ?.weatherCode.colorScheme.accentColor ??
-                                    Colors.white),
-                      ),
+                                color: state.getWeatherColorScheme().accent,
+                              )),
                     ),
                   ],
                 ),
@@ -228,8 +221,7 @@ class _SummaryPageState extends State<SummaryPage> {
           children: [
             Icon(
               field.icon,
-              color: currentHour?.weatherCode.colorScheme.accentColor ??
-                  Colors.white,
+              color: provider.getWeatherColorScheme().accent,
             ),
             const SizedBox(width: 6),
             Text(
@@ -238,9 +230,10 @@ class _SummaryPageState extends State<SummaryPage> {
                       .toString() ??
                   "XX",
               style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: currentHour?.weatherCode.colorScheme.accentColor),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: provider.getWeatherColorScheme().accent,
+              ),
             ),
           ],
         ),

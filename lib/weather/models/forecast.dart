@@ -149,6 +149,18 @@ class Forecast {
     }
   }
 
+  CustomClipper<Path> getClipperOfHour([int? hour]) {
+    DateTime now = DateTime.now();
+    DateTime startOfCurrentHour =
+        DateTime(now.year, now.month, now.day, hour ?? now.hour);
+    HourlyWeatherData hourlyData = hourlyWeatherData[startOfCurrentHour]!;
+
+    bool isInTheDay = startOfCurrentHour.isBefore(sunset) &&
+        startOfCurrentHour.isAfter(sunrise);
+
+    return hourlyData.weatherCode.clipper.getClipper(isInTheDay);
+  }
+
   @override
   String toString() {
     return "${getCurrentHourData().temperature}º - [$latitude|$longitude] - ${getCurrentHourData().weatherCode.description}";

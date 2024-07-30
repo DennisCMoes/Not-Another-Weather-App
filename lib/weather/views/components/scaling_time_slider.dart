@@ -6,10 +6,10 @@ import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 
 class ScalingTimeSlider extends StatefulWidget {
   final ValueChanged<int> onChange;
-  final WeatherColorScheme colorScheme;
+  final ColorPair colorPair;
 
   const ScalingTimeSlider(
-      {required this.onChange, required this.colorScheme, super.key});
+      {required this.onChange, required this.colorPair, super.key});
 
   @override
   State<ScalingTimeSlider> createState() => _ScalingTimeSliderState();
@@ -85,7 +85,7 @@ class _ScalingTimeSliderState extends State<ScalingTimeSlider> {
           child: Material(
             clipBehavior: Clip.hardEdge,
             borderRadius: BorderRadius.circular(8),
-            color: widget.colorScheme.mainColor.darkenColor(0.1),
+            color: widget.colorPair.main.darkenColor(0.1),
             child: InkWell(
               onTap: () => _onTapOtherHour(index),
               child: Center(
@@ -94,7 +94,7 @@ class _ScalingTimeSliderState extends State<ScalingTimeSlider> {
                   style: Theme.of(context)
                       .textTheme
                       .displaySmall!
-                      .copyWith(color: widget.colorScheme.accentColor),
+                      .copyWith(color: widget.colorPair.accent),
                 ),
               ),
             ),

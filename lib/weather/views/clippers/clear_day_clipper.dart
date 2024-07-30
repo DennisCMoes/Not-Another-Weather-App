@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class SunClipper extends CustomClipper<Path> {
+class ClearDayClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     Path combinedPath = Path();

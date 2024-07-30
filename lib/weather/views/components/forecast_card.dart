@@ -77,8 +77,7 @@ class ForecastCardState extends State<ForecastCard> {
             ?.getCurrentHourData(state.selectedHour.hour);
 
         return ColoredBox(
-          color: currentHourData?.weatherCode.colorScheme.mainColor ??
-              Colors.blueGrey,
+          color: state.getWeatherColorScheme().main,
           child: Padding(
             padding: EdgeInsets.only(
               top: 12,
@@ -109,8 +108,9 @@ class ForecastCardState extends State<ForecastCard> {
                                       .textTheme
                                       .displayMedium!
                                       .copyWith(
-                                        color: currentHourData?.weatherCode
-                                            .colorScheme.accentColor,
+                                        color: state
+                                            .getWeatherColorScheme()
+                                            .accent,
                                       ),
                                 ),
                                 Text(
@@ -119,8 +119,9 @@ class ForecastCardState extends State<ForecastCard> {
                                       .textTheme
                                       .displaySmall!
                                       .copyWith(
-                                        color: currentHourData?.weatherCode
-                                            .colorScheme.accentColor
+                                        color: state
+                                            .getWeatherColorScheme()
+                                            .accent
                                             .withOpacity(0.6),
                                       ),
                                 ),
@@ -135,9 +136,7 @@ class ForecastCardState extends State<ForecastCard> {
                                   onPressed: resetSelectedTime,
                                   icon: Icon(
                                     Icons.restore,
-                                    color: currentHourData?.weatherCode
-                                            .colorScheme.accentColor ??
-                                        Colors.black,
+                                    color: state.getWeatherColorScheme().accent,
                                   ),
                                 ),
                           Provider.of<DeviceProvider>(context).hasInternet
@@ -151,10 +150,10 @@ class ForecastCardState extends State<ForecastCard> {
                                   .openDrawer();
                             },
                             visualDensity: VisualDensity.compact,
-                            icon: Icon(Icons.reorder,
-                                color: currentHourData
-                                        ?.weatherCode.colorScheme.accentColor ??
-                                    Colors.black),
+                            icon: Icon(
+                              Icons.reorder,
+                              color: state.getWeatherColorScheme().accent,
+                            ),
                           ),
                         ],
                       ),
@@ -180,8 +179,7 @@ class ForecastCardState extends State<ForecastCard> {
                       width: MediaQuery.of(context).size.width,
                       child: ScalingTimeSlider(
                         onChange: onChangeSelectedHour,
-                        colorScheme: currentHourData?.weatherCode.colorScheme ??
-                            WeatherColorScheme.gray,
+                        colorPair: state.getWeatherColorScheme(),
                       ),
                     ),
                   ),
@@ -197,9 +195,7 @@ class ForecastCardState extends State<ForecastCard> {
                           onPressed: toggleIsEditing,
                           icon: Icon(
                             state.isEditing ? Icons.edit_off : Icons.edit,
-                            color: currentHourData
-                                    ?.weatherCode.colorScheme.accentColor ??
-                                Colors.black,
+                            color: state.getWeatherColorScheme().accent,
                           ),
                         ),
                       ),
@@ -209,9 +205,7 @@ class ForecastCardState extends State<ForecastCard> {
                           onPressed: toggleTimeSlider,
                           icon: Icon(
                             Icons.schedule,
-                            color: currentHourData
-                                    ?.weatherCode.colorScheme.accentColor ??
-                                Colors.black,
+                            color: state.getWeatherColorScheme().accent,
                           ),
                         ),
                       ),
@@ -242,9 +236,15 @@ class ForecastCardState extends State<ForecastCard> {
                                       .textTheme
                                       .displaySmall!
                                       .copyWith(
-                                          color: state.isCurrentPage(index)
-                                              ? Colors.black
-                                              : Colors.black45),
+                                        color: state.isCurrentPage(index)
+                                            ? state
+                                                .getWeatherColorScheme()
+                                                .accent
+                                            : state
+                                                .getWeatherColorScheme()
+                                                .accent
+                                                .withOpacity(0.6),
+                                      ),
                                 ),
                               ),
                             ),

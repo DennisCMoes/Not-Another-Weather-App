@@ -87,11 +87,7 @@ class SunriseSunsetWidget extends StatelessWidget {
           CustomPaint(
             painter: SunPainter(
               currentTime: DateTime.now(),
-              colorScheme: provider.geocoding.forecast
-                      ?.getCurrentHourData(provider.selectedHour.hour)
-                      .weatherCode
-                      .colorScheme ??
-                  WeatherColorScheme.gray,
+              colorPair: provider.getWeatherColorScheme(),
             ),
             child: Container(),
           ),

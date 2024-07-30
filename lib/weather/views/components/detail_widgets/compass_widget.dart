@@ -89,8 +89,7 @@ class CompassWidget extends StatelessWidget {
             ],
           ),
           Divider(
-            color: weatherData?.weatherCode.colorScheme.accentColor ??
-                Colors.white,
+            color: provider.getWeatherColorScheme().accent,
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -109,19 +108,18 @@ class CompassWidget extends StatelessWidget {
       HourlyWeatherData? weatherData) {
     return CustomPaint(
       painter: CompassPainter(
-        direction: weatherData?.windDirection.toDouble() ?? 0.0,
-        colorScheme:
-            weatherData?.weatherCode.colorScheme ?? WeatherColorScheme.gray,
-      ),
+          direction: weatherData?.windDirection.toDouble() ?? 0.0,
+          colorPair: provider.getWeatherColorScheme()),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             getHeading(weatherData?.windDirection ?? 0),
-            style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                color: weatherData?.weatherCode.colorScheme.accentColor ??
-                    Colors.white),
+            style: Theme.of(context)
+                .textTheme
+                .displayMedium!
+                .copyWith(color: provider.getWeatherColorScheme().accent),
           ),
         ],
       ),

@@ -7,9 +7,9 @@ import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 
 class SunPainter extends CustomPainter {
   final DateTime currentTime;
-  final WeatherColorScheme colorScheme;
+  final ColorPair colorPair;
 
-  SunPainter({required this.currentTime, required this.colorScheme});
+  SunPainter({required this.currentTime, required this.colorPair});
 
   double calculateSunPositionAngle(DateTime time) {
     // Convert the current time to a value between 0 and 1, where 0 is 6 AM and 1 is 6 PM
@@ -23,7 +23,7 @@ class SunPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint linePaint = Paint()
-      ..color = colorScheme.mainColor.darkenColor(0.2)
+      ..color = colorPair.main.darkenColor(0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
