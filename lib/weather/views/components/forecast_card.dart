@@ -86,6 +86,7 @@ class ForecastCardState extends State<ForecastCard> {
             ),
             child: Column(
               children: [
+                // Top bar
                 Padding(
                   padding: EdgeInsets.only(
                     top: MediaQuery.of(context).padding.top,
@@ -160,6 +161,7 @@ class ForecastCardState extends State<ForecastCard> {
                     ],
                   ),
                 ),
+                // Page view
                 Expanded(
                   child: PageView(
                     controller: state.subPageController,
