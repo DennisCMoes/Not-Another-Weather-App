@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
-import 'package:not_another_weather_app/weather/views/components/slider/hour_slider_thumb_shape.dart';
-import 'package:not_another_weather_app/weather/views/components/slider/hour_slider_track_shape.dart';
+import 'package:not_another_weather_app/weather/views/components/scaling_time_slider.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/summary_page.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/details_page.dart';
 import 'package:provider/provider.dart';
@@ -22,21 +21,21 @@ class ForecastCardState extends State<ForecastCard> {
   late CurrentGeocodingProvider _geocodingProvider;
 
   final List<String> _subPageButtonLabels = ["Summary", "Details"];
+  final PageController _timeController = PageController(viewportFraction: 0.2);
 
-  double _currentSliderValue = 0;
+  bool _showTimeSlider = false;
 
   @override
   void initState() {
     super.initState();
 
-    _currentSliderValue = DateTime.now().hour.toDouble();
     _geocodingProvider =
         Provider.of<CurrentGeocodingProvider>(context, listen: false);
   }
 
   @override
   void dispose() {
-    // _geocodingProvider.dispose();
+    _timeController.dispose();
     super.dispose();
   }
 
@@ -47,12 +46,29 @@ class ForecastCardState extends State<ForecastCard> {
       _geocodingProvider.setIsEditing(!_geocodingProvider.isEditing);
     }
 
-    void onChangeSelectedHour(double value) {
-      setState(() {
-        _currentSliderValue = value;
-      });
+    void onChangeSelectedHour(int value) {
+      _geocodingProvider.setSelectedHour(value);
+    }
 
-      _geocodingProvider.setSelectedHour(value.toInt());
+    void toggleTimeSlider() {
+      setState(() {
+        _showTimeSlider = !_showTimeSlider;
+      });
+    }
+
+    void resetSelectedTime() {
+      onChangeSelectedHour(DateTime.now().hour);
+
+      setState(() {
+        _showTimeSlider = false;
+      });
+    }
+
+    bool currentHourIsSelected() {
+      DateTime now = DateTime.now();
+      DateTime currentHour = DateTime(now.year, now.month, now.day, now.hour);
+
+      return currentHour == _geocodingProvider.selectedHour;
     }
 
     return Consumer<CurrentGeocodingProvider>(
@@ -112,6 +128,17 @@ class ForecastCardState extends State<ForecastCard> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          currentHourIsSelected()
+                              ? const SizedBox.shrink()
+                              : IconButton(
+                                  onPressed: resetSelectedTime,
+                                  icon: Icon(
+                                    Icons.restore,
+                                    color: currentHourData?.weatherCode
+                                            .colorScheme.accentColor ??
+                                        Colors.black,
+                                  ),
+                                ),
                           Provider.of<DeviceProvider>(context).hasInternet
                               ? const SizedBox.shrink()
                               : const Icon(
@@ -140,46 +167,21 @@ class ForecastCardState extends State<ForecastCard> {
                     children: const <Widget>[SummaryPage(), PageTwo()],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: SliderTheme(
-                          data: SliderThemeData(
-                            thumbColor: currentHourData
-                                ?.weatherCode.colorScheme.mainColor
-                                .darkenColor(0.4),
-                            activeTrackColor: currentHourData
-                                ?.weatherCode.colorScheme.mainColor
-                                .darkenColor(0.1),
-                            trackShape: HourSliderTrackShape(),
-                            thumbShape: HourSliderThumbShape(),
-                            // tickMarkShape: HourSliderTickShape(),
-                          ),
-                          child: Slider(
-                            value: _currentSliderValue,
-                            max: 23,
-                            divisions: 23,
-                            onChanged: onChangeSelectedHour,
-                          ),
-                        ),
+                AnimatedContainer(
+                  height: _showTimeSlider ? 75 : 0,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.fastOutSlowIn,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: SizedBox(
+                      height: 75,
+                      width: MediaQuery.of(context).size.width,
+                      child: ScalingTimeSlider(
+                        onChange: onChangeSelectedHour,
+                        colorScheme: currentHourData?.weatherCode.colorScheme ??
+                            WeatherColorScheme.gray,
                       ),
-                      IconButton(
-                        onPressed:
-                            _currentSliderValue.toInt() == DateTime.now().hour
-                                ? null
-                                : () => onChangeSelectedHour(
-                                    DateTime.now().hour.toDouble()),
-                        visualDensity: VisualDensity.compact,
-                        disabledColor: currentHourData
-                            ?.weatherCode.colorScheme.accentColor
-                            .withOpacity(0.4),
-                        color: currentHourData
-                            ?.weatherCode.colorScheme.accentColor,
-                        icon: const Icon(Icons.restore),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -193,6 +195,18 @@ class ForecastCardState extends State<ForecastCard> {
                           onPressed: toggleIsEditing,
                           icon: Icon(
                             state.isEditing ? Icons.edit_off : Icons.edit,
+                            color: currentHourData
+                                    ?.weatherCode.colorScheme.accentColor ??
+                                Colors.black,
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          onPressed: toggleTimeSlider,
+                          icon: Icon(
+                            Icons.schedule,
                             color: currentHourData
                                     ?.weatherCode.colorScheme.accentColor ??
                                 Colors.black,
