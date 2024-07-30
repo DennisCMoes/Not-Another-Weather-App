@@ -13,7 +13,10 @@ class CurrentGeocodingProvider extends ChangeNotifier {
   int _subPageIndex = 0;
   DateTime _selectedHour = DateTime.now();
 
-  CurrentGeocodingProvider(this.geocoding);
+  CurrentGeocodingProvider(this.geocoding) {
+    DateTime now = DateTime.now();
+    _selectedHour = DateTime(now.year, now.month, now.day, now.hour);
+  }
 
   bool get isEditing => _isEditing;
   int get subPageIndex => _subPageIndex;

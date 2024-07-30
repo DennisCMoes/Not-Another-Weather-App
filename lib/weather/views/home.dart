@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
+import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
@@ -22,6 +23,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late Future<void> _initialization;
 
+  late DeviceProvider _deviceProvider;
+  late WeatherProvider _weatherProvider;
+  late DrawerProvider _drawerProvider;
+
   final LocationController locationController = LocationController();
   final ForecastRepo forecastRepo = ForecastRepo();
 
@@ -32,59 +37,58 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
+    _deviceProvider = Provider.of<DeviceProvider>(context, listen: false);
+    _weatherProvider = Provider.of<WeatherProvider>(context, listen: false);
+    _drawerProvider = Provider.of<DrawerProvider>(context, listen: false);
+
     Connectivity().onConnectivityChanged.listen((event) {
-      print(event);
-      Provider.of<DeviceProvider>(context, listen: false)
-          .setHasInternet(!event.contains(ConnectivityResult.none));
+      _deviceProvider.setHasInternet(!event.contains(ConnectivityResult.none));
     });
 
     _initialization = initialize();
   }
 
   Future<void> initialize() async {
-    final weatherProvider =
-        Provider.of<WeatherProvider>(context, listen: false);
-    await weatherProvider.initialization();
-    // await weatherProvider.getStoredGeocodings();
+    await _weatherProvider.initialization();
     FlutterNativeSplash.remove();
   }
 
   @override
   Widget build(BuildContext context) {
-    Color getBackgroundColor() {
-      WeatherProvider provider =
-          Provider.of<WeatherProvider>(context, listen: false);
-      PageController? pageController = provider.pageController;
-
-      int pageIndex = 0;
-
-      if (pageController.positions.isNotEmpty) {
-        pageIndex = pageController.page?.toInt() ?? 0;
-      }
-
-      if (provider.geocodings.isEmpty) {
-        return Colors.blueGrey;
-      } else {
-        return provider.geocodings[pageIndex].forecast
-                ?.getCurrentHourData()
-                .weatherCode
-                .colorScheme
-                .mainColor ??
-            Colors.blueGrey;
+    void onStatusBarTap() {
+      if (!_drawerProvider.isOpened &&
+          _weatherProvider.pageController.page! > 0) {
+        _weatherProvider.pageController.animateToPage(0,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeInOut);
       }
     }
 
-    return Scaffold(
-      body: FutureBuilder(
-        future: _initialization,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else {
-            return _buildHomeScreen();
-          }
-        },
-      ),
+    return Stack(
+      children: [
+        Scaffold(
+          body: FutureBuilder(
+            future: _initialization,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return _buildHomeScreen();
+              }
+            },
+          ),
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: MediaQuery.of(context).padding.top,
+          child: GestureDetector(
+            excludeFromSemantics: true,
+            onTap: onStatusBarTap,
+          ),
+        ),
+      ],
     );
   }
 
@@ -142,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           );
         },
