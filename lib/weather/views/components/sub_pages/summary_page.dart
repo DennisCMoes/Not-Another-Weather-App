@@ -172,17 +172,16 @@ class _SummaryPageState extends State<SummaryPage> {
                         );
                       },
                       child: Text(
-                          "${currentForecast?.getField(state.geocoding.selectedMainField, state.selectedHour.hour) ?? "XX"}",
-                          key: ValueKey(currentForecast?.getField(
-                              state.geocoding.selectedMainField,
-                              state.selectedHour.hour)),
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayLarge!
-                              .copyWith(
-                                fontSize: 128,
-                                color: state.getWeatherColorScheme().accent,
-                              )),
+                        "${currentForecast?.getField(state.geocoding.selectedMainField, state.selectedHour.hour) ?? "XX"}",
+                        key: ValueKey(currentForecast?.getField(
+                            state.geocoding.selectedMainField,
+                            state.selectedHour.hour)),
+                        style:
+                            Theme.of(context).textTheme.displayLarge!.copyWith(
+                                  fontSize: 128,
+                                  color: state.getWeatherColorScheme().accent,
+                                ),
+                      ),
                     ),
                   ],
                 ),
@@ -211,7 +210,9 @@ class _SummaryPageState extends State<SummaryPage> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: provider.isEditing ? Colors.black : Colors.transparent,
+            color: provider.isEditing
+                ? provider.getWeatherColorScheme().accent
+                : Colors.transparent,
             width: 1,
           ),
         ),

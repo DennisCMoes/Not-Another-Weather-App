@@ -135,7 +135,9 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
           searchedGeocodings = [];
         });
 
-        weatherProvider.addGeocoding(geocoding);
+        // TODO: Try something else then to wait for the geocoding.
+        //  The internet could be slow and temporarily slowing down the app
+        await weatherProvider.addGeocoding(geocoding);
         scrollToPage(weatherProvider.geocodings.length - 1);
         drawerProvider.closeDrawer();
       } else {
@@ -146,13 +148,13 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
 
     Widget listChild = Material(
       key: ValueKey(geocoding),
-      // color: geocoding.forecast
-      //         ?.getCurrentHourData()
-      //         .weatherCode
-      //         .colorScheme
-      //         .getMainColor() ??
-      //     Colors.blueGrey,
-      color: Colors.blueGrey, // TODO: Change this
+      color: geocoding.forecast
+              ?.getCurrentHourData()
+              .weatherCode
+              .colorScheme
+              .getColorPair(true)
+              .main ??
+          Colors.blueGrey,
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: onClick,
@@ -169,16 +171,15 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                     Text(
                       geocoding.name,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context)
-                          .textTheme
-                          .displayMedium!
-                          .copyWith(color: Colors.blueGrey // TODO: CHANGE THIS
-                              // color: geocoding.forecast
-                              //         ?.getCurrentHourData()
-                              //         .weatherCode
-                              //         .colorScheme
-                              //         .getAccentColor() ??
-                              //     Colors.white,
+                      style:
+                          Theme.of(context).textTheme.displayMedium!.copyWith(
+                                color: geocoding.forecast
+                                        ?.getCurrentHourData()
+                                        .weatherCode
+                                        .colorScheme
+                                        .getColorPair(true)
+                                        .accent ??
+                                    Colors.white,
                               ),
                     ),
                     Text(
@@ -189,17 +190,15 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                                   .weatherCode
                                   .description ??
                               "XX",
-                      style: Theme.of(context)
-                          .textTheme
-                          .displaySmall!
-                          .copyWith(color: Colors.blueGrey // TODO: CHANGE THIS
-                              // color: geocoding.forecast
-                              //         ?.getCurrentHourData()
-                              //         .weatherCode
-                              //         .colorScheme
-                              //         .getAccentColor() ??
-                              //     Colors.white,
-                              ),
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                            color: geocoding.forecast
+                                    ?.getCurrentHourData()
+                                    .weatherCode
+                                    .colorScheme
+                                    .getColorPair(true)
+                                    .accent ??
+                                Colors.white,
+                          ),
                     ),
                   ],
                 ),
@@ -208,17 +207,17 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
                   ? const SizedBox.shrink()
                   : Text(
                       "${geocoding.forecast?.getCurrentHourData().temperature.round() ?? "XX"}º",
-                      style: Theme.of(context)
-                          .textTheme
-                          .displayMedium!
-                          .copyWith(color: Colors.blueGrey) // TODO: CHANGE THIS
-                      // color: geocoding.forecast
-                      //         ?.getCurrentHourData()
-                      //         .weatherCode
-                      //         .colorScheme
-                      //         .getAccentColor() ??
-                      //     Colors.white),
-                      )
+                      style:
+                          Theme.of(context).textTheme.displayMedium!.copyWith(
+                                color: geocoding.forecast
+                                        ?.getCurrentHourData()
+                                        .weatherCode
+                                        .colorScheme
+                                        .getColorPair(true)
+                                        .accent ??
+                                    Colors.white,
+                              ),
+                    ),
             ],
           ),
         ),

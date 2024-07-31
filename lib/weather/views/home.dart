@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
@@ -12,6 +13,7 @@ import 'package:not_another_weather_app/weather/controllers/providers/weather_pr
 import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
 import 'package:not_another_weather_app/weather/views/components/forecast_card.dart';
 import 'package:not_another_weather_app/weather/views/components/weather_drawer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int selectedPageIndex = 0;
   bool isPressingNewLocation = false;
+  DateTime refreshDate = DateTime.now();
 
   @override
   void initState() {
@@ -51,7 +54,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> initialize() async {
     await _weatherProvider.initialization();
     FlutterNativeSplash.remove();
+
+    refreshDate = DateTime.now();
+
+    final SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance();
+    await sharedPreferences.setString("refresh_date", refreshDate.toString());
   }
+
+  String getRefreshString() => DateFormat("HH:mm").format(refreshDate);
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +115,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Padding(
                   padding:
                       EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  child: const Text("End of the list"),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("End of the list"),
+                      Text("Refreshed at ${getRefreshString()}"),
+                    ],
+                  ),
                 ),
               ),
               Align(
@@ -112,7 +131,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Padding(
                   padding: EdgeInsets.only(
                       bottom: MediaQuery.of(context).padding.bottom),
-                  child: const Text("End of the list"),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("End of the list"),
+                      Text("Refreshed at ${getRefreshString()}"),
+                    ],
+                  ),
                 ),
               ),
               PageView(

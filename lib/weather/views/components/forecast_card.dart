@@ -20,7 +20,10 @@ class ForecastCard extends StatefulWidget {
 class ForecastCardState extends State<ForecastCard> {
   late CurrentGeocodingProvider _geocodingProvider;
 
-  final List<String> _subPageButtonLabels = ["Summary", "Details"];
+  final List<String> _subPageButtonLabels = [
+    "Summary",
+    // "Details",
+  ];
   final PageController _timeController = PageController(viewportFraction: 0.2);
 
   bool _showTimeSlider = false;
@@ -58,6 +61,7 @@ class ForecastCardState extends State<ForecastCard> {
 
     void resetSelectedTime() {
       onChangeSelectedHour(DateTime.now().hour);
+      _geocodingProvider.setFutureForecastIndex(DateTime.now());
 
       setState(() {
         _showTimeSlider = false;
@@ -165,7 +169,10 @@ class ForecastCardState extends State<ForecastCard> {
                   child: PageView(
                     controller: state.subPageController,
                     onPageChanged: (index) => state.setSubPageIndex(index),
-                    children: const <Widget>[SummaryPage(), PageTwo()],
+                    children: const <Widget>[
+                      SummaryPage(),
+                      // PageTwo(),
+                    ],
                   ),
                 ),
                 AnimatedContainer(
@@ -177,9 +184,12 @@ class ForecastCardState extends State<ForecastCard> {
                     child: SizedBox(
                       height: 75,
                       width: MediaQuery.of(context).size.width,
-                      child: ScalingTimeSlider(
-                        onChange: onChangeSelectedHour,
-                        colorPair: state.getWeatherColorScheme(),
+                      child: ChangeNotifierProvider.value(
+                        value: state,
+                        child: ScalingTimeSlider(
+                          onChange: onChangeSelectedHour,
+                          colorPair: state.getWeatherColorScheme(),
+                        ),
                       ),
                     ),
                   ),
