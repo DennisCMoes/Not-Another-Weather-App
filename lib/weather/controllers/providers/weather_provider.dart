@@ -12,7 +12,7 @@ class WeatherProvider extends ChangeNotifier {
   final LocationController _locationController = LocationController();
   final PageController _pageController = PageController();
 
-  final List<Geocoding> _geocodings = [];
+  List<Geocoding> _geocodings = [];
 
   PageController get pageController => _pageController;
 
@@ -38,6 +38,17 @@ class WeatherProvider extends ChangeNotifier {
     } catch (ex) {
       debugPrint("Error during initialization: $ex");
     }
+  }
+
+  Future<void> refreshData() async {
+    var codings = await Future.wait(geocodings.map((coding) async {
+      Forecast forecast = await _forecastRepo.getLocalForecast(
+          coding.latitude, coding.longitude);
+      coding.forecast = forecast;
+      return coding;
+    }));
+
+    _geocodings = codings.toList();
   }
 
   /// Retrieves the stored geocodings and their forecasts

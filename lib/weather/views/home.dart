@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       if (DateTime.now()
           .isAfter(refreshDate.add(const Duration(minutes: 15)))) {
-        getData();
+        refreshData();
       }
     }
   }
@@ -79,6 +79,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> initialize() async {
     await getData();
     FlutterNativeSplash.remove();
+  }
+
+  Future<void> refreshData() async {
+    await _weatherProvider.refreshData();
   }
 
   Future<void> getData() async {
