@@ -37,14 +37,16 @@ class SunriseSunsetWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.keyboard_arrow_up),
-            Text(formatTime(provider.geocoding.forecast?.sunrise)),
+            Text(formatTime(
+                provider.geocoding.forecast?.getCurrentDayData().sunrise)),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.keyboard_arrow_down),
-            Text(formatTime(provider.geocoding.forecast?.sunset)),
+            Text(formatTime(
+                provider.geocoding.forecast?.getCurrentDayData().sunset)),
           ],
         )
       ],
@@ -64,7 +66,8 @@ class SunriseSunsetWidget extends StatelessWidget {
               children: [
                 const Text("Sunrise"),
                 Text(
-                  formatTime(provider.geocoding.forecast?.sunrise),
+                  formatTime(
+                      provider.geocoding.forecast?.getCurrentDayData().sunrise),
                   style: Theme.of(context).textTheme.displaySmall,
                 ),
               ],
@@ -78,7 +81,8 @@ class SunriseSunsetWidget extends StatelessWidget {
               children: [
                 const Text("Sunset"),
                 Text(
-                  formatTime(provider.geocoding.forecast?.sunset),
+                  formatTime(
+                      provider.geocoding.forecast?.getCurrentDayData().sunset),
                   style: Theme.of(context).textTheme.displaySmall,
                 ),
               ],

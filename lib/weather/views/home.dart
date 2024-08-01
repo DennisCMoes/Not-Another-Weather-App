@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late Future<void> _initialization;
 
   late DeviceProvider _deviceProvider;
@@ -40,6 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addObserver(this);
+
     _deviceProvider = Provider.of<DeviceProvider>(context, listen: false);
     _weatherProvider = Provider.of<WeatherProvider>(context, listen: false);
     _drawerProvider = Provider.of<DrawerProvider>(context, listen: false);
@@ -51,12 +53,38 @@ class _HomeScreenState extends State<HomeScreen> {
     _initialization = initialize();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+
+    _deviceProvider.dispose();
+    _weatherProvider.dispose();
+    _drawerProvider.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed) {
+      if (DateTime.now()
+          .isAfter(refreshDate.add(const Duration(minutes: 15)))) {
+        getData();
+      }
+    }
+  }
+
   Future<void> initialize() async {
-    await _weatherProvider.initialization();
+    await getData();
     FlutterNativeSplash.remove();
+  }
+
+  Future<void> getData() async {
+    await _weatherProvider.initialization();
 
     refreshDate = DateTime.now();
-
     final SharedPreferences sharedPreferences =
         await SharedPreferences.getInstance();
     await sharedPreferences.setString("refresh_date", refreshDate.toString());
@@ -162,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               Positioned.fill(
-                // right: 0,
+                right: 6,
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Column(

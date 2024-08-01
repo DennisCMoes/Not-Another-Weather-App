@@ -30,32 +30,15 @@ class ForecastRepo {
             "wind_direction_10m",
             "wind_gusts_10m",
           ].join(","),
-          "daily": ["sunrise", "sunset"].join(","),
+          "daily": [
+            "sunrise",
+            "sunset",
+            "uv_index_max",
+            "uv_index_clear_sky_max",
+          ].join(","),
         },
       ),
       (json) => Forecast.fromJson(json),
-    );
-  }
-
-  Future<Forecast> getForecast() {
-    return _apiController.getRequest(
-      "$_baseUrl/forecast",
-      parameters: Map.from(
-        {
-          "latitude": "52.52",
-          "longitude": "13.41",
-          "current": [
-            "temperature_2m",
-            "relative_humidity_2m",
-            "precipitation",
-            "weather_code",
-            "wind_speed_10m"
-          ].join(","),
-          "hourly": ["temperature_2m"].join(","),
-          "forecast_days": 1,
-        },
-      ),
-      (x) => Forecast.fromJson(x),
     );
   }
 }

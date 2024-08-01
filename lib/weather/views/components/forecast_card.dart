@@ -49,8 +49,8 @@ class ForecastCardState extends State<ForecastCard> {
       _geocodingProvider.setIsEditing(!_geocodingProvider.isEditing);
     }
 
-    void onChangeSelectedHour(int value) {
-      _geocodingProvider.setSelectedHour(value);
+    void onChangeSelectedHour(DateTime time) {
+      _geocodingProvider.setFutureForecastIndex(time);
     }
 
     void toggleTimeSlider() {
@@ -60,8 +60,9 @@ class ForecastCardState extends State<ForecastCard> {
     }
 
     void resetSelectedTime() {
-      onChangeSelectedHour(DateTime.now().hour);
       _geocodingProvider.setFutureForecastIndex(DateTime.now());
+      var index = _geocodingProvider.get24hForecastIndex(DateTime.now());
+      _geocodingProvider.futureForecastController.jumpToPage(index);
 
       setState(() {
         _showTimeSlider = false;
@@ -72,14 +73,12 @@ class ForecastCardState extends State<ForecastCard> {
       DateTime now = DateTime.now();
       DateTime currentHour = DateTime(now.year, now.month, now.day, now.hour);
 
-      return currentHour == _geocodingProvider.selectedHour;
+      return currentHour.isAtSameMomentAs(_geocodingProvider.selectedHour) &&
+          DateUtils.isSameDay(currentHour, _geocodingProvider.selectedHour);
     }
 
     return Consumer<CurrentGeocodingProvider>(
       builder: (context, state, child) {
-        HourlyWeatherData? currentHourData = state.geocoding.forecast
-            ?.getCurrentHourData(state.selectedHour.hour);
-
         return ColoredBox(
           color: state.getWeatherColorScheme().main,
           child: Padding(
@@ -179,16 +178,18 @@ class ForecastCardState extends State<ForecastCard> {
                   height: _showTimeSlider ? 75 : 0,
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.fastOutSlowIn,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: SizedBox(
-                      height: 75,
-                      width: MediaQuery.of(context).size.width,
-                      child: ChangeNotifierProvider.value(
-                        value: state,
-                        child: ScalingTimeSlider(
-                          onChange: onChangeSelectedHour,
-                          colorPair: state.getWeatherColorScheme(),
+                  child: ClipRRect(
+                    child: OverflowBox(
+                      maxHeight: 75,
+                      child: SizedBox(
+                        height: 75,
+                        width: MediaQuery.of(context).size.width,
+                        child: ChangeNotifierProvider.value(
+                          value: state,
+                          child: ScalingTimeSlider(
+                            onChange: onChangeSelectedHour,
+                            colorPair: state.getWeatherColorScheme(),
+                          ),
                         ),
                       ),
                     ),

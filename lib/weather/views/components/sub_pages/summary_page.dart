@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/weather_clipper.dart';
@@ -57,8 +58,8 @@ class _SummaryPageState extends State<SummaryPage> {
   Widget build(BuildContext context) {
     return Consumer<CurrentGeocodingProvider>(
       builder: (context, state, child) {
-        HourlyWeatherData? currentHourData = state.geocoding.forecast
-            ?.getCurrentHourData(state.selectedHour.hour);
+        HourlyWeatherData? currentHourData =
+            state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
         Forecast? currentForecast = state.geocoding.forecast;
 
         return Padding(
@@ -73,8 +74,8 @@ class _SummaryPageState extends State<SummaryPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ClipPath(
-                            clipper: currentForecast?.getClipperOfHour(
-                                    state.selectedHour.hour) ??
+                            clipper: currentForecast
+                                    ?.getClipperOfHour(state.selectedHour) ??
                                 WeatherClipper.unknown.getClipper(),
                             child: SizedBox(
                               width: 300,
@@ -153,7 +154,7 @@ class _SummaryPageState extends State<SummaryPage> {
 
                         ValueKey key = ValueKey(currentForecast?.getField(
                             state.geocoding.selectedMainField,
-                            state.selectedHour.hour));
+                            state.selectedHour));
 
                         // TODO: If the new value is lower slide in from the top, if larger slide in from the bottom
                         return ClipRect(
@@ -172,10 +173,10 @@ class _SummaryPageState extends State<SummaryPage> {
                         );
                       },
                       child: Text(
-                        "${currentForecast?.getField(state.geocoding.selectedMainField, state.selectedHour.hour) ?? "XX"}",
+                        "${currentForecast?.getField(state.geocoding.selectedMainField, state.selectedHour) ?? "XX"}",
                         key: ValueKey(currentForecast?.getField(
                             state.geocoding.selectedMainField,
-                            state.selectedHour.hour)),
+                            state.selectedHour)),
                         style:
                             Theme.of(context).textTheme.displayLarge!.copyWith(
                                   fontSize: 128,
@@ -195,8 +196,8 @@ class _SummaryPageState extends State<SummaryPage> {
 
   Widget _weatherDetailItem(BuildContext context,
       CurrentGeocodingProvider provider, SelectableForecastFields field) {
-    HourlyWeatherData? currentHour = provider.geocoding.forecast
-        ?.getCurrentHourData(provider.selectedHour.hour);
+    HourlyWeatherData? currentHour =
+        provider.geocoding.forecast?.getCurrentHourData(provider.selectedHour);
 
     return GestureDetector(
       key: ValueKey(field),
@@ -213,7 +214,7 @@ class _SummaryPageState extends State<SummaryPage> {
             color: provider.isEditing
                 ? provider.getWeatherColorScheme().accent
                 : Colors.transparent,
-            width: 1,
+            width: 1.5,
           ),
         ),
         child: Row(
@@ -227,7 +228,7 @@ class _SummaryPageState extends State<SummaryPage> {
             const SizedBox(width: 6),
             Text(
               provider.geocoding.forecast
-                      ?.getField(field, provider.selectedHour.hour)
+                      ?.getField(field, provider.selectedHour)
                       .toString() ??
                   "XX",
               style: TextStyle(

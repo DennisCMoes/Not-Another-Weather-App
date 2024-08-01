@@ -37,8 +37,8 @@ class CompassWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CurrentGeocodingProvider>(
       builder: (context, state, child) {
-        HourlyWeatherData? weatherData = state.geocoding.forecast
-            ?.getCurrentHourData(state.selectedHour.hour);
+        HourlyWeatherData? weatherData =
+            state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
 
         switch (size) {
           case WidgetSize.small:

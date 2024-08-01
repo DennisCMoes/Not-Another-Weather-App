@@ -47,8 +47,8 @@ class _PageTwoState extends State<PageTwo> {
 
     return Consumer<CurrentGeocodingProvider>(
       builder: (context, state, child) {
-        HourlyWeatherData? currentHourData = state.geocoding.forecast
-            ?.getCurrentHourData(state.selectedHour.hour);
+        HourlyWeatherData? currentHourData =
+            state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
 
         return Padding(
           padding: const EdgeInsets.symmetric(

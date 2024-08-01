@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
+import 'package:provider/provider.dart';
 
 class ScalingTimeSlider extends StatefulWidget {
-  final ValueChanged<int> onChange;
+  final ValueChanged<DateTime> onChange;
   final ColorPair colorPair;
 
   const ScalingTimeSlider(
@@ -16,89 +19,98 @@ class ScalingTimeSlider extends StatefulWidget {
 }
 
 class _ScalingTimeSliderState extends State<ScalingTimeSlider> {
-  late PageController _timeController;
+  late CurrentGeocodingProvider _geocodingProvider;
 
   @override
   void initState() {
     super.initState();
 
-    _timeController = PageController(
-      viewportFraction: 0.2,
-      initialPage: DateTime.now().hour,
-    );
+    _geocodingProvider =
+        Provider.of<CurrentGeocodingProvider>(context, listen: false);
   }
 
   @override
   void dispose() {
-    _timeController.dispose();
     super.dispose();
   }
 
-  void _onPageChanged(int index) {
+  void _onPageChanged(DateTime time) {
     HapticFeedback.lightImpact();
-    widget.onChange(index);
+    widget.onChange(time);
   }
 
-  void _onTapOtherHour(int index) {
-    widget.onChange(index);
-    _timeController.animateToPage(
+  void _onTapOtherHour(DateTime time) {
+    widget.onChange(time);
+
+    int index = _geocodingProvider.get24hForecastIndex(time);
+    _geocodingProvider.futureForecastController.animateToPage(
       index,
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeOut,
     );
   }
 
-  String _getHourFormat(int index) {
-    DateTime now = DateTime.now();
-    DateFormat hourFormat = DateFormat("HH:mm");
-    DateTime hour = DateTime(now.year, now.month, now.day, index);
-
-    return hourFormat.format(hour);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return PageView.builder(
-      itemCount: 48,
-      controller: _timeController,
-      onPageChanged: _onPageChanged,
-      itemBuilder: (context, index) {
-        return AnimatedBuilder(
-          animation: _timeController,
-          builder: (context, child) {
-            double value = 1.0;
+    return Consumer<CurrentGeocodingProvider>(
+      builder: (context, state, child) {
+        DateFormat hourFormat = DateFormat("HH:mm");
+        List<MapEntry<DateTime, HourlyWeatherData>> futureForecast =
+            state.get24hForecast();
 
-            if (_timeController.position.haveDimensions) {
-              value = (_timeController.page ?? 0.0) - index;
-              value = (1 - (value.abs() * 0.3)).clamp(0.0, 1.0);
-            } else {
-              value = (index == 0) ? 1.0 : 0.7;
-            }
+        return PageView.builder(
+          itemCount: futureForecast.length,
+          controller: state.futureForecastController,
+          onPageChanged: (value) => _onPageChanged(futureForecast[value].key),
+          itemBuilder: (context, index) {
+            HourlyWeatherData hourData = futureForecast[index].value;
 
-            return Center(
-              child: Transform.scale(
-                scale: Curves.easeOut.transform(value),
-                child: child,
+            return AnimatedBuilder(
+              animation: state.futureForecastController,
+              builder: (context, child) {
+                double value = 1.0;
+
+                if (state.futureForecastController.position.haveDimensions) {
+                  value = (state.futureForecastController.page ?? 0.0) - index;
+                  value = (1 - (value.abs() * 0.3)).clamp(0.0, 1.0);
+                } else {
+                  value = (index == 0) ? 1.0 : 0.7;
+                }
+
+                return Transform.scale(
+                  scale: Curves.easeOut.transform(value),
+                  child: child,
+                );
+              },
+              child: Material(
+                clipBehavior: Clip.hardEdge,
+                borderRadius: BorderRadius.circular(8),
+                color: widget.colorPair.main.darkenColor(0.1),
+                child: InkWell(
+                  onTap: () => _onTapOtherHour(futureForecast[index].key),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("${hourData.temperature.round()}º",
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall!
+                              .copyWith(
+                                  color: widget.colorPair.accent
+                                      .withOpacity(0.7))),
+                      Text(hourFormat.format(futureForecast[index].key),
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall!
+                              .copyWith(color: widget.colorPair.accent)),
+                    ],
+                  ),
+                ),
               ),
             );
           },
-          child: Material(
-            clipBehavior: Clip.hardEdge,
-            borderRadius: BorderRadius.circular(8),
-            color: widget.colorPair.main.darkenColor(0.1),
-            child: InkWell(
-              onTap: () => _onTapOtherHour(index),
-              child: Center(
-                child: Text(
-                  _getHourFormat(index),
-                  style: Theme.of(context)
-                      .textTheme
-                      .displaySmall!
-                      .copyWith(color: widget.colorPair.accent),
-                ),
-              ),
-            ),
-          ),
         );
       },
     );

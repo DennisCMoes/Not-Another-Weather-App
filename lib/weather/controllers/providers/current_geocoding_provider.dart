@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
@@ -8,21 +8,50 @@ import 'package:not_another_weather_app/weather/models/widget_item.dart';
 /// A provider that manages the state and logic for the currently selected geocoding
 class CurrentGeocodingProvider extends ChangeNotifier {
   final Geocoding geocoding;
+
   final PageController _pageController = PageController(initialPage: 0);
+  final PageController _futureForecastController =
+      PageController(initialPage: 2, viewportFraction: 0.2);
 
   bool _isEditing = false;
   int _subPageIndex = 0;
   DateTime _selectedHour = DateTime.now();
 
   CurrentGeocodingProvider(this.geocoding) {
-    DateTime now = DateTime.now();
-    _selectedHour = DateTime(now.year, now.month, now.day, now.hour);
+    _initializeSelectedHour();
   }
 
   bool get isEditing => _isEditing;
   int get subPageIndex => _subPageIndex;
   PageController get subPageController => _pageController;
+  PageController get futureForecastController => _futureForecastController;
   DateTime get selectedHour => _selectedHour;
+
+  void _initializeSelectedHour() {
+    final now = DateTime.now();
+    _selectedHour = DateTime(now.year, now.month, now.day, now.hour);
+  }
+
+  void _setSelectedHour(DateTime time) {
+    final now = DateTime.now();
+    _selectedHour = DateTime(now.year, now.month, time.day, time.hour);
+    notifyListeners();
+  }
+
+  void _updateWidgetItem(WidgetItem item, void Function(WidgetItem) updateFn) {
+    WidgetItem widget =
+        geocoding.detailWidgets.singleWhere((widget) => widget.id == item.id);
+
+    updateFn(widget);
+    notifyListeners();
+  }
+
+  DateTime _getStartOfHour([int offset = 0, int? hour]) {
+    final now = DateTime.now();
+    final adjustedHour = hour ?? now.hour;
+    return DateTime(now.year, now.month, now.day, adjustedHour)
+        .add(Duration(hours: offset));
+  }
 
   /// Checks if the given [index] is the current page.
   ///
@@ -41,10 +70,14 @@ class CurrentGeocodingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setFutureForecastIndex(DateTime time) {
+    _setSelectedHour(time);
+    notifyListeners();
+  }
+
   /// Sets the selected hour to [hour] and notifies it's listeners
-  void setSelectedHour(int hour) {
-    DateTime now = DateTime.now();
-    _selectedHour = DateTime(now.year, now.month, now.day, hour);
+  void setSelectedHour(DateTime time) {
+    _setSelectedHour(time);
     notifyListeners();
   }
 
@@ -75,15 +108,13 @@ class CurrentGeocodingProvider extends ChangeNotifier {
 
   /// Sets the size of the widget item identified by [item] to [size] and notifies it's listeners
   void setGeocodingSize(WidgetItem item, WidgetSize size) {
-    geocoding.detailWidgets.singleWhere((widget) => widget.id == item.id).size =
-        size;
+    _updateWidgetItem(item, (widget) => widget.size == size);
     notifyListeners();
   }
 
   /// Sets the type of the widget item identified by [item] to [type] and notifies it's listeners
   void setGeocodingType(WidgetItem item, WidgetType type) {
-    geocoding.detailWidgets.singleWhere((widget) => widget.id == item.id).type =
-        type;
+    _updateWidgetItem(item, (widget) => widget.type == type);
     notifyListeners();
   }
 
@@ -113,11 +144,31 @@ class CurrentGeocodingProvider extends ChangeNotifier {
       return const ColorPair(Colors.purple, Colors.white);
     }
 
-    bool isInTheDay = selectedHour.isBefore(forecast.sunset) &&
-        selectedHour.isAfter(forecast.sunrise);
-    HourlyWeatherData weatherData =
-        forecast.getCurrentHourData(selectedHour.hour);
+    DateTime startOfDay =
+        DateTime(selectedHour.year, selectedHour.month, selectedHour.day);
+
+    final isInTheDay = selectedHour
+            .isBefore(forecast.dailyWeatherData[startOfDay]!.sunset) &&
+        selectedHour.isAfter(forecast.dailyWeatherData[startOfDay]!.sunrise);
+
+    final weatherData = forecast.getCurrentHourData(selectedHour);
 
     return weatherData.weatherCode.colorScheme.getColorPair(isInTheDay);
+  }
+
+  List<MapEntry<DateTime, HourlyWeatherData>> get24hForecast() {
+    final startOfHour = _getStartOfHour(-2);
+
+    return geocoding.forecast!.hourlyWeatherData.entries
+        .where((element) =>
+            element.key.isAtSameMomentAs(startOfHour) ||
+            element.key.isAfter(startOfHour))
+        .take(27)
+        .toList();
+  }
+
+  int get24hForecastIndex(DateTime time) {
+    final startOfHour = _getStartOfHour(0, time.hour);
+    return get24hForecast().indexWhere((element) => element.key == startOfHour);
   }
 }
