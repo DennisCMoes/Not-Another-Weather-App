@@ -6,6 +6,7 @@ import 'package:not_another_weather_app/weather/controllers/providers/current_ge
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:provider/provider.dart';
+import 'package:instant/instant.dart';
 
 class ScalingTimeSlider extends StatefulWidget {
   final ValueChanged<DateTime> onChange;
@@ -50,11 +51,23 @@ class _ScalingTimeSliderState extends State<ScalingTimeSlider> {
     );
   }
 
+  String _formatHour(DateTime time, String timezone) {
+    DateTime now = DateTime.now();
+    DateTime nowConverted = dateTimeToZone(
+        zone: timezone,
+        datetime: DateTime(now.year, now.month, now.day, now.hour));
+    DateTime timeConverted = dateTimeToZone(zone: timezone, datetime: time);
+
+    DateFormat hourFormat = DateFormat("HH:mm");
+    return nowConverted == timeConverted
+        ? "Now"
+        : hourFormat.format(dateTimeToZone(zone: timezone, datetime: time));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<CurrentGeocodingProvider>(
       builder: (context, state, child) {
-        DateFormat hourFormat = DateFormat("HH:mm");
         List<MapEntry<DateTime, HourlyWeatherData>> futureForecast =
             state.get24hForecast();
 
@@ -100,7 +113,9 @@ class _ScalingTimeSliderState extends State<ScalingTimeSlider> {
                               .copyWith(
                                   color: widget.colorPair.accent
                                       .withOpacity(0.7))),
-                      Text(hourFormat.format(futureForecast[index].key),
+                      Text(
+                          _formatHour(futureForecast[index].key,
+                              state.geocoding.forecast?.timezome ?? "CEST"),
                           style: Theme.of(context)
                               .textTheme
                               .displaySmall!
