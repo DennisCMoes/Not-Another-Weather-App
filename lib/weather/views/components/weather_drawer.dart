@@ -233,7 +233,13 @@ class _WeatherDrawerState extends State<WeatherDrawer> {
         key: ValueKey(geocoding),
         background: const Material(
           color: Colors.red,
-          child: Icon(Icons.delete),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Icon(Icons.delete),
+            ),
+          ),
         ),
         onDismissed: (direction) {
           Provider.of<WeatherProvider>(context, listen: false)
