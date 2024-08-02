@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
@@ -159,6 +158,7 @@ class CurrentGeocodingProvider extends ChangeNotifier {
   List<MapEntry<DateTime, HourlyWeatherData>> get24hForecast() {
     final startOfHour = _getStartOfHour(-2);
 
+    // TODO: Remove the is not null check because it throws an error
     return geocoding.forecast!.hourlyWeatherData.entries
         .where((element) =>
             element.key.isAtSameMomentAs(startOfHour) ||

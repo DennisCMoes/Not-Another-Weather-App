@@ -1,3 +1,5 @@
+import 'package:not_another_weather_app/main.dart';
+import 'package:not_another_weather_app/objectbox.g.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/api_controller.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 
@@ -5,7 +7,43 @@ class GeocodingRepo {
   final String _baseUrl = "https://geocoding-api.open-meteo.com/v1";
   final ApiController _apiController = ApiController();
 
+  List<Geocoding> _getAllGeocodingsFromBox() {
+    final geocodingBox = objectBox.geoBox;
+    return geocodingBox.getAll();
+  }
+
+  void _saveGeocodingsToBox(List<Geocoding> geocodings) {
+    final geocodingBox = objectBox.geoBox;
+    geocodingBox.putMany(geocodings);
+  }
+
+  bool _areGeocodingsEqual(List<Geocoding> list1, List<Geocoding> list2) {
+    if (list1.length != list2.length) return false;
+
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i] != list2[2]) return false;
+    }
+
+    return true;
+  }
+
+  void storeGeocoding(Geocoding geocoding) {
+    final geocodingBox = objectBox.geoBox;
+    geocodingBox.put(geocoding);
+  }
+
+  void removeGeocoding(int id) {
+    final geocodingBox = objectBox.geoBox;
+    geocodingBox.remove(id);
+  }
+
+  List<Geocoding> getStoredGeocodings() {
+    return _getAllGeocodingsFromBox();
+  }
+
   Future<List<Geocoding>> getGeocodings(String searchValue) async {
+    final storedGeocodings = _getAllGeocodingsFromBox();
+
     final Map<String, dynamic> data = await _apiController.getRawRequest(
       "$_baseUrl/search",
       parameters: {
@@ -15,11 +53,16 @@ class GeocodingRepo {
     );
 
     if (!data.containsKey("results")) {
-      return [];
+      return storedGeocodings;
     } else {
-      return List.from(data['results'])
-          .map((e) => Geocoding.fromJson(e))
-          .toList();
+      List<Geocoding> newGeocodings =
+          List.from(data['results']).map((e) => Geocoding.fromJson(e)).toList();
+
+      if (_areGeocodingsEqual(storedGeocodings, newGeocodings)) {
+        _saveGeocodingsToBox(newGeocodings);
+      }
+
+      return newGeocodings;
     }
   }
 }

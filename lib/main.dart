@@ -1,14 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:not_another_weather_app/weather/controllers/stores/object_box.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/views/home.dart';
 
-void main() {
+late ObjectBox objectBox;
+
+Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  objectBox = await ObjectBox.create();
 
   runApp(
     MultiProvider(

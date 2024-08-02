@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:not_another_weather_app/weather/views/painters/compass_painter.dart';

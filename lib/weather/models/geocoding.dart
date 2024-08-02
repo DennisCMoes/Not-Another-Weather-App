@@ -1,14 +1,19 @@
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
+import 'package:objectbox/objectbox.dart';
 
+@Entity()
 class Geocoding {
-  final int id;
-  final bool isCurrentLocation;
+  @Id(assignable: true)
+  int id;
 
   String name;
   double latitude;
   double longitude;
   String country;
+
+  @Transient() // Not stored in database
+  bool isCurrentLocation;
 
   Forecast? forecast;
 
@@ -42,7 +47,7 @@ class Geocoding {
       json['name'],
       json['latitude'],
       json['longitude'],
-      json['country'] ?? "None",
+      json['country'] ?? "Unknown",
     );
   }
 

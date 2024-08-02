@@ -1,14 +1,18 @@
 import 'dart:collection';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
+import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 
 /// A provider class that manages the weather-related data and operations
 class WeatherProvider extends ChangeNotifier {
   final ForecastRepo _forecastRepo = ForecastRepo();
+  final GeocodingRepo _geocodingRepo = GeocodingRepo();
   final LocationController _locationController = LocationController();
   final PageController _pageController = PageController();
 
@@ -24,20 +28,41 @@ class WeatherProvider extends ChangeNotifier {
   /// Initializes the weather provider by fetching the current location and it's forecasts, and notifying it's listeners.
   Future<void> initialization() async {
     try {
-      final Position position = await _locationController.getCurrentPosition();
-      final currentLocationGeocoding = Geocoding(1, "My location",
-          position.latitude, position.longitude, "My location",
-          isCurrentLocation: true);
+      // Check network connectivity
+      final List<ConnectivityResult> connectivityResult =
+          await Connectivity().checkConnectivity();
 
-      _geocodings.add(currentLocationGeocoding);
-      notifyListeners();
+      final List<Geocoding> localGeocodings =
+          _geocodingRepo.getStoredGeocodings();
+      final Geocoding localGeocoding =
+          localGeocodings.firstWhere((geocoding) => geocoding.id == 1);
+      localGeocoding.isCurrentLocation = true;
 
-      currentLocationGeocoding.forecast = await _forecastRepo.getLocalForecast(
-          position.latitude, position.longitude);
-      notifyListeners();
+      // If there is network connectivity refresh and store local geocoding data
+      if (!connectivityResult.contains(ConnectivityResult.none)) {
+        final Position position =
+            await _locationController.getCurrentPosition();
+
+        localGeocoding.latitude = position.latitude;
+        localGeocoding.longitude = position.longitude;
+
+        _geocodingRepo.storeGeocoding(localGeocoding);
+      }
+
+      _geocodings.addAll(localGeocodings);
+      await refreshData();
     } catch (ex) {
       debugPrint("Error during initialization: $ex");
     }
+  }
+
+  Future<List<Geocoding>> refreshForecastData() async {
+    return await Future.wait(geocodings.map((coding) async {
+      Forecast forecast = await _forecastRepo.getLocalForecast(
+          coding.latitude, coding.longitude);
+      coding.forecast = forecast;
+      return coding;
+    }));
   }
 
   Future<void> refreshData() async {
@@ -87,6 +112,7 @@ class WeatherProvider extends ChangeNotifier {
     geocoding.forecast = forecast;
 
     _geocodings[_geocodings.length - 1] = geocoding;
+    _geocodingRepo.storeGeocoding(geocoding);
     notifyListeners();
   }
 
@@ -96,6 +122,7 @@ class WeatherProvider extends ChangeNotifier {
 
     if (geoIndex != -1) {
       _geocodings.removeAt(geoIndex);
+      _geocodingRepo.removeGeocoding(geocoding.id);
       notifyListeners();
     } else {
       debugPrint("Error: Geocoding not found");

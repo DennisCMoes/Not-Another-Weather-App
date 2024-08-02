@@ -1,0 +1,57 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:8085940287060332242",
+      "lastPropertyId": "6:732950383778108936",
+      "name": "Geocoding",
+      "properties": [
+        {
+          "id": "1:7054998796814959178",
+          "name": "id",
+          "type": 6,
+          "flags": 129
+        },
+        {
+          "id": "2:5494809353542255611",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:7850404958651001704",
+          "name": "latitude",
+          "type": 8
+        },
+        {
+          "id": "4:3272231588208254688",
+          "name": "longitude",
+          "type": 8
+        },
+        {
+          "id": "5:785092990110049512",
+          "name": "country",
+          "type": 9
+        },
+        {
+          "id": "6:732950383778108936",
+          "name": "selectedPage",
+          "type": 6
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:8085940287060332242",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}
