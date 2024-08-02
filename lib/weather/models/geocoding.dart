@@ -42,7 +42,7 @@ class Geocoding {
       json['name'],
       json['latitude'],
       json['longitude'],
-      json['country'],
+      json['country'] ?? "None",
     );
   }
 
