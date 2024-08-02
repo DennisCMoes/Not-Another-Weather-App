@@ -18,23 +18,12 @@ class _SummaryPageState extends State<SummaryPage> {
   late CurrentGeocodingProvider _geocodingProvider;
 
   void _showSelectedFieldMenu(
-      SelectableForecastFields field, bool isMainField) {
-    List<SelectableForecastFields> fieldList = isMainField
-        ? SelectableForecastFields.values
-            .where((e) => e.mainFieldAccessible == true)
-            .toList()
-        : SelectableForecastFields.values;
-
-    // TODO: Return the value via the pop function
-    Navigator.of(context).push(
+      SelectableForecastFields field, bool isMainField) async {
+    await Navigator.of(context).push(
       WidgetOverlay(
         overlayChild: ChangeNotifierProvider.value(
           value: _geocodingProvider,
-          child: SelectableWidgetGrid(
-            fieldToReplace: field,
-            fields: fieldList,
-            isMainField: isMainField,
-          ),
+          child: SelectableWidgetGrid(fieldToReplace: field),
         ),
       ),
     );

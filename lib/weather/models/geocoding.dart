@@ -67,17 +67,18 @@ class Geocoding {
 
   void _ensureStableEnumValues() {
     assert(SelectableForecastFields.temperature.index == 0);
-    assert(SelectableForecastFields.windSpeed.index == 1);
-    assert(SelectableForecastFields.precipitation.index == 2);
-    assert(SelectableForecastFields.chainceOfRain.index == 3);
-    assert(SelectableForecastFields.sunrise.index == 4);
-    assert(SelectableForecastFields.sunset.index == 5);
-    assert(SelectableForecastFields.humidity.index == 6);
-    assert(SelectableForecastFields.windDirection.index == 7);
-    assert(SelectableForecastFields.windGusts.index == 8);
-    assert(SelectableForecastFields.cloudCover.index == 9);
-    assert(SelectableForecastFields.isDay.index == 10);
-    assert(SelectableForecastFields.localTime.index == 11);
+    assert(SelectableForecastFields.apparentTemperature.index == 1);
+    assert(SelectableForecastFields.windSpeed.index == 2);
+    assert(SelectableForecastFields.precipitation.index == 3);
+    assert(SelectableForecastFields.chainceOfRain.index == 4);
+    assert(SelectableForecastFields.sunrise.index == 5);
+    assert(SelectableForecastFields.sunset.index == 6);
+    assert(SelectableForecastFields.humidity.index == 7);
+    assert(SelectableForecastFields.windDirection.index == 8);
+    assert(SelectableForecastFields.windGusts.index == 9);
+    assert(SelectableForecastFields.cloudCover.index == 10);
+    assert(SelectableForecastFields.isDay.index == 11);
+    assert(SelectableForecastFields.localTime.index == 12);
   }
 
   @override

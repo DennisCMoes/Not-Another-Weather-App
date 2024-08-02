@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
-import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/views/components/scaling_time_slider.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/summary_page.dart';
-import 'package:not_another_weather_app/weather/views/components/sub_pages/details_page.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 

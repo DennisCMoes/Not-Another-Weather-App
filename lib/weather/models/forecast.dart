@@ -39,25 +39,24 @@ class DailyWeatherData {
 }
 
 enum SelectableForecastFields {
-  temperature("Temperature", Icons.thermostat, true),
-  windSpeed("Wind speed", Icons.air, false),
-  precipitation("Precipitation", Icons.water_drop, false),
-  chainceOfRain("Chance of rain", Icons.umbrella, false),
-  sunrise("Sunrise", Icons.keyboard_arrow_up, false),
-  sunset("Sunset", Icons.keyboard_arrow_down, false),
-  humidity("Humidity", Icons.percent, true),
-  windDirection("Wind direction", Icons.directions, false),
-  windGusts("Wind gusts", Icons.speed, false),
-  cloudCover("Cloud cover", Icons.cloud, false),
-  isDay("Day or night", Icons.access_time, false),
-  localTime("Local time", Icons.circle, false);
+  temperature("Temperature", Icons.thermostat),
+  apparentTemperature("Apparent temperature", Icons.person),
+  windSpeed("Wind speed", Icons.air),
+  precipitation("Precipitation", Icons.water_drop),
+  chainceOfRain("Chance of rain", Icons.umbrella),
+  sunrise("Sunrise", Icons.keyboard_arrow_up),
+  sunset("Sunset", Icons.keyboard_arrow_down),
+  humidity("Humidity", Icons.percent),
+  windDirection("Wind direction", Icons.directions),
+  windGusts("Wind gusts", Icons.speed),
+  cloudCover("Cloud cover", Icons.cloud),
+  isDay("Day or night", Icons.access_time),
+  localTime("Local time", Icons.circle);
 
-  const SelectableForecastFields(
-      this.label, this.icon, this.mainFieldAccessible);
+  const SelectableForecastFields(this.label, this.icon);
 
   final String label;
   final IconData icon;
-  final bool mainFieldAccessible;
 
   static int fromEnumToIndex(SelectableForecastFields field) => field.index;
 
@@ -158,6 +157,8 @@ class Forecast {
     switch (field) {
       case SelectableForecastFields.temperature:
         return "${currentHourData.temperature.round()}º";
+      case SelectableForecastFields.apparentTemperature:
+        return "${currentHourData.apparentTemperature.round()}º";
       case SelectableForecastFields.windSpeed:
         return "${currentHourData.windSpeed.round()}km/h";
       case SelectableForecastFields.precipitation:

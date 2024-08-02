@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:provider/provider.dart';
 
 class SelectableWidgetGrid extends StatefulWidget {
   final SelectableForecastFields fieldToReplace;
-  final List<SelectableForecastFields> fields;
-  final bool isMainField;
 
-  const SelectableWidgetGrid(
-      {required this.fieldToReplace,
-      required this.fields,
-      required this.isMainField,
-      super.key});
+  const SelectableWidgetGrid({required this.fieldToReplace, super.key});
 
   @override
   State<SelectableWidgetGrid> createState() => _SelectableWidgetGridState();
@@ -45,77 +40,104 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
     return Consumer<CurrentGeocodingProvider>(
       builder: (context, state, child) {
         return Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: NavigationToolbar.kMiddleSpacing),
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Replacing ${widget.fieldToReplace.label}",
-                    style: Theme.of(context)
-                        .textTheme
-                        .displayMedium!
-                        .copyWith(color: Colors.white),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: Colors.white),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              GridView.builder(
-                shrinkWrap: true,
-                itemCount: widget.fields.length,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 16 / 9,
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: NavigationToolbar.kMiddleSpacing),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Replacing",
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayMedium!
+                              .copyWith(color: Colors.white),
+                        ),
+                        Text(
+                          widget.fieldToReplace.label,
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall!
+                              .copyWith(color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close, color: Colors.white),
+                    ),
+                  ],
                 ),
-                itemBuilder: (context, index) {
-                  SelectableForecastFields forecastField = widget.fields[index];
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    itemCount: SelectableForecastFields.values.length,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 16 / 9,
+                    ),
+                    padding: EdgeInsets.only(
+                      top: NavigationToolbar.kMiddleSpacing,
+                      left: NavigationToolbar.kMiddleSpacing,
+                      right: NavigationToolbar.kMiddleSpacing,
+                      bottom: MediaQuery.of(context).padding.bottom,
+                    ),
+                    itemBuilder: (context, index) {
+                      SelectableForecastFields forecastField =
+                          SelectableForecastFields.values[index];
 
-                  return AnimatedBuilder(
-                    animation: _animationController,
-                    child: _fieldCard(state, forecastField),
-                    builder: (context, child) {
-                      final animation = Tween<Offset>(
-                              begin: const Offset(0, 0.1), end: Offset.zero)
-                          .animate(CurvedAnimation(
-                        parent: _animationController,
-                        curve: Interval(
-                          index / widget.fields.length,
-                          1.0,
-                          curve: Curves.easeOut,
-                        ),
-                      ));
+                      return AnimatedBuilder(
+                        animation: _animationController,
+                        child: _fieldCard(state, forecastField),
+                        builder: (context, child) {
+                          final animation = Tween<Offset>(
+                                  begin: const Offset(0, 0.1), end: Offset.zero)
+                              .animate(CurvedAnimation(
+                            parent: _animationController,
+                            curve: Interval(
+                              index / SelectableForecastFields.values.length,
+                              1.0,
+                              curve: Curves.easeOut,
+                            ),
+                          ));
 
-                      final opacity = Tween<double>(begin: 0.0, end: 1.0)
-                          .animate(CurvedAnimation(
-                        parent: _animationController,
-                        curve: Interval(
-                          (index / widget.fields.length),
-                          1.0,
-                          curve: Curves.easeIn,
-                        ),
-                      ));
+                          final opacity = Tween<double>(begin: 0.0, end: 1.0)
+                              .animate(CurvedAnimation(
+                            parent: _animationController,
+                            curve: Interval(
+                              (index / SelectableForecastFields.values.length),
+                              1.0,
+                              curve: Curves.easeIn,
+                            ),
+                          ));
 
-                      return SlideTransition(
-                        position: animation,
-                        child: FadeTransition(
-                          opacity: opacity,
-                          child: child,
-                        ),
+                          return SlideTransition(
+                            position: animation,
+                            child: FadeTransition(
+                              opacity: opacity,
+                              child: child,
+                            ),
+                          );
+                        },
                       );
                     },
-                  );
-                },
+                  ),
+                ),
               )
             ],
           ),
@@ -141,16 +163,16 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
           child: InkWell(
             splashColor: isCurrentField ? Colors.transparent : null,
             highlightColor: isCurrentField ? Colors.transparent : null,
-            onTap: () {
-              if (isCurrentField) {
-                return;
-              }
+            onTap: isCurrentField
+                ? null
+                : () {
+                    provider.replaceSecondaryField(
+                      widget.fieldToReplace,
+                      forecastField,
+                    );
 
-              provider.replaceSecondaryField(
-                  widget.fieldToReplace, forecastField);
-
-              Navigator.of(context).pop();
-            },
+                    Navigator.of(context).pop(forecastField);
+                  },
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -170,7 +192,7 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
             ),
           ),
         ),
-        index != -1 && !widget.isMainField
+        index != -1
             ? Positioned(
                 right: -10,
                 top: -10,

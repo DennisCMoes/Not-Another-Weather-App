@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 class WidgetOverlay extends ModalRoute<void> {
@@ -28,7 +30,13 @@ class WidgetOverlay extends ModalRoute<void> {
       Animation<double> secondaryAnimation, Widget child) {
     return FadeTransition(
       opacity: animation,
-      child: child,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: animation.value * 10,
+          sigmaY: animation.value * 10,
+        ),
+        child: child,
+      ),
     );
   }
 
@@ -37,7 +45,8 @@ class WidgetOverlay extends ModalRoute<void> {
       Animation<double> secondaryAnimation) {
     return Material(
       type: MaterialType.transparency,
-      child: SafeArea(child: overlayChild),
+      child: overlayChild,
+      // child: SafeArea(child: overlayChild),
     );
   }
 }
