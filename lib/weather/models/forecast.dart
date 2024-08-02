@@ -58,6 +58,11 @@ enum SelectableForecastFields {
   final String label;
   final IconData icon;
   final bool mainFieldAccessible;
+
+  static int fromEnumToIndex(SelectableForecastFields field) => field.index;
+
+  static SelectableForecastFields fromIndexToEnum(int index) =>
+      SelectableForecastFields.values[index];
 }
 
 class Forecast {

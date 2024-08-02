@@ -146,12 +146,8 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
                 return;
               }
 
-              if (widget.isMainField) {
-                provider.setMainField(forecastField);
-              } else {
-                provider.replaceSecondaryField(
-                    widget.fieldToReplace, forecastField);
-              }
+              provider.replaceSecondaryField(
+                  widget.fieldToReplace, forecastField);
 
               Navigator.of(context).pop();
             },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
@@ -7,6 +8,7 @@ import 'package:not_another_weather_app/weather/models/widget_item.dart';
 /// A provider that manages the state and logic for the currently selected geocoding
 class CurrentGeocodingProvider extends ChangeNotifier {
   final Geocoding geocoding;
+  final GeocodingRepo _geocodingRepo = GeocodingRepo();
 
   final PageController _pageController = PageController(initialPage: 0);
   final PageController _futureForecastController =
@@ -80,12 +82,6 @@ class CurrentGeocodingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sets the main field of the geocoding to [field] and notifies it's listeners
-  void setMainField(SelectableForecastFields field) {
-    geocoding.selectedMainField = field;
-    notifyListeners();
-  }
-
   /// Replaces the [oldField] with [newField] in the list of selected forecast items and notifies it's listeners
   void replaceSecondaryField(
       SelectableForecastFields oldField, SelectableForecastFields newField) {
@@ -100,6 +96,7 @@ class CurrentGeocodingProvider extends ChangeNotifier {
 
       geocoding.selectedForecastItems[oldFieldIndex] = newField;
       notifyListeners();
+      _geocodingRepo.storeGeocoding(geocoding);
     } else {
       debugPrint("Error: Old field not found");
     }

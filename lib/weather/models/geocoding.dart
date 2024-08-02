@@ -19,15 +19,29 @@ class Geocoding {
 
   int selectedPage = 0;
 
-  SelectableForecastFields selectedMainField =
-      SelectableForecastFields.temperature;
+  @Transient()
+  List<SelectableForecastFields> selectedForecastItems = [];
 
-  List<SelectableForecastFields> selectedForecastItems = [
-    SelectableForecastFields.windSpeed,
-    SelectableForecastFields.precipitation,
-    SelectableForecastFields.chainceOfRain,
-    SelectableForecastFields.cloudCover
-  ];
+  List<int> get selectedForecastItemsDb {
+    _ensureStableEnumValues();
+    return selectedForecastItems
+        .map((e) => SelectableForecastFields.fromEnumToIndex(e))
+        .toList();
+  }
+
+  set selectedForecastItemsDb(List<int> fields) {
+    _ensureStableEnumValues();
+    selectedForecastItems = fields.isNotEmpty
+        ? fields
+            .map((e) => SelectableForecastFields.fromIndexToEnum(e))
+            .toList()
+        : [
+            SelectableForecastFields.windSpeed,
+            SelectableForecastFields.precipitation,
+            SelectableForecastFields.chainceOfRain,
+            SelectableForecastFields.cloudCover
+          ];
+  }
 
   List<WidgetItem> detailWidgets = [
     WidgetItem(id: 1, size: WidgetSize.medium, type: WidgetType.compass),
@@ -51,17 +65,19 @@ class Geocoding {
     );
   }
 
-  static List<Geocoding> sampleData() {
-    var items = [
-      Geocoding(2759794, 'Amsterdam', 52.37403, 4.88969, "Netherlands"),
-      Geocoding(2911298, 'Hamburg', 53.55073, 9.99302, 'Germany'),
-      Geocoding(2514256, 'Málaga', 36.72016, -4.42034, 'Spain'),
-      Geocoding(3413829, 'Reykjavik', 64.13548, -21.89541, 'Iceland'),
-      Geocoding(2825297, 'Stuttgart', 48.78232, 9.17702, 'Germany'),
-      Geocoding(2791537, 'Mechelen', 51.02574, 4.47762, 'Belgium')
-    ];
-
-    return items;
+  void _ensureStableEnumValues() {
+    assert(SelectableForecastFields.temperature.index == 0);
+    assert(SelectableForecastFields.windSpeed.index == 1);
+    assert(SelectableForecastFields.precipitation.index == 2);
+    assert(SelectableForecastFields.chainceOfRain.index == 3);
+    assert(SelectableForecastFields.sunrise.index == 4);
+    assert(SelectableForecastFields.sunset.index == 5);
+    assert(SelectableForecastFields.humidity.index == 6);
+    assert(SelectableForecastFields.windDirection.index == 7);
+    assert(SelectableForecastFields.windGusts.index == 8);
+    assert(SelectableForecastFields.cloudCover.index == 9);
+    assert(SelectableForecastFields.isDay.index == 10);
+    assert(SelectableForecastFields.localTime.index == 11);
   }
 
   @override

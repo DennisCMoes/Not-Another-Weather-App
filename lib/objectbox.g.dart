@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(1, 8085940287060332242),
       name: 'Geocoding',
-      lastPropertyId: const obx_int.IdUid(6, 732950383778108936),
+      lastPropertyId: const obx_int.IdUid(7, 973518960355281142),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -54,6 +54,11 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(6, 732950383778108936),
             name: 'selectedPage',
             type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 973518960355281142),
+            name: 'selectedForecastItemsDb',
+            type: 27,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -119,13 +124,16 @@ obx_int.ModelDefinition getObjectBoxModel() {
         objectToFB: (Geocoding object, fb.Builder fbb) {
           final nameOffset = fbb.writeString(object.name);
           final countryOffset = fbb.writeString(object.country);
-          fbb.startTable(7);
+          final selectedForecastItemsDbOffset =
+              fbb.writeListInt64(object.selectedForecastItemsDb);
+          fbb.startTable(8);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, nameOffset);
           fbb.addFloat64(2, object.latitude);
           fbb.addFloat64(3, object.longitude);
           fbb.addOffset(4, countryOffset);
           fbb.addInt64(5, object.selectedPage);
+          fbb.addOffset(6, selectedForecastItemsDbOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -145,7 +153,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final object = Geocoding(
               idParam, nameParam, latitudeParam, longitudeParam, countryParam)
             ..selectedPage =
-                const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0);
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0)
+            ..selectedForecastItemsDb =
+                const fb.ListReader<int>(fb.Int64Reader(), lazy: false)
+                    .vTableGet(buffer, rootOffset, 16, []);
 
           return object;
         })
@@ -179,4 +190,8 @@ class Geocoding_ {
   /// See [Geocoding.selectedPage].
   static final selectedPage =
       obx.QueryIntegerProperty<Geocoding>(_entities[0].properties[5]);
+
+  /// See [Geocoding.selectedForecastItemsDb].
+  static final selectedForecastItemsDb =
+      obx.QueryIntegerVectorProperty<Geocoding>(_entities[0].properties[6]);
 }

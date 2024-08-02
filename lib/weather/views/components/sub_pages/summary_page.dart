@@ -153,7 +153,7 @@ class _SummaryPageState extends State<SummaryPage> {
                         ).animate(animation);
 
                         ValueKey key = ValueKey(currentForecast?.getField(
-                            state.geocoding.selectedMainField,
+                            SelectableForecastFields.temperature,
                             state.selectedHour));
 
                         // TODO: If the new value is lower slide in from the top, if larger slide in from the bottom
@@ -173,9 +173,9 @@ class _SummaryPageState extends State<SummaryPage> {
                         );
                       },
                       child: Text(
-                        "${currentForecast?.getField(state.geocoding.selectedMainField, state.selectedHour) ?? "XX"}",
+                        "${currentForecast?.getField(SelectableForecastFields.temperature, state.selectedHour) ?? "XX"}",
                         key: ValueKey(currentForecast?.getField(
-                            state.geocoding.selectedMainField,
+                            SelectableForecastFields.temperature,
                             state.selectedHour)),
                         style:
                             Theme.of(context).textTheme.displayLarge!.copyWith(

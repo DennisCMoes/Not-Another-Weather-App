@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:8085940287060332242",
-      "lastPropertyId": "6:732950383778108936",
+      "lastPropertyId": "7:973518960355281142",
       "name": "Geocoding",
       "properties": [
         {
@@ -38,6 +38,11 @@
           "id": "6:732950383778108936",
           "name": "selectedPage",
           "type": 6
+        },
+        {
+          "id": "7:973518960355281142",
+          "name": "selectedForecastItemsDb",
+          "type": 27
         }
       ],
       "relations": []

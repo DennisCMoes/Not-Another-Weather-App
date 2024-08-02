@@ -76,25 +76,6 @@ class WeatherProvider extends ChangeNotifier {
     _geocodings = codings.toList();
   }
 
-  /// Retrieves the stored geocodings and their forecasts
-  Future<void> getStoredGeocodings() async {
-    try {
-      final List<Geocoding> storedGeocodings = await Future.wait(
-        Geocoding.sampleData().map((geo) async {
-          final forecast =
-              await _forecastRepo.getLocalForecast(geo.latitude, geo.longitude);
-          geo.forecast = forecast;
-          return geo;
-        }).toList(),
-      );
-
-      _geocodings.addAll(storedGeocodings);
-      notifyListeners();
-    } catch (ex) {
-      debugPrint("Error getting the stored geocodings: $ex");
-    }
-  }
-
   // Moves a geocoding location from [oldIndex] to [newIndex] in the list
   void moveGeocodings(int oldIndex, int newIndex) {
     final item = _geocodings.removeAt(oldIndex);
