@@ -7,9 +7,9 @@ enum WeatherCode {
 
   // Cloudy
   mainlyClear(1, "Mainly clear", WeatherColorScheme.partlyCloudy,
-      WeatherClipper.cloudy),
+      WeatherClipper.partlyClouded),
   partlyCloudy(2, "Partly clouded", WeatherColorScheme.partlyCloudy,
-      WeatherClipper.cloudy),
+      WeatherClipper.partlyClouded),
   overcast(3, "Overcast", WeatherColorScheme.overcast, WeatherClipper.overcast),
 
   // Fog
