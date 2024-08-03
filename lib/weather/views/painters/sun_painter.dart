@@ -27,11 +27,6 @@ class SunPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    final Paint pointPaint = Paint()
-      ..color = Colors.blue
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 10.0;
-
     final Paint sunPaint = Paint()
       ..color = Colors.yellow
       ..style = PaintingStyle.fill;

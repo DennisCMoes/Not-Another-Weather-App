@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/weather_clipper.dart';
@@ -185,8 +184,7 @@ class _SummaryPageState extends State<SummaryPage> {
 
   Widget _weatherDetailItem(BuildContext context,
       CurrentGeocodingProvider provider, SelectableForecastFields field) {
-    HourlyWeatherData? currentHour =
-        provider.geocoding.forecast?.getCurrentHourData(provider.selectedHour);
+    provider.geocoding.forecast?.getCurrentHourData(provider.selectedHour);
 
     return GestureDetector(
       key: ValueKey(field),
