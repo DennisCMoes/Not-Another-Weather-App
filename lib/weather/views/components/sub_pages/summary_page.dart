@@ -1,5 +1,8 @@
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/weather_clipper.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/selectable_widget_grid.dart';
@@ -112,67 +115,71 @@ class _SummaryPageState extends State<SummaryPage> {
                 ),
               ),
               IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: state.geocoding.selectedForecastItems
-                            .map((e) => _weatherDetailItem(context, state, e))
-                            .toList(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: state.geocoding.selectedForecastItems
+                              .map((e) => _weatherDetailItem(context, state, e))
+                              .toList(),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      transitionBuilder: (child, animation) {
-                        final inAnimation = Tween<Offset>(
-                          begin: const Offset(0.0, 1.0),
-                          end: Offset.zero,
-                        ).animate(animation);
+                      const SizedBox(width: 12),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        transitionBuilder: (child, animation) {
+                          final inAnimation = Tween<Offset>(
+                            begin: const Offset(0.0, 1.0),
+                            end: Offset.zero,
+                          ).animate(animation);
 
-                        final outAnimation = Tween<Offset>(
-                          begin: const Offset(0.0, -1.0),
-                          end: Offset.zero,
-                        ).animate(animation);
+                          final outAnimation = Tween<Offset>(
+                            begin: const Offset(0.0, -1.0),
+                            end: Offset.zero,
+                          ).animate(animation);
 
-                        ValueKey key = ValueKey(currentForecast?.getField(
-                            SelectableForecastFields.temperature,
-                            state.selectedHour));
+                          ValueKey key = ValueKey(currentForecast?.getField(
+                              SelectableForecastFields.temperature,
+                              state.selectedHour));
 
-                        // TODO: If the new value is lower slide in from the top, if larger slide in from the bottom
-                        return ClipRect(
-                          clipBehavior: Clip.antiAlias,
-                          child: Stack(
-                            alignment: Alignment.centerRight,
-                            children: [
-                              if (child.key != key)
-                                SlideTransition(
-                                    position: outAnimation, child: child),
-                              if (child.key == key)
-                                SlideTransition(
-                                    position: inAnimation, child: child),
-                            ],
-                          ),
-                        );
-                      },
-                      child: Text(
-                        "${currentForecast?.getField(SelectableForecastFields.temperature, state.selectedHour) ?? "XX"}",
-                        key: ValueKey(currentForecast?.getField(
-                            SelectableForecastFields.temperature,
-                            state.selectedHour)),
-                        style:
-                            Theme.of(context).textTheme.displayLarge!.copyWith(
-                                  fontSize: 128,
-                                  color: state.getWeatherColorScheme().accent,
-                                ),
+                          // TODO: If the new value is lower slide in from the top, if larger slide in from the bottom
+                          return ClipRect(
+                            clipBehavior: Clip.antiAlias,
+                            child: Stack(
+                              alignment: Alignment.centerRight,
+                              children: [
+                                if (child.key != key)
+                                  SlideTransition(
+                                      position: outAnimation, child: child),
+                                if (child.key == key)
+                                  SlideTransition(
+                                      position: inAnimation, child: child),
+                              ],
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "${currentForecast?.getField(SelectableForecastFields.temperature, state.selectedHour) ?? "XX"}",
+                          key: ValueKey(currentForecast?.getField(
+                              SelectableForecastFields.temperature,
+                              state.selectedHour)),
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayLarge!
+                              .copyWith(
+                                fontSize: 128,
+                                color: state.getWeatherColorScheme().accent,
+                              ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -184,47 +191,54 @@ class _SummaryPageState extends State<SummaryPage> {
 
   Widget _weatherDetailItem(BuildContext context,
       CurrentGeocodingProvider provider, SelectableForecastFields field) {
-    provider.geocoding.forecast?.getCurrentHourData(provider.selectedHour);
+    ColorPair colorPair = provider.getWeatherColorScheme();
 
-    return GestureDetector(
-      key: ValueKey(field),
-      onTap: () {
-        if (provider.isEditing) {
-          _showSelectedFieldMenu(field, false);
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: provider.isEditing
-                ? provider.getWeatherColorScheme().accent
-                : Colors.transparent,
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              field.icon,
-              color: provider.getWeatherColorScheme().accent,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              provider.geocoding.forecast
-                      ?.getField(field, provider.selectedHour)
-                      .toString() ??
-                  "XX",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: provider.getWeatherColorScheme().accent,
+    return Material(
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.hardEdge,
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {},
+        child: DottedBorder(
+          color: provider.isEditing
+              ? colorPair.main.darkenColor(0.4)
+              : Colors.transparent,
+          strokeWidth: 3,
+          radius: const Radius.circular(8),
+          dashPattern: const [4],
+          borderType: BorderType.RRect,
+          child: GestureDetector(
+            key: ValueKey(field),
+            onTap: provider.isEditing
+                ? () => _showSelectedFieldMenu(field, false)
+                : null,
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    field.icon,
+                    color: provider.getWeatherColorScheme().accent,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    provider.geocoding.forecast
+                            ?.getField(field, provider.selectedHour)
+                            .toString() ??
+                        "XX",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: provider.getWeatherColorScheme().accent,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
