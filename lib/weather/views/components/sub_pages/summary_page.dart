@@ -6,7 +6,7 @@ import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/weather_clipper.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/selectable_widget_grid.dart';
-import 'package:not_another_weather_app/weather/views/routes/widget_overlay.dart';
+import 'package:not_another_weather_app/shared/views/modal_overlay.dart';
 import 'package:provider/provider.dart';
 
 class SummaryPage extends StatefulWidget {
@@ -22,7 +22,7 @@ class _SummaryPageState extends State<SummaryPage> {
   void _showSelectedFieldMenu(
       SelectableForecastFields field, bool isMainField) async {
     await Navigator.of(context).push(
-      WidgetOverlay(
+      ModalOverlay(
         overlayChild: ChangeNotifierProvider.value(
           value: _geocodingProvider,
           child: SelectableWidgetGrid(fieldToReplace: field),
@@ -194,11 +194,16 @@ class _SummaryPageState extends State<SummaryPage> {
     ColorPair colorPair = provider.getWeatherColorScheme();
 
     return Material(
+      key: ValueKey(field),
       borderRadius: BorderRadius.circular(8),
       clipBehavior: Clip.hardEdge,
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        splashColor: colorPair.main.darkenColor(0.1),
+        highlightColor: Colors.transparent,
+        onTap: provider.isEditing
+            ? () => _showSelectedFieldMenu(field, false)
+            : null,
         child: DottedBorder(
           color: provider.isEditing
               ? colorPair.main.darkenColor(0.4)
@@ -207,36 +212,30 @@ class _SummaryPageState extends State<SummaryPage> {
           radius: const Radius.circular(8),
           dashPattern: const [4],
           borderType: BorderType.RRect,
-          child: GestureDetector(
-            key: ValueKey(field),
-            onTap: provider.isEditing
-                ? () => _showSelectedFieldMenu(field, false)
-                : null,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    field.icon,
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  field.icon,
+                  color: provider.getWeatherColorScheme().accent,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  provider.geocoding.forecast
+                          ?.getField(field, provider.selectedHour)
+                          .toString() ??
+                      "XX",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                     color: provider.getWeatherColorScheme().accent,
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    provider.geocoding.forecast
-                            ?.getField(field, provider.selectedHour)
-                            .toString() ??
-                        "XX",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: provider.getWeatherColorScheme().accent,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

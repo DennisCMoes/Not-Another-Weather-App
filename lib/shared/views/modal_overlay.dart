@@ -2,16 +2,22 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-class WidgetOverlay extends ModalRoute<void> {
+class ModalOverlay extends ModalRoute<void> {
   final Widget overlayChild;
+  final bool isDismissible;
+  final Duration durationOfTransition;
 
-  WidgetOverlay({required this.overlayChild});
+  ModalOverlay({
+    required this.overlayChild,
+    this.isDismissible = true,
+    this.durationOfTransition = const Duration(milliseconds: 300),
+  });
 
   @override
   Color? get barrierColor => Colors.black.withOpacity(0.6);
 
   @override
-  bool get barrierDismissible => true;
+  bool get barrierDismissible => isDismissible;
 
   @override
   String? get barrierLabel => null;
@@ -23,7 +29,7 @@ class WidgetOverlay extends ModalRoute<void> {
   bool get opaque => false;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
+  Duration get transitionDuration => durationOfTransition;
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation,
