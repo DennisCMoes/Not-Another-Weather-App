@@ -33,6 +33,11 @@ class WeatherProvider extends ChangeNotifier {
 
       final List<Geocoding> localGeocodings =
           _geocodingRepo.getStoredGeocodings();
+
+      if (localGeocodings.isEmpty) {
+        localGeocodings.add(Geocoding(1, "My location", 0, 0, "My location"));
+      }
+
       final Geocoding localGeocoding =
           localGeocodings.firstWhere((geocoding) => geocoding.id == 1);
       localGeocoding.isCurrentLocation = true;
@@ -52,6 +57,7 @@ class WeatherProvider extends ChangeNotifier {
       await refreshData();
     } catch (ex) {
       debugPrint("Error during initialization: $ex");
+      rethrow;
     }
   }
 

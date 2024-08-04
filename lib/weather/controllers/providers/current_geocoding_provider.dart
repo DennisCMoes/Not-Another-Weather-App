@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:instant/instant.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
@@ -121,9 +122,24 @@ class CurrentGeocodingProvider extends ChangeNotifier {
   ///
   /// Returns a string indicating the relative day and hour
   String getSelectedHourDescription() {
-    return DateUtils.isSameDay(DateTime.now(), selectedHour)
-        ? "Today at ${selectedHour.hour}"
-        : "Tomorrow at ${selectedHour.hour}";
+    final now = DateTime.now();
+    final timezone = geocoding.forecast?.timezome ?? now.timeZoneName;
+
+    final nowInTargetZone = dateTimeToZone(zone: timezone, datetime: now);
+    final selectedHourInZone =
+        dateTimeToZone(zone: timezone, datetime: selectedHour);
+
+    if (DateUtils.isSameDay(nowInTargetZone, selectedHourInZone)) {
+      return "Today at ${selectedHourInZone.hour}";
+    } else if (selectedHourInZone.isBefore(nowInTargetZone)) {
+      return "Yesterday at ${selectedHourInZone.hour}";
+    } else {
+      return "Tomorrow at ${selectedHourInZone.hour}";
+    }
+
+    // return DateUtils.isSameDay(now, selectedHour)
+    //     ? "Today at ${selectedHourInZone.hour}"
+    //     : "Tomorrow at ${selectedHourInZone.hour}";
   }
 
   /// Returns a color scheme based on the weather forecast and selected hour
