@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:not_another_weather_app/menu/views/main_menu.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
+import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/views/components/scaling_time_slider.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/summary_page.dart';
@@ -74,6 +76,30 @@ class ForecastCardState extends State<ForecastCard> {
           DateUtils.isSameDay(currentHour, _geocodingProvider.selectedHour);
     }
 
+    void openMainMenu() {
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          fullscreenDialog: true,
+          barrierColor: Colors.black54,
+          transitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return const MainMenuScreen();
+          },
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(0.0, 1.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end)
+                .chain(CurveTween(curve: Curves.fastOutSlowIn));
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+        ),
+      );
+    }
+
     return Consumer<CurrentGeocodingProvider>(
       builder: (context, state, child) {
         return ColoredBox(
@@ -144,11 +170,12 @@ class ForecastCardState extends State<ForecastCard> {
                               : const Icon(
                                   Icons.signal_wifi_connected_no_internet_4),
                           IconButton(
-                            onPressed: () {
-                              Provider.of<DrawerProvider>(context,
-                                      listen: false)
-                                  .openDrawer();
-                            },
+                            // onPressed: () {
+                            //   Provider.of<DrawerProvider>(context,
+                            //           listen: false)
+                            //       .openDrawer();
+                            // },
+                            onPressed: openMainMenu,
                             visualDensity: VisualDensity.compact,
                             icon: Icon(
                               Icons.reorder,

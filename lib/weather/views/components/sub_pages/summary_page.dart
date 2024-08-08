@@ -6,7 +6,7 @@ import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/weather_clipper.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/selectable_widget_grid.dart';
-import 'package:not_another_weather_app/shared/views/modal_overlay.dart';
+import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
 import 'package:provider/provider.dart';
 
 class SummaryPage extends StatefulWidget {

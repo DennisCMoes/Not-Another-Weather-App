@@ -56,13 +56,22 @@ class Geocoding {
       {this.isCurrentLocation = false});
 
   factory Geocoding.fromJson(Map<String, dynamic> json) {
-    return Geocoding(
+    Geocoding geocoding = Geocoding(
       json['id'],
       json['name'],
       json['latitude'],
       json['longitude'],
       json['country'] ?? "Unknown",
     );
+
+    geocoding.selectedForecastItems = [
+      SelectableForecastFields.windSpeed,
+      SelectableForecastFields.precipitation,
+      SelectableForecastFields.chainceOfRain,
+      SelectableForecastFields.cloudCover,
+    ];
+
+    return geocoding;
   }
 
   void _ensureStableEnumValues() {

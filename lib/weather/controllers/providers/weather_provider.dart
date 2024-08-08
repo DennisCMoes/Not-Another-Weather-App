@@ -35,7 +35,8 @@ class WeatherProvider extends ChangeNotifier {
           _geocodingRepo.getStoredGeocodings();
 
       if (localGeocodings.isEmpty) {
-        localGeocodings.add(Geocoding(1, "My location", 0, 0, "My location"));
+        localGeocodings
+            .add(Geocoding(1, "Current location", 0, 0, "Current location"));
       }
 
       final Geocoding localGeocoding =
