@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UnitTileComponent<T> extends StatefulWidget {
   final String label;
+  final String sharedPreferenceKey;
   final IconData icon;
-  final IUnit initialValue;
   final List<IUnit> enumValues;
 
   const UnitTileComponent(
-      this.label, this.icon, this.initialValue, this.enumValues,
+      this.label, this.sharedPreferenceKey, this.icon, this.enumValues,
       {super.key});
 
   @override
@@ -23,15 +24,31 @@ class _UnitTileComponentState extends State<UnitTileComponent> {
   void initState() {
     super.initState();
 
-    _selected = widget.initialValue;
     _values = widget.enumValues;
+    _selected = widget.enumValues.first;
+
+    initialize();
   }
 
-  void _cycleUnit() {
+  void initialize() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var valueIndex = prefs.getInt(widget.sharedPreferenceKey);
+
     setState(() {
-      int currentIndex = _values.indexOf(_selected);
-      int nextIndex = (currentIndex + 1) % _values.length;
+      _values = widget.enumValues;
+      _selected = widget.enumValues[valueIndex ?? 0];
+    });
+  }
+
+  void _cycleUnit() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    int currentIndex = _values.indexOf(_selected);
+    int nextIndex = (currentIndex + 1) % _values.length;
+
+    setState(() {
       _selected = _values[nextIndex];
+      prefs.setInt(widget.sharedPreferenceKey, nextIndex);
     });
   }
 

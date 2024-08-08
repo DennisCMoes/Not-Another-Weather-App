@@ -279,19 +279,19 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   ),
                   const UnitTileComponent<WindspeedUnit>(
                     "Windspeed",
+                    "wind_speed_unit",
                     Icons.speed,
-                    WindspeedUnit.kmph,
                     WindspeedUnit.values,
                   ),
                   const UnitTileComponent<TemperatureUnit>(
                       "Temperature",
+                      "temperature_unit",
                       Icons.thermostat,
-                      TemperatureUnit.celsius,
                       TemperatureUnit.values),
                   const UnitTileComponent<PrecipitationUnit>(
                       "Precipitation",
+                      "precipitation_unit",
                       Icons.water_drop,
-                      PrecipitationUnit.millimeter,
                       PrecipitationUnit.values),
                 ],
               ),
