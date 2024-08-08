@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UnitTileComponent<T> extends StatefulWidget {
@@ -50,6 +52,8 @@ class _UnitTileComponentState extends State<UnitTileComponent> {
       _selected = _values[nextIndex];
       prefs.setInt(widget.sharedPreferenceKey, nextIndex);
     });
+
+    if (mounted) context.read<WeatherProvider>().refreshData();
   }
 
   @override

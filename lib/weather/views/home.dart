@@ -11,7 +11,6 @@ import 'package:not_another_weather_app/shared/utilities/controllers/location_co
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
 import 'package:not_another_weather_app/weather/views/components/forecast_card.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,18 +20,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  late Future<void> _initialization;
+  late Future<void> _initializationBuilder;
 
   late DeviceProvider _deviceProvider;
   late WeatherProvider _weatherProvider;
   late DrawerProvider _drawerProvider;
 
+  final DateTime _refreshDate = DateTime.now();
   final LocationController locationController = LocationController();
   final ForecastRepo forecastRepo = ForecastRepo();
 
-  int selectedPageIndex = 0;
-  bool isPressingNewLocation = false;
-  DateTime refreshDate = DateTime.now();
+  int _selectedPageIndex = 0;
 
   @override
   void initState() {
@@ -48,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _deviceProvider.setHasInternet(!event.contains(ConnectivityResult.none));
     });
 
-    _initialization = initialize();
+    _initializationBuilder = _initialize();
   }
 
   @override
@@ -67,32 +65,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      if (DateTime.now()
-          .isAfter(refreshDate.add(const Duration(minutes: 15)))) {
-        refreshData();
-      }
+      _refreshData();
     }
   }
 
-  Future<void> initialize() async {
-    await getData();
+  String getRefreshString() => DateFormat("HH:mm").format(_refreshDate);
+
+  Future<void> _initialize() async {
+    await _weatherProvider.initialization();
     FlutterNativeSplash.remove();
   }
 
-  Future<void> refreshData() async {
-    await _weatherProvider.refreshData();
+  // Future<void> _refreshData() async => await _weatherProvider.refreshData();
+  Future<void> _refreshData() async {
+    bool shouldRefresh =
+        DateTime.now().isAfter(_refreshDate.add(const Duration(minutes: 15)));
+
+    if (shouldRefresh) await _weatherProvider.refreshData();
   }
-
-  Future<void> getData() async {
-    await _weatherProvider.initialization();
-
-    refreshDate = DateTime.now();
-    final SharedPreferences sharedPreferences =
-        await SharedPreferences.getInstance();
-    await sharedPreferences.setString("refresh_date", refreshDate.toString());
-  }
-
-  String getRefreshString() => DateFormat("HH:mm").format(refreshDate);
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       children: [
         Scaffold(
           body: FutureBuilder(
-            future: _initialization,
+            future: _initializationBuilder,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -177,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onPageChanged: (page) {
                 HapticFeedback.mediumImpact();
                 setState(() {
-                  selectedPageIndex = page;
+                  _selectedPageIndex = page;
                 });
               },
               children: [
@@ -197,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     state.geocodings.length,
-                    (index) => _indicator(index, index == selectedPageIndex),
+                    (index) => _indicator(index, index == _selectedPageIndex),
                   ),
                 ),
               ),
