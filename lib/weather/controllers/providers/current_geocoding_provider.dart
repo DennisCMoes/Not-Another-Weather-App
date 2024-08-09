@@ -8,7 +8,8 @@ import 'package:not_another_weather_app/weather/models/widget_item.dart';
 
 /// A provider that manages the state and logic for the currently selected geocoding
 class CurrentGeocodingProvider extends ChangeNotifier {
-  final Geocoding geocoding;
+  Geocoding _geocoding;
+
   final GeocodingRepo _geocodingRepo = GeocodingRepo();
 
   final PageController _pageController = PageController(initialPage: 0);
@@ -19,7 +20,9 @@ class CurrentGeocodingProvider extends ChangeNotifier {
   int _subPageIndex = 0;
   DateTime _selectedHour = DateTime.now();
 
-  CurrentGeocodingProvider(this.geocoding) {
+  Geocoding get geocoding => _geocoding;
+
+  CurrentGeocodingProvider(this._geocoding) {
     _initializeSelectedHour();
   }
 
@@ -53,6 +56,11 @@ class CurrentGeocodingProvider extends ChangeNotifier {
     final adjustedHour = hour ?? now.hour;
     return DateTime(now.year, now.month, now.day, adjustedHour)
         .add(Duration(hours: offset));
+  }
+
+  void setGeocoding(Geocoding geocoding) {
+    _geocoding = geocoding;
+    notifyListeners();
   }
 
   /// Checks if the given [index] is the current page.

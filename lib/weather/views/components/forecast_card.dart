@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/menu/views/main_menu.dart';
+import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
-import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/views/components/scaling_time_slider.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/summary_page.dart';
 import 'package:provider/provider.dart';
-import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 
 class ForecastCard extends StatefulWidget {
   const ForecastCard({super.key});
@@ -16,7 +16,7 @@ class ForecastCard extends StatefulWidget {
   State<ForecastCard> createState() => ForecastCardState();
 }
 
-class ForecastCardState extends State<ForecastCard> {
+class ForecastCardState extends State<ForecastCard> with RouteAware {
   late CurrentGeocodingProvider _geocodingProvider;
 
   final List<String> _subPageButtonLabels = [
@@ -38,7 +38,25 @@ class ForecastCardState extends State<ForecastCard> {
   @override
   void dispose() {
     _timeController.dispose();
+    ObserverUtils.routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    ObserverUtils.routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() async {
+    var geo = context
+        .read<WeatherProvider>()
+        .getGeocoding(_geocodingProvider.geocoding.id);
+
+    // TODO: Find a way to only call this function if the data has changed
+    _geocodingProvider.setGeocoding(geo);
+    super.didPopNext();
   }
 
   @override

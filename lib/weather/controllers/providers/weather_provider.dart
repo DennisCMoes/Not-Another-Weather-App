@@ -84,6 +84,10 @@ class WeatherProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Geocoding getGeocoding(int id) {
+    return _geocodings.firstWhere((geo) => geo.id == id);
+  }
+
   // Moves a geocoding location from [oldIndex] to [newIndex] in the list
   void moveGeocodings(int oldIndex, int newIndex) {
     final item = _geocodings.removeAt(oldIndex);
