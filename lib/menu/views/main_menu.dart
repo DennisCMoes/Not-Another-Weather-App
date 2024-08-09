@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/menu/views/unit_tile.dart';
@@ -43,7 +44,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
   @override
   void dispose() {
-    // _weatherProvider.dispose();
     _focusNode.dispose();
     _textEditingController.dispose();
 
@@ -59,6 +59,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
     setState(() {
       _hasValue = hasSearchValue;
+
+      if (hasSearchValue) {
+        _isEditing = false;
+      }
     });
 
     var results =
@@ -72,16 +76,22 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   void _goToPage(int pageIndex) {
     Navigator.of(context).pop();
 
-    context.read<WeatherProvider>().pageController.animateToPage(
-          pageIndex,
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeInOut,
-        );
+    _weatherProvider.pageController.animateToPage(
+      pageIndex,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _selectNewGeocoding(Geocoding geocoding) async {
-    await _weatherProvider.addGeocoding(geocoding);
-    _goToPage(_weatherProvider.geocodings.length - 1);
+    int index = _weatherProvider.getIndexOfGeocoding(geocoding);
+
+    if (index == -1) {
+      await _weatherProvider.addGeocoding(geocoding);
+      _goToPage(_weatherProvider.geocodings.length - 1);
+    } else {
+      _goToPage(index);
+    }
   }
 
   void _removeGeocoding(Geocoding geocoding) {
@@ -178,7 +188,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   Widget _geocodingTile(Geocoding geocoding, int index) {
-    ColorPair colorPair = WeatherColorScheme.partlyCloudy.getColorPair(true);
+    ColorPair colorPair = geocoding.forecast?.getColorPair() ??
+        const ColorPair(Colors.purple, Colors.white);
 
     return ListTile(
       key: ValueKey(geocoding),
@@ -293,6 +304,11 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       "precipitation_unit",
                       Icons.water_drop,
                       PrecipitationUnit.values),
+                  if (kDebugMode) _debugButtons(),
+                  // TODO: If env debug show three buttons:
+                  //  1. Clear shared preferences
+                  //  2. Clear stored geocodings
+                  //  3. Clear stored forecasts
                 ],
               ),
             ],
@@ -319,5 +335,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             _searchedGeocodingTile(_searchedGeocodings[index]),
       );
     }
+  }
+
+  Widget _debugButtons() {
+    return Column(
+      children: [
+        Text("DEBUG BUTTONS"),
+      ],
+    );
   }
 }

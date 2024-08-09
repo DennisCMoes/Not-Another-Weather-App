@@ -84,6 +84,14 @@ class WeatherProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  int getIndexOfGeocoding(Geocoding geocoding) {
+    return _geocodings.indexWhere((geo) => geo.id == geocoding.id);
+  }
+
+  bool isAlreadyPresent(Geocoding geocoding) {
+    return _geocodings.any((geo) => geo.id == geocoding.id);
+  }
+
   Geocoding getGeocoding(int id) {
     return _geocodings.firstWhere((geo) => geo.id == id);
   }

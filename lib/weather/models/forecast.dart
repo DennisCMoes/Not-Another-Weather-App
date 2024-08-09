@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:instant/instant.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/weather_code.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -213,6 +214,15 @@ class Forecast {
     bool isInTheDay = isBeforeSunset && isAfterSunrise;
 
     return hourlyWeatherData.weatherCode.clipper.getClipper(isInTheDay);
+  }
+
+  ColorPair getColorPair([DateTime? date]) {
+    DateTime now = DateTime.now();
+    DailyWeatherData daily = getCurrentDayData(date);
+    HourlyWeatherData hourly = getCurrentHourData(date);
+
+    final isInTheDay = now.isBefore(daily.sunset) && now.isAfter(daily.sunrise);
+    return hourly.weatherCode.colorScheme.getColorPair(isInTheDay);
   }
 
   @override
