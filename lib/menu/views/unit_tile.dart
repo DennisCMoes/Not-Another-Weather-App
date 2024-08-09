@@ -4,11 +4,11 @@ import 'package:not_another_weather_app/weather/controllers/providers/weather_pr
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class UnitTileComponent<T> extends StatefulWidget {
+class UnitTileComponent<T extends IUnit> extends StatefulWidget {
   final String label;
   final String sharedPreferenceKey;
   final IconData icon;
-  final List<IUnit> enumValues;
+  final List<T> enumValues;
 
   const UnitTileComponent(
       this.label, this.sharedPreferenceKey, this.icon, this.enumValues,

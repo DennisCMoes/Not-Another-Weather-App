@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:instant/instant.dart';
+import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/weather/models/weather_code.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HourlyWeatherData {
   final double temperature;
@@ -65,6 +67,8 @@ enum SelectableForecastFields {
 }
 
 class Forecast {
+  late SharedPreferences _preferences;
+
   double latitude;
   double longitude;
   String timezome;
@@ -75,7 +79,13 @@ class Forecast {
   Map<DateTime, DailyWeatherData> dailyWeatherData;
 
   Forecast(this.latitude, this.longitude, this.timezome, this.pressure,
-      this.isDay, this.hourlyWeatherData, this.dailyWeatherData);
+      this.isDay, this.hourlyWeatherData, this.dailyWeatherData) {
+    _initialization();
+  }
+
+  Future<void> _initialization() async {
+    _preferences = await SharedPreferences.getInstance();
+  }
 
   factory Forecast.fromJson(Map<String, dynamic> json) {
     DateFormat hourFormat = DateFormat('yyyy-MM-ddTHH:mm');
@@ -154,15 +164,22 @@ class Forecast {
     HourlyWeatherData currentHourData = getCurrentHourData(date);
     DailyWeatherData currentDayData = getCurrentDayData(date);
 
+    int windSpeedUnit = _preferences.getInt("wind_speed_unit") ?? 0;
+    int precipitationUnit = _preferences.getInt("precipitation_unit") ?? 0;
+
     switch (field) {
       case SelectableForecastFields.temperature:
         return "${currentHourData.temperature.round()}º";
       case SelectableForecastFields.apparentTemperature:
         return "${currentHourData.apparentTemperature.round()}º";
       case SelectableForecastFields.windSpeed:
-        return "${currentHourData.windSpeed.round()}km/h";
+        String label = WindspeedUnit.values[windSpeedUnit].label.toLowerCase();
+
+        return "${currentHourData.windSpeed.round()}$label";
       case SelectableForecastFields.precipitation:
-        return "${currentHourData.rainInMM}mm";
+        String label = PrecipitationUnit.values[precipitationUnit].value;
+
+        return "${currentHourData.rainInMM}$label";
       case SelectableForecastFields.chainceOfRain:
         return "${currentHourData.rainProbability}%";
       case SelectableForecastFields.sunrise:
