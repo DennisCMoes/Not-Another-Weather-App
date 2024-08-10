@@ -68,8 +68,10 @@ class _PageTwoState extends State<PageTwo> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         width: 2,
-                        color:
-                            state.getWeatherColorScheme().main.darkenColor(0.1),
+                        color: state.geocoding
+                            .getColorSchemeOfForecast(state.selectedHour)
+                            .main
+                            .darkenColor(0.1),
                       ),
                     ),
                     clipBehavior: Clip.hardEdge,

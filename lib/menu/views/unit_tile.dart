@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:provider/provider.dart';
@@ -44,6 +45,7 @@ class _UnitTileComponentState extends State<UnitTileComponent> {
 
   void _cycleUnit() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    HapticFeedback.lightImpact();
 
     int currentIndex = _values.indexOf(_selected);
     int nextIndex = (currentIndex + 1) % _values.length;

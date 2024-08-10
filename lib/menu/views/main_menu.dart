@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/menu/views/unit_tile.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
@@ -74,6 +75,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   void _goToPage(int pageIndex) {
+    HapticFeedback.lightImpact();
     Navigator.of(context).pop();
 
     _weatherProvider.pageController.animateToPage(
@@ -95,7 +97,18 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   void _removeGeocoding(Geocoding geocoding) {
+    HapticFeedback.lightImpact();
     _weatherProvider.removeGeocoding(geocoding);
+  }
+
+  void _setEditing(bool value, [bool withHaptics = false]) {
+    if (withHaptics) {
+      HapticFeedback.lightImpact();
+    }
+
+    setState(() {
+      _isPressingEdit = value;
+    });
   }
 
   @override
@@ -138,26 +151,11 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                           _hasValue
                               ? const SizedBox.shrink()
                               : GestureDetector(
-                                  onTapDown: (details) {
-                                    setState(() {
-                                      _isPressingEdit = true;
-                                    });
-                                  },
-                                  onTapCancel: () {
-                                    setState(() {
-                                      _isPressingEdit = false;
-                                    });
-                                  },
-                                  onTapUp: (details) {
-                                    setState(() {
-                                      _isPressingEdit = false;
-                                    });
-                                  },
-                                  onTap: () {
-                                    setState(() {
-                                      _isEditing = !_isEditing;
-                                    });
-                                  },
+                                  onTapDown: (details) => _setEditing(true),
+                                  onTapCancel: () => _setEditing(false),
+                                  onTapUp: (details) => _setEditing(false),
+                                  onTap: () =>
+                                      _setEditing(!_isPressingEdit, true),
                                   child: Text(
                                     _isEditing ? "Done" : "Edit",
                                     style: Theme.of(context)
@@ -188,8 +186,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   Widget _geocodingTile(Geocoding geocoding, int index) {
-    ColorPair colorPair = geocoding.forecast?.getColorPair() ??
-        const ColorPair(Colors.purple, Colors.white);
+    ColorPair colorPair = geocoding.getColorSchemeOfForecast();
 
     return ListTile(
       key: ValueKey(geocoding),
@@ -223,7 +220,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             .copyWith(color: colorPair.accent.withOpacity(0.6)),
       ),
       leading: _isEditing && !geocoding.isCurrentLocation
-          ? const Icon(Icons.drag_indicator)
+          ? Icon(Icons.drag_indicator, color: colorPair.accent)
           : null,
       trailing: _isEditing && !geocoding.isCurrentLocation
           ? IconButton(
@@ -305,10 +302,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       Icons.water_drop,
                       PrecipitationUnit.values),
                   if (kDebugMode) _debugButtons(),
-                  // TODO: If env debug show three buttons:
-                  //  1. Clear shared preferences
-                  //  2. Clear stored geocodings
-                  //  3. Clear stored forecasts
                 ],
               ),
             ],

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:objectbox/objectbox.dart';
@@ -88,6 +90,25 @@ class Geocoding {
     assert(SelectableForecastFields.cloudCover.index == 10);
     assert(SelectableForecastFields.isDay.index == 11);
     assert(SelectableForecastFields.localTime.index == 12);
+  }
+
+  ColorPair getColorSchemeOfForecast([DateTime? selectedTime]) {
+    if (forecast == null) {
+      return const ColorPair(Color(0xFF0327D6), Color(0xFFDBE7F6));
+    }
+
+    DateTime time = selectedTime ?? DateTime.now();
+    DateTime startOfDay = DateTime(time.year, time.month, time.day);
+
+    final isInTheDay =
+        time.isBefore(forecast!.dailyWeatherData[startOfDay]!.sunset) &&
+            time.isAfter(forecast!.dailyWeatherData[startOfDay]!.sunrise);
+
+    return forecast!
+        .getCurrentHourData(time)
+        .weatherCode
+        .colorScheme
+        .getColorPair(isInTheDay);
   }
 
   @override

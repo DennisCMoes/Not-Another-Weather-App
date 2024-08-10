@@ -150,32 +150,6 @@ class CurrentGeocodingProvider extends ChangeNotifier {
     //     : "Tomorrow at ${selectedHourInZone.hour}";
   }
 
-  /// Returns a color scheme based on the weather forecast and selected hour
-  ///
-  /// If no forecast data is available, return a default color scheme of purple and white.
-  /// Otherwise, it determines if the `selectedHour` falls within the daytime and retrieves
-  /// the appropriate color scheme based on the weather conditions for that hour.
-  ///
-  /// Return a `ColorPair` representing the color scheme for the selected hour's weather conditions.
-  ColorPair getWeatherColorScheme() {
-    Forecast? forecast = geocoding.forecast;
-
-    if (forecast == null) {
-      return const ColorPair(Colors.purple, Colors.white);
-    }
-
-    DateTime startOfDay =
-        DateTime(selectedHour.year, selectedHour.month, selectedHour.day);
-
-    final isInTheDay = selectedHour
-            .isBefore(forecast.dailyWeatherData[startOfDay]!.sunset) &&
-        selectedHour.isAfter(forecast.dailyWeatherData[startOfDay]!.sunrise);
-
-    final weatherData = forecast.getCurrentHourData(selectedHour);
-
-    return weatherData.weatherCode.colorScheme.getColorPair(isInTheDay);
-  }
-
   List<MapEntry<DateTime, HourlyWeatherData>> get24hForecast() {
     final startOfHour = _getStartOfHour(-2);
 
