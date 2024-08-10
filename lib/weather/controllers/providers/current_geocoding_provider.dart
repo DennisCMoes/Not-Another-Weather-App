@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:instant/instant.dart';
+import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
@@ -33,13 +33,14 @@ class CurrentGeocodingProvider extends ChangeNotifier {
   DateTime get selectedHour => _selectedHour;
 
   void _initializeSelectedHour() {
-    final now = DateTime.now();
-    _selectedHour = DateTime(now.year, now.month, now.day, now.hour);
+    final convertedNow = DatetimeUtils.convertToTimezone(DateTime.now(),
+        geocoding.forecast?.timezome ?? DateTime.now().timeZoneName);
+    final convertedStart = DatetimeUtils.startOfHour(convertedNow);
+    _selectedHour = convertedStart;
   }
 
   void _setSelectedHour(DateTime time) {
-    final now = DateTime.now();
-    _selectedHour = DateTime(now.year, now.month, time.day, time.hour);
+    _selectedHour = DatetimeUtils.startOfHour(time);
     notifyListeners();
   }
 
@@ -87,7 +88,7 @@ class CurrentGeocodingProvider extends ChangeNotifier {
 
   /// Sets the selected hour to [hour] and notifies it's listeners
   void setSelectedHour(DateTime time) {
-    _setSelectedHour(time);
+    _selectedHour = DatetimeUtils.startOfHour(time);
     notifyListeners();
   }
 
@@ -133,21 +134,15 @@ class CurrentGeocodingProvider extends ChangeNotifier {
     final now = DateTime.now();
     final timezone = geocoding.forecast?.timezome ?? now.timeZoneName;
 
-    final nowInTargetZone = dateTimeToZone(zone: timezone, datetime: now);
-    final selectedHourInZone =
-        dateTimeToZone(zone: timezone, datetime: selectedHour);
+    final nowInTargetzone = DatetimeUtils.convertToTimezone(now, timezone);
 
-    if (DateUtils.isSameDay(nowInTargetZone, selectedHourInZone)) {
-      return "Today at ${selectedHourInZone.hour}";
-    } else if (selectedHourInZone.isBefore(nowInTargetZone)) {
-      return "Yesterday at ${selectedHourInZone.hour}";
+    if (DateUtils.isSameDay(nowInTargetzone, selectedHour)) {
+      return "Today at ${selectedHour.hour}";
+    } else if (selectedHour.isBefore(nowInTargetzone)) {
+      return "Yesterday at ${selectedHour.hour}";
     } else {
-      return "Tomorrow at ${selectedHourInZone.hour}";
+      return "Tomorrow at ${selectedHour.hour}";
     }
-
-    // return DateUtils.isSameDay(now, selectedHour)
-    //     ? "Today at ${selectedHourInZone.hour}"
-    //     : "Tomorrow at ${selectedHourInZone.hour}";
   }
 
   List<MapEntry<DateTime, HourlyWeatherData>> get24hForecast() {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/menu/views/main_menu.dart';
+import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
@@ -19,21 +20,24 @@ class ForecastCard extends StatefulWidget {
 
 class ForecastCardState extends State<ForecastCard> with RouteAware {
   late CurrentGeocodingProvider _geocodingProvider;
+  late DateTime _currentDateTime;
 
   final List<String> _subPageButtonLabels = [
-    "Summary",
+    // "Summary",
     // "Details",
   ];
   final PageController _timeController = PageController(viewportFraction: 0.2);
 
   bool _showTimeSlider = false;
 
+  double _sliderValue = 0.0;
+
   @override
   void initState() {
     super.initState();
 
-    _geocodingProvider =
-        Provider.of<CurrentGeocodingProvider>(context, listen: false);
+    _geocodingProvider = context.read<CurrentGeocodingProvider>();
+    _currentDateTime = _getConvertedCurrentTime();
   }
 
   @override
@@ -55,9 +59,38 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
         .read<WeatherProvider>()
         .getGeocoding(_geocodingProvider.geocoding.id);
 
-    // TODO: Find a way to only call this function if the data has changed
     _geocodingProvider.setGeocoding(geo);
     super.didPopNext();
+  }
+
+  DateTime _getConvertedCurrentTime() {
+    return DatetimeUtils.convertToTimezone(
+        DatetimeUtils.startOfHour(),
+        _geocodingProvider.geocoding.forecast?.timezome ??
+            DateTime.now().timeZoneName);
+  }
+
+  void _onChangeSliderValue(double offset) {
+    _geocodingProvider
+        .setSelectedHour(_currentDateTime.add(Duration(hours: offset.toInt())));
+
+    setState(() {
+      _sliderValue = offset;
+    });
+  }
+
+  void _resetSliderTime() {
+    _geocodingProvider.setSelectedHour(_getConvertedCurrentTime());
+
+    setState(() {
+      _sliderValue = 0.0;
+    });
+  }
+
+  bool _isCurrentHour() {
+    DateTime converted =
+        _currentDateTime.add(Duration(hours: _sliderValue.toInt()));
+    return _currentDateTime == converted;
   }
 
   @override
@@ -67,33 +100,11 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
       _geocodingProvider.setIsEditing(!_geocodingProvider.isEditing);
     }
 
-    void onChangeSelectedHour(DateTime time) {
-      _geocodingProvider.setFutureForecastIndex(time);
-    }
-
     void toggleTimeSlider() {
       HapticFeedback.lightImpact();
       setState(() {
         _showTimeSlider = !_showTimeSlider;
       });
-    }
-
-    void resetSelectedTime() {
-      _geocodingProvider.setFutureForecastIndex(DateTime.now());
-      var index = _geocodingProvider.get24hForecastIndex(DateTime.now());
-      _geocodingProvider.futureForecastController.jumpToPage(index);
-
-      setState(() {
-        _showTimeSlider = false;
-      });
-    }
-
-    bool currentHourIsSelected() {
-      DateTime now = DateTime.now();
-      DateTime currentHour = DateTime(now.year, now.month, now.day, now.hour);
-
-      return currentHour.isAtSameMomentAs(_geocodingProvider.selectedHour) &&
-          DateUtils.isSameDay(currentHour, _geocodingProvider.selectedHour);
     }
 
     void openMainMenu() {
@@ -176,10 +187,10 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          currentHourIsSelected()
+                          _isCurrentHour()
                               ? const SizedBox.shrink()
                               : IconButton(
-                                  onPressed: resetSelectedTime,
+                                  onPressed: _resetSliderTime,
                                   icon: Icon(
                                     Icons.restore,
                                     color: colorPair.accent,
@@ -213,26 +224,36 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                     ],
                   ),
                 ),
-                AnimatedContainer(
-                  height: _showTimeSlider ? 75 : 0,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.fastOutSlowIn,
-                  child: ClipRRect(
-                    child: OverflowBox(
-                      maxHeight: 75,
-                      child: SizedBox(
-                        height: 75,
-                        width: MediaQuery.of(context).size.width,
-                        child: ChangeNotifierProvider.value(
-                          value: state,
-                          child: ScalingTimeSlider(
-                            onChange: onChangeSelectedHour,
-                            colorPair: colorPair,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                // AnimatedContainer(
+                //   height: _showTimeSlider ? 75 : 0,
+                //   duration: const Duration(milliseconds: 500),
+                //   curve: Curves.fastOutSlowIn,
+                //   child: ClipRRect(
+                //     child: OverflowBox(
+                //       maxHeight: 75,
+                //       child: SizedBox(
+                //         height: 75,
+                //         width: MediaQuery.of(context).size.width,
+                //         child: ChangeNotifierProvider.value(
+                //           value: state,
+                //           child: ScalingTimeSlider(
+                //             onChange: onChangeSelectedHour,
+                //             colorPair: colorPair,
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                Slider(
+                  min: 0,
+                  max: 24,
+                  divisions: 24,
+                  value: _sliderValue,
+                  label: DatetimeUtils.startOfHour(_currentDateTime)
+                      .add(Duration(hours: _sliderValue.toInt()))
+                      .toString(),
+                  onChanged: _onChangeSliderValue,
                 ),
                 SizedBox(
                   height: 50,

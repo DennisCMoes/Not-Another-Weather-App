@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:instant/instant.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
+import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/weather_code.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -93,11 +94,11 @@ class Forecast {
     DateFormat dayFormat = DateFormat("yyyy-MM-dd");
 
     List<DateTime> times = List<String>.from(json['hourly']['time'])
-        .map((time) => hourFormat.parse(time))
+        .map((time) => hourFormat.parseUtc(time))
         .toList();
 
     List<DateTime> days = List<String>.from(json['daily']['time'])
-        .map((day) => dayFormat.parse(day))
+        .map((day) => dayFormat.parseUTC(day))
         .toList();
 
     var dataMap = _extractDataMap(json['hourly']);
@@ -147,16 +148,14 @@ class Forecast {
   }
 
   HourlyWeatherData getCurrentHourData([DateTime? date]) {
-    DateTime now = DateTime.now();
-    return hourlyWeatherData[
-        date ?? DateTime(now.year, now.month, now.day, now.hour)]!;
+    date ??= DatetimeUtils.startOfHour();
+    return hourlyWeatherData[date]!;
   }
 
   DailyWeatherData getCurrentDayData([DateTime? date]) {
-    DateTime now = DateTime.now();
-    return dailyWeatherData[date == null
-        ? DateTime(now.year, now.month, now.day)
-        : DateTime(date.year, date.month, date.day)]!;
+    date ??= DatetimeUtils.startOfHour();
+    DateTime startOfDay = DatetimeUtils.startOfDay(date);
+    return dailyWeatherData[startOfDay]!;
   }
 
   dynamic getField(SelectableForecastFields field, [DateTime? date]) {

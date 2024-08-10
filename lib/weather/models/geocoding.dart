@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
@@ -98,8 +99,8 @@ class Geocoding {
     }
 
     DateTime time = selectedTime ?? DateTime.now();
-    DateTime startOfHour = DateTime(time.year, time.month, time.day, time.hour);
-    DateTime startOfDay = DateTime(time.year, time.month, time.day);
+    DateTime startOfHour = DatetimeUtils.startOfHour(time);
+    DateTime startOfDay = DatetimeUtils.startOfDay(time);
 
     final dailyWeatherData = forecast?.dailyWeatherData[startOfDay];
     if (dailyWeatherData == null) {
