@@ -101,11 +101,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     _weatherProvider.removeGeocoding(geocoding);
   }
 
-  void _setEditing(bool value, [bool withHaptics = false]) {
-    if (withHaptics) {
-      HapticFeedback.lightImpact();
-    }
-
+  void _setEditing(bool value) {
     setState(() {
       _isPressingEdit = value;
     });
@@ -128,7 +124,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     color: Theme.of(context).scaffoldBackgroundColor,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0,
+                        horizontal: 16.0,
                         vertical: 12.0,
                       ),
                       child: Row(
@@ -154,8 +150,12 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                                   onTapDown: (details) => _setEditing(true),
                                   onTapCancel: () => _setEditing(false),
                                   onTapUp: (details) => _setEditing(false),
-                                  onTap: () =>
-                                      _setEditing(!_isPressingEdit, true),
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    setState(() {
+                                      _isEditing = !_isEditing;
+                                    });
+                                  },
                                   child: Text(
                                     _isEditing ? "Done" : "Edit",
                                     style: Theme.of(context)
@@ -277,14 +277,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     _geocodingTile(state.geocodings[i], i)
                 ],
               ),
-              const Divider(thickness: 1),
+              const Divider(),
               Column(
                 children: [
-                  ListTile(
-                    leading: const Icon(Icons.tour),
-                    onTap: () {},
-                    title: const Text("Quick Guide"),
-                  ),
                   const UnitTileComponent<WindspeedUnit>(
                     "Windspeed",
                     "wind_speed_unit",
@@ -301,6 +296,18 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       "precipitation_unit",
                       Icons.water_drop,
                       PrecipitationUnit.values),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.tour),
+                    onTap: () {},
+                    title: const Text("Quick Guide"),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.cell_tower),
+                    onTap: () {},
+                    title: const Text("Data sources"),
+                  ),
+                  // If we are in debug mode and not release display the debug buttons
                   if (kDebugMode) _debugButtons(),
                 ],
               ),

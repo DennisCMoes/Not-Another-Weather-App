@@ -98,14 +98,21 @@ class Geocoding {
     }
 
     DateTime time = selectedTime ?? DateTime.now();
+    DateTime startOfHour = DateTime(time.year, time.month, time.day, time.hour);
     DateTime startOfDay = DateTime(time.year, time.month, time.day);
 
-    final isInTheDay =
-        time.isBefore(forecast!.dailyWeatherData[startOfDay]!.sunset) &&
-            time.isAfter(forecast!.dailyWeatherData[startOfDay]!.sunrise);
+    final dailyWeatherData = forecast?.dailyWeatherData[startOfDay];
+    if (dailyWeatherData == null) {
+      return const ColorPair(Color(0xFF0327D6), Color(0xFFDBE7F6));
+    }
+
+    final sunrise = dailyWeatherData.sunrise;
+    final sunset = dailyWeatherData.sunset;
+
+    final isInTheDay = time.isBefore(sunset) && time.isAfter(sunrise);
 
     return forecast!
-        .getCurrentHourData(time)
+        .getCurrentHourData(startOfHour)
         .weatherCode
         .colorScheme
         .getColorPair(isInTheDay);
