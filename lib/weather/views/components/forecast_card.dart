@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:not_another_weather_app/menu/views/main_menu.dart';
+import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/views/components/scaling_time_slider.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/summary_page.dart';
 import 'package:provider/provider.dart';
-import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 
 class ForecastCard extends StatefulWidget {
   const ForecastCard({super.key});
@@ -14,7 +17,7 @@ class ForecastCard extends StatefulWidget {
   State<ForecastCard> createState() => ForecastCardState();
 }
 
-class ForecastCardState extends State<ForecastCard> {
+class ForecastCardState extends State<ForecastCard> with RouteAware {
   late CurrentGeocodingProvider _geocodingProvider;
 
   final List<String> _subPageButtonLabels = [
@@ -36,7 +39,25 @@ class ForecastCardState extends State<ForecastCard> {
   @override
   void dispose() {
     _timeController.dispose();
+    ObserverUtils.routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    ObserverUtils.routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() async {
+    var geo = context
+        .read<WeatherProvider>()
+        .getGeocoding(_geocodingProvider.geocoding.id);
+
+    // TODO: Find a way to only call this function if the data has changed
+    _geocodingProvider.setGeocoding(geo);
+    super.didPopNext();
   }
 
   @override
@@ -51,6 +72,7 @@ class ForecastCardState extends State<ForecastCard> {
     }
 
     void toggleTimeSlider() {
+      HapticFeedback.lightImpact();
       setState(() {
         _showTimeSlider = !_showTimeSlider;
       });
@@ -74,10 +96,38 @@ class ForecastCardState extends State<ForecastCard> {
           DateUtils.isSameDay(currentHour, _geocodingProvider.selectedHour);
     }
 
+    void openMainMenu() {
+      HapticFeedback.lightImpact();
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          fullscreenDialog: true,
+          barrierColor: Colors.black54,
+          transitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return const MainMenuScreen();
+          },
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(0.0, 1.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end)
+                .chain(CurveTween(curve: Curves.fastOutSlowIn));
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+        ),
+      );
+    }
+
     return Consumer<CurrentGeocodingProvider>(
       builder: (context, state, child) {
+        ColorPair colorPair =
+            state.geocoding.getColorSchemeOfForecast(state.selectedHour);
+
         return ColoredBox(
-          color: state.getWeatherColorScheme().main,
+          color: colorPair.main,
           child: Padding(
             padding: EdgeInsets.only(
               top: 12,
@@ -108,9 +158,7 @@ class ForecastCardState extends State<ForecastCard> {
                                       .textTheme
                                       .displayMedium!
                                       .copyWith(
-                                        color: state
-                                            .getWeatherColorScheme()
-                                            .accent,
+                                        color: colorPair.accent,
                                       ),
                                 ),
                                 Text(
@@ -119,10 +167,8 @@ class ForecastCardState extends State<ForecastCard> {
                                       .textTheme
                                       .displaySmall!
                                       .copyWith(
-                                        color: state
-                                            .getWeatherColorScheme()
-                                            .accent
-                                            .withOpacity(0.6),
+                                        color:
+                                            colorPair.accent.withOpacity(0.6),
                                       ),
                                 ),
                               ],
@@ -136,7 +182,7 @@ class ForecastCardState extends State<ForecastCard> {
                                   onPressed: resetSelectedTime,
                                   icon: Icon(
                                     Icons.restore,
-                                    color: state.getWeatherColorScheme().accent,
+                                    color: colorPair.accent,
                                   ),
                                 ),
                           Provider.of<DeviceProvider>(context).hasInternet
@@ -144,15 +190,11 @@ class ForecastCardState extends State<ForecastCard> {
                               : const Icon(
                                   Icons.signal_wifi_connected_no_internet_4),
                           IconButton(
-                            onPressed: () {
-                              Provider.of<DrawerProvider>(context,
-                                      listen: false)
-                                  .openDrawer();
-                            },
+                            onPressed: openMainMenu,
                             visualDensity: VisualDensity.compact,
                             icon: Icon(
                               Icons.reorder,
-                              color: state.getWeatherColorScheme().accent,
+                              color: colorPair.accent,
                             ),
                           ),
                         ],
@@ -185,7 +227,7 @@ class ForecastCardState extends State<ForecastCard> {
                           value: state,
                           child: ScalingTimeSlider(
                             onChange: onChangeSelectedHour,
-                            colorPair: state.getWeatherColorScheme(),
+                            colorPair: colorPair,
                           ),
                         ),
                       ),
@@ -203,7 +245,7 @@ class ForecastCardState extends State<ForecastCard> {
                           onPressed: toggleIsEditing,
                           icon: Icon(
                             state.isEditing ? Icons.edit_off : Icons.edit,
-                            color: state.getWeatherColorScheme().accent,
+                            color: colorPair.accent,
                           ),
                         ),
                       ),
@@ -213,7 +255,7 @@ class ForecastCardState extends State<ForecastCard> {
                           onPressed: toggleTimeSlider,
                           icon: Icon(
                             Icons.schedule,
-                            color: state.getWeatherColorScheme().accent,
+                            color: colorPair.accent,
                           ),
                         ),
                       ),
@@ -245,13 +287,8 @@ class ForecastCardState extends State<ForecastCard> {
                                       .displaySmall!
                                       .copyWith(
                                         color: state.isCurrentPage(index)
-                                            ? state
-                                                .getWeatherColorScheme()
-                                                .accent
-                                            : state
-                                                .getWeatherColorScheme()
-                                                .accent
-                                                .withOpacity(0.6),
+                                            ? colorPair.accent
+                                            : colorPair.accent.withOpacity(0.6),
                                       ),
                                 ),
                               ),

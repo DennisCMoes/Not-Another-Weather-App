@@ -1,12 +1,13 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/weather_clipper.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/selectable_widget_grid.dart';
-import 'package:not_another_weather_app/shared/views/modal_overlay.dart';
+import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
 import 'package:provider/provider.dart';
 
 class SummaryPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _SummaryPageState extends State<SummaryPage> {
 
   void _showSelectedFieldMenu(
       SelectableForecastFields field, bool isMainField) async {
+    HapticFeedback.lightImpact();
     await Navigator.of(context).push(
       ModalOverlay(
         overlayChild: ChangeNotifierProvider.value(
@@ -52,6 +54,8 @@ class _SummaryPageState extends State<SummaryPage> {
         HourlyWeatherData? currentHourData =
             state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
         Forecast? currentForecast = state.geocoding.forecast;
+        ColorPair colorPair =
+            state.geocoding.getColorSchemeOfForecast(state.selectedHour);
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -79,9 +83,7 @@ class _SummaryPageState extends State<SummaryPage> {
                                       delegate: SliverChildBuilderDelegate(
                                         (context, index) => ClipOval(
                                           child: Material(
-                                            color: state
-                                                .getWeatherColorScheme()
-                                                .accent,
+                                            color: colorPair.accent,
                                           ),
                                         ),
                                         childCount: 400, // 20 * 20
@@ -105,7 +107,7 @@ class _SummaryPageState extends State<SummaryPage> {
                                 .textTheme
                                 .displayMedium!
                                 .copyWith(
-                                  color: state.getWeatherColorScheme().accent,
+                                  color: colorPair.accent,
                                 ),
                           ),
                         ],
@@ -174,7 +176,7 @@ class _SummaryPageState extends State<SummaryPage> {
                               .displayLarge!
                               .copyWith(
                                 fontSize: 128,
-                                color: state.getWeatherColorScheme().accent,
+                                color: colorPair.accent,
                               ),
                         ),
                       ),
@@ -191,7 +193,8 @@ class _SummaryPageState extends State<SummaryPage> {
 
   Widget _weatherDetailItem(BuildContext context,
       CurrentGeocodingProvider provider, SelectableForecastFields field) {
-    ColorPair colorPair = provider.getWeatherColorScheme();
+    ColorPair colorPair =
+        provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
 
     return Material(
       key: ValueKey(field),
@@ -221,7 +224,7 @@ class _SummaryPageState extends State<SummaryPage> {
               children: [
                 Icon(
                   field.icon,
-                  color: provider.getWeatherColorScheme().accent,
+                  color: colorPair.accent,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -232,7 +235,7 @@ class _SummaryPageState extends State<SummaryPage> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: provider.getWeatherColorScheme().accent,
+                    color: colorPair.accent,
                   ),
                 ),
               ],

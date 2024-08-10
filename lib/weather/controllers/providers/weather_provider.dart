@@ -7,6 +7,7 @@ import 'package:not_another_weather_app/weather/controllers/repositories/forecas
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// A provider class that manages the weather-related data and operations
 class WeatherProvider extends ChangeNotifier {
@@ -35,7 +36,8 @@ class WeatherProvider extends ChangeNotifier {
           _geocodingRepo.getStoredGeocodings();
 
       if (localGeocodings.isEmpty) {
-        localGeocodings.add(Geocoding(1, "My location", 0, 0, "My location"));
+        localGeocodings
+            .add(Geocoding(1, "Current location", 0, 0, "Current location"));
       }
 
       final Geocoding localGeocoding =
@@ -61,24 +63,37 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<Geocoding>> refreshForecastData() async {
-    return await Future.wait(geocodings.map((coding) async {
-      Forecast forecast = await _forecastRepo.getLocalForecast(
-          coding.latitude, coding.longitude);
-      coding.forecast = forecast;
-      return coding;
-    }));
+  Future<void> refreshData() async {
+    _geocodings = await Future.wait(
+      geocodings.map(
+        (coding) async {
+          Forecast forecast = await _forecastRepo.getForecastOfLocation(
+            coding.latitude,
+            coding.longitude,
+          );
+
+          coding.forecast = forecast;
+          return coding;
+        },
+      ).toList(),
+    );
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString("refresh_date", DateTime.now().toString());
+
+    notifyListeners();
   }
 
-  Future<void> refreshData() async {
-    var codings = await Future.wait(geocodings.map((coding) async {
-      Forecast forecast = await _forecastRepo.getLocalForecast(
-          coding.latitude, coding.longitude);
-      coding.forecast = forecast;
-      return coding;
-    }));
+  int getIndexOfGeocoding(Geocoding geocoding) {
+    return _geocodings.indexWhere((geo) => geo.id == geocoding.id);
+  }
 
-    _geocodings = codings.toList();
+  bool isAlreadyPresent(Geocoding geocoding) {
+    return _geocodings.any((geo) => geo.id == geocoding.id);
+  }
+
+  Geocoding getGeocoding(int id) {
+    return _geocodings.firstWhere((geo) => geo.id == id);
   }
 
   // Moves a geocoding location from [oldIndex] to [newIndex] in the list
@@ -93,7 +108,7 @@ class WeatherProvider extends ChangeNotifier {
     _geocodings.add(geocoding);
     notifyListeners();
 
-    final Forecast forecast = await _forecastRepo.getLocalForecast(
+    final Forecast forecast = await _forecastRepo.getForecastOfLocation(
         geocoding.latitude, geocoding.longitude);
     geocoding.forecast = forecast;
 
