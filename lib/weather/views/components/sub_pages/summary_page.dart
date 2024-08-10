@@ -208,9 +208,7 @@ class _SummaryPageState extends State<SummaryPage> {
             ? () => _showSelectedFieldMenu(field, false)
             : null,
         child: DottedBorder(
-          color: provider.isEditing
-              ? colorPair.main.darkenColor(0.4)
-              : Colors.transparent,
+          color: provider.isEditing ? colorPair.accent : Colors.transparent,
           strokeWidth: 3,
           radius: const Radius.circular(8),
           dashPattern: const [4],
