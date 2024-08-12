@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/menu/views/main_menu.dart';
+import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
@@ -8,6 +11,11 @@ import 'package:not_another_weather_app/weather/controllers/providers/current_ge
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/views/components/scaling_time_slider.dart';
+import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_overlay.dart';
+import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_thumb.dart';
+import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_tick.dart';
+import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_track.dart';
+import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_value_indicator.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/summary_page.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +37,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   final PageController _timeController = PageController(viewportFraction: 0.2);
 
   bool _showTimeSlider = false;
+  bool _isDragging = false;
 
   double _sliderValue = 0.0;
 
@@ -71,6 +80,8 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   }
 
   void _onChangeSliderValue(double offset) {
+    HapticFeedback.lightImpact();
+
     _geocodingProvider
         .setSelectedHour(_currentDateTime.add(Duration(hours: offset.toInt())));
 
@@ -224,37 +235,51 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                     ],
                   ),
                 ),
-                // AnimatedContainer(
-                //   height: _showTimeSlider ? 75 : 0,
-                //   duration: const Duration(milliseconds: 500),
-                //   curve: Curves.fastOutSlowIn,
-                //   child: ClipRRect(
-                //     child: OverflowBox(
-                //       maxHeight: 75,
-                //       child: SizedBox(
-                //         height: 75,
-                //         width: MediaQuery.of(context).size.width,
-                //         child: ChangeNotifierProvider.value(
-                //           value: state,
-                //           child: ScalingTimeSlider(
-                //             onChange: onChangeSelectedHour,
-                //             colorPair: colorPair,
-                //           ),
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                Slider(
-                  min: 0,
-                  max: 24,
-                  divisions: 24,
-                  value: _sliderValue,
-                  label: DatetimeUtils.startOfHour(_currentDateTime)
-                      .add(Duration(hours: _sliderValue.toInt()))
-                      .toString(),
-                  onChanged: _onChangeSliderValue,
+
+                AnimatedPadding(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.fastOutSlowIn,
+                  padding: EdgeInsets.only(
+                    top: _isDragging ? 50 : 0,
+                    left: NavigationToolbar.kMiddleSpacing,
+                    right: NavigationToolbar.kMiddleSpacing,
+                  ),
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      trackHeight: 40,
+                      trackShape: ForecastSliderTrack(),
+                      thumbShape: ForecastSliderThumb(),
+                      thumbColor: colorPair.main.lightenColor(0.1),
+                      overlayColor: Colors.transparent,
+                      activeTrackColor: colorPair.main.darkenColor(0.1),
+                      valueIndicatorColor: colorPair.main.lightenColor(0.1),
+                      valueIndicatorTextStyle: TextStyle(
+                        color: colorPair.accent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      valueIndicatorShape: ForecastSliderValueIndicator(),
+                    ),
+                    child: Slider(
+                        min: 0,
+                        max: 24,
+                        divisions: 24,
+                        value: _sliderValue,
+                        label: DateFormat.Hm().format(
+                            DatetimeUtils.startOfHour(_currentDateTime)
+                                .add(Duration(hours: _sliderValue.toInt()))),
+                        onChanged: _onChangeSliderValue,
+                        onChangeStart: (value) =>
+                            setState(() => _isDragging = true),
+                        onChangeEnd: (value) {
+                          Future.delayed(
+                            const Duration(milliseconds: 100),
+                            () => _resetSliderTime(),
+                          );
+                          setState(() => _isDragging = false);
+                        }),
+                  ),
                 ),
+
                 SizedBox(
                   height: 50,
                   width: double.infinity,
@@ -270,16 +295,16 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                           ),
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          onPressed: toggleTimeSlider,
-                          icon: Icon(
-                            Icons.schedule,
-                            color: colorPair.accent,
-                          ),
-                        ),
-                      ),
+                      // Align(
+                      //   alignment: Alignment.centerRight,
+                      //   child: IconButton(
+                      //     onPressed: toggleTimeSlider,
+                      //     icon: Icon(
+                      //       Icons.schedule,
+                      //       color: colorPair.accent,
+                      //     ),
+                      //   ),
+                      // ),
                       Align(
                         alignment: Alignment.center,
                         child: Row(
