@@ -110,7 +110,7 @@ class Geocoding {
     final sunrise = dailyWeatherData.sunrise;
     final sunset = dailyWeatherData.sunset;
 
-    final isInTheDay = time.isBefore(sunset) && time.isAfter(sunrise);
+    final isInTheDay = (time.isAfter(sunrise)) && (time.isBefore(sunset));
 
     return forecast!
         .getCurrentHourData(startOfHour)

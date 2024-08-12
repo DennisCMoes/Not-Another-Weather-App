@@ -98,7 +98,7 @@ class Forecast {
         .toList();
 
     List<DateTime> days = List<String>.from(json['daily']['time'])
-        .map((day) => dayFormat.parseUTC(day))
+        .map((day) => dayFormat.parseUtc(day))
         .toList();
 
     var dataMap = _extractDataMap(json['hourly']);
@@ -124,8 +124,8 @@ class Forecast {
 
     for (int i = 0; i < days.length; i++) {
       dailyWeatherData[days[i]] = DailyWeatherData(
-        hourFormat.parse(daysMap['sunrise']![i]),
-        hourFormat.parse(daysMap['sunset']![i]),
+        hourFormat.parseUtc(daysMap['sunrise']![i]),
+        hourFormat.parseUtc(daysMap['sunset']![i]),
         daysMap['uv_index_max']![i],
         daysMap['uv_index_clear_sky_max']![i],
       );
@@ -207,8 +207,10 @@ class Forecast {
     HourlyWeatherData hourlyWeatherData = getCurrentHourData(date);
     DailyWeatherData dailyWeatherData = getCurrentDayData(date);
 
-    bool isBeforeSunset = date.isBefore(dailyWeatherData.sunset);
-    bool isAfterSunrise = date.isAfter(dailyWeatherData.sunrise);
+    bool isBeforeSunset = date.isBefore(dailyWeatherData.sunset) ||
+        date.isAtSameMomentAs(dailyWeatherData.sunset);
+    bool isAfterSunrise = date.isAfter(dailyWeatherData.sunrise) ||
+        date.isAtSameMomentAs(dailyWeatherData.sunrise);
 
     bool isInTheDay = isBeforeSunset && isAfterSunrise;
 
