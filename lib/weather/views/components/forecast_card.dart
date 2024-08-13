@@ -98,12 +98,6 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
     });
   }
 
-  bool _isCurrentHour() {
-    DateTime converted =
-        _currentDateTime.add(Duration(hours: _sliderValue.toInt()));
-    return _currentDateTime == converted;
-  }
-
   @override
   Widget build(BuildContext context) {
     void toggleIsEditing() {
@@ -198,19 +192,16 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          _isCurrentHour()
-                              ? const SizedBox.shrink()
-                              : IconButton(
-                                  onPressed: _resetSliderTime,
-                                  icon: Icon(
-                                    Icons.restore,
-                                    color: colorPair.accent,
-                                  ),
-                                ),
-                          Provider.of<DeviceProvider>(context).hasInternet
-                              ? const SizedBox.shrink()
-                              : const Icon(
-                                  Icons.signal_wifi_connected_no_internet_4),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              onPressed: toggleIsEditing,
+                              icon: Icon(
+                                state.isEditing ? Icons.edit_off : Icons.edit,
+                                color: colorPair.accent,
+                              ),
+                            ),
+                          ),
                           IconButton(
                             onPressed: openMainMenu,
                             visualDensity: VisualDensity.compact,
@@ -243,7 +234,8 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                     top: _isDragging ? 50 : 0,
                     left: NavigationToolbar.kMiddleSpacing,
                     right: NavigationToolbar.kMiddleSpacing,
-                    bottom: 10,
+                    // bottom: 20,
+                    bottom: 0,
                   ),
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
@@ -286,16 +278,16 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                   width: double.infinity,
                   child: Stack(
                     children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: IconButton(
-                          onPressed: toggleIsEditing,
-                          icon: Icon(
-                            state.isEditing ? Icons.edit_off : Icons.edit,
-                            color: colorPair.accent,
-                          ),
-                        ),
-                      ),
+                      // Align(
+                      //   alignment: Alignment.centerLeft,
+                      //   child: IconButton(
+                      //     onPressed: toggleIsEditing,
+                      //     icon: Icon(
+                      //       state.isEditing ? Icons.edit_off : Icons.edit,
+                      //       color: colorPair.accent,
+                      //     ),
+                      //   ),
+                      // ),
                       // Align(
                       //   alignment: Alignment.centerRight,
                       //   child: IconButton(
