@@ -243,11 +243,12 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                     top: _isDragging ? 50 : 0,
                     left: NavigationToolbar.kMiddleSpacing,
                     right: NavigationToolbar.kMiddleSpacing,
+                    bottom: 10,
                   ),
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       trackHeight: 40,
-                      trackShape: ForecastSliderTrack(),
+                      trackShape: ForecastSliderTrack(colorPair),
                       thumbShape: ForecastSliderThumb(),
                       thumbColor: colorPair.main.lightenColor(0.1),
                       overlayColor: Colors.transparent,
