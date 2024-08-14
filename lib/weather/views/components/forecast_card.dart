@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/menu/views/main_menu.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
-import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
-import 'package:not_another_weather_app/weather/views/components/scaling_time_slider.dart';
-import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_overlay.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_thumb.dart';
-import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_tick.dart';
 import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_track.dart';
 import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_value_indicator.dart';
 import 'package:not_another_weather_app/weather/views/components/sub_pages/summary_page.dart';
@@ -98,18 +94,37 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
     });
   }
 
+  String _getSliderLabel(CurrentGeocodingProvider provider) {
+    final Forecast? forecast = provider.geocoding.forecast;
+    final DateTime startOfHour = DatetimeUtils.startOfHour(_currentDateTime)
+        .add(Duration(hours: _sliderValue.toInt()));
+
+    if (forecast == null) {
+      return DateFormat.Hm().format(startOfHour);
+    }
+
+    final DailyWeatherData dailyWeatherData =
+        forecast.getCurrentDayData(startOfHour);
+
+    final DateTime sunriseHour =
+        DatetimeUtils.startOfHour(dailyWeatherData.sunrise);
+    final DateTime sunsetHour =
+        DatetimeUtils.startOfHour(dailyWeatherData.sunset);
+
+    if (sunriseHour == startOfHour) {
+      return DateFormat.Hm().format(dailyWeatherData.sunrise);
+    } else if (sunsetHour == startOfHour) {
+      return DateFormat.Hm().format(dailyWeatherData.sunset);
+    } else {
+      return DateFormat.Hm().format(startOfHour);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     void toggleIsEditing() {
       HapticFeedback.lightImpact();
       _geocodingProvider.setIsEditing(!_geocodingProvider.isEditing);
-    }
-
-    void toggleTimeSlider() {
-      HapticFeedback.lightImpact();
-      setState(() {
-        _showTimeSlider = !_showTimeSlider;
-      });
     }
 
     void openMainMenu() {
@@ -257,9 +272,9 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                         max: 24,
                         divisions: 24,
                         value: _sliderValue,
-                        label: DateFormat.Hm().format(
-                            DatetimeUtils.startOfHour(_currentDateTime)
-                                .add(Duration(hours: _sliderValue.toInt()))),
+                        label: _getSliderLabel(
+                          state,
+                        ),
                         onChanged: _onChangeSliderValue,
                         onChangeStart: (value) =>
                             setState(() => _isDragging = true),
