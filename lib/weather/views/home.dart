@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:intl/intl.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
@@ -38,9 +39,9 @@ class _HomeScreenState extends State<HomeScreen>
 
     WidgetsBinding.instance.addObserver(this);
 
-    _deviceProvider = Provider.of<DeviceProvider>(context, listen: false);
-    _weatherProvider = Provider.of<WeatherProvider>(context, listen: false);
-    _drawerProvider = Provider.of<DrawerProvider>(context, listen: false);
+    _deviceProvider = context.read<DeviceProvider>();
+    _weatherProvider = context.read<WeatherProvider>();
+    _drawerProvider = context.read<DrawerProvider>();
 
     Connectivity().onConnectivityChanged.listen((event) {
       _deviceProvider.setHasInternet(!event.contains(ConnectivityResult.none));
@@ -69,8 +70,9 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  String getRefreshString() =>
-      DateFormat("HH:mm").format(_deviceProvider.refreshTime);
+  String getRefreshString() {
+    return DateFormat("HH:mm").format(_deviceProvider.refreshTime);
+  }
 
   Future<void> _initialize() async {
     await _weatherProvider.initialization();
@@ -117,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen>
           top: 0,
           left: 0,
           right: 0,
-          height: MediaQuery.of(context).padding.top,
+          height: context.padding.top,
           child: GestureDetector(
             excludeFromSemantics: true,
             onTap: onStatusBarTap,
@@ -135,8 +137,7 @@ class _HomeScreenState extends State<HomeScreen>
             Align(
               alignment: Alignment.topCenter,
               child: Padding(
-                padding:
-                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                padding: EdgeInsets.only(top: context.padding.top),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -151,8 +152,7 @@ class _HomeScreenState extends State<HomeScreen>
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).padding.bottom),
+                padding: EdgeInsets.only(bottom: context.padding.bottom),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,

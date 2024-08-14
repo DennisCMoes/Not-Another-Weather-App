@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/menu/views/main_menu.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
@@ -162,14 +163,14 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
           child: Padding(
             padding: EdgeInsets.only(
               top: 12,
-              bottom: MediaQuery.of(context).padding.bottom,
+              bottom: context.padding.bottom,
             ),
             child: Column(
               children: [
                 // Top bar
                 Padding(
                   padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top,
+                    top: context.padding.top,
                     left: NavigationToolbar.kMiddleSpacing,
                     right: NavigationToolbar.kMiddleSpacing,
                   ),
@@ -179,7 +180,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                     children: <Widget>[
                       state.geocoding.forecast == null
                           ? Text("Loading",
-                              style: Theme.of(context).textTheme.displayLarge)
+                              style: context.textTheme.displayLarge)
                           : Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -249,7 +250,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                     top: _isDragging ? 50 : 0,
                     left: NavigationToolbar.kMiddleSpacing,
                     right: NavigationToolbar.kMiddleSpacing,
-                    bottom: MediaQuery.of(context).padding.bottom,
+                    bottom: context.padding.bottom,
                   ),
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(

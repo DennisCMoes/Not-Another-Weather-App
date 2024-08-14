@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
@@ -66,7 +67,7 @@ class CompassWidget extends StatelessWidget {
         const Icon(Icons.directions),
         Text(
           "${weatherData?.windDirection ?? "XX"}º",
-          style: Theme.of(context).textTheme.displayMedium,
+          style: context.textTheme.displayMedium,
         )
       ],
     );
@@ -88,7 +89,7 @@ class CompassWidget extends StatelessWidget {
             children: [
               const Text("Wind speed"),
               Text("${weatherData?.windSpeed.round() ?? 0.0} km/h",
-                  style: Theme.of(context).textTheme.displayMedium),
+                  style: context.textTheme.displayMedium),
             ],
           ),
           Divider(
@@ -98,7 +99,7 @@ class CompassWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text("${weatherData?.windGusts.round() ?? 0.0} km/h",
-                  style: Theme.of(context).textTheme.displayMedium),
+                  style: context.textTheme.displayMedium),
               const Text("Wind gusts")
             ],
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
@@ -71,7 +72,7 @@ class SunriseSunsetWidget extends StatelessWidget {
                 Text(
                   formatTime(
                       provider.geocoding.forecast?.getCurrentDayData().sunrise),
-                  style: Theme.of(context).textTheme.displaySmall,
+                  style: context.textTheme.displaySmall,
                 ),
               ],
             ),
@@ -86,7 +87,7 @@ class SunriseSunsetWidget extends StatelessWidget {
                 Text(
                   formatTime(
                       provider.geocoding.forecast?.getCurrentDayData().sunset),
-                  style: Theme.of(context).textTheme.displaySmall,
+                  style: context.textTheme.displaySmall,
                 ),
               ],
             ),

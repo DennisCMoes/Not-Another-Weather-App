@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/shared/extensions/title_case.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
@@ -114,7 +115,7 @@ class _DetailWidgetsOverlayState extends State<DetailWidgetsOverlay> {
             child: Center(
               child: Text(
                 size.toString().toTitleCase(),
-                style: Theme.of(context).textTheme.displaySmall,
+                style: context.textTheme.displaySmall,
               ),
             ),
           ),

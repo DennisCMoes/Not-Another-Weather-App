@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +41,7 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
     return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
         return Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          padding: EdgeInsets.only(top: context.padding.top),
           child: Column(
             children: [
               Padding(
@@ -95,7 +96,7 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
                       top: NavigationToolbar.kMiddleSpacing,
                       left: NavigationToolbar.kMiddleSpacing,
                       right: NavigationToolbar.kMiddleSpacing,
-                      bottom: MediaQuery.of(context).padding.bottom,
+                      bottom: context.padding.bottom,
                     ),
                     itemBuilder: (context, index) {
                       SelectableForecastFields forecastField =

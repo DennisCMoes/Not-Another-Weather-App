@@ -5,6 +5,7 @@ import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/menu/views/unit_tile.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
@@ -248,7 +249,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     final state = context.read<WeatherProvider>();
 
     return SingleChildScrollView(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.only(bottom: context.padding.bottom),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.max,
@@ -320,12 +321,12 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       return Center(
         child: Text(
           "No matching locations",
-          style: Theme.of(context).textTheme.displayMedium,
+          style: context.textTheme.displayMedium,
         ),
       );
     } else {
       return ListView.separated(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        padding: EdgeInsets.only(bottom: context.padding.bottom),
         itemCount: _searchedGeocodings.length,
         separatorBuilder: (context, index) => const Divider(height: 0),
         itemBuilder: (context, index) =>
@@ -341,7 +342,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     }
 
     void clearAllGeocodings() {
-      objectBox.geoBox.removeAll();
+      objectBox.geocodingBox.removeAll();
     }
 
     void clearAllForecasts() {

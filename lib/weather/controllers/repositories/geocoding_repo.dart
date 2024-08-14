@@ -7,12 +7,12 @@ class GeocodingRepo {
   final ApiController _apiController = ApiController();
 
   List<Geocoding> _getAllGeocodingsFromBox() {
-    final geocodingBox = objectBox.geoBox;
+    final geocodingBox = objectBox.geocodingBox;
     return geocodingBox.getAll();
   }
 
   void _saveGeocodingsToBox(List<Geocoding> geocodings) {
-    final geocodingBox = objectBox.geoBox;
+    final geocodingBox = objectBox.geocodingBox;
     geocodingBox.putMany(geocodings);
   }
 
@@ -27,12 +27,12 @@ class GeocodingRepo {
   }
 
   void storeGeocoding(Geocoding geocoding) {
-    final geocodingBox = objectBox.geoBox;
+    final geocodingBox = objectBox.geocodingBox;
     geocodingBox.put(geocoding);
   }
 
   void removeGeocoding(int id) {
-    final geocodingBox = objectBox.geoBox;
+    final geocodingBox = objectBox.geocodingBox;
     geocodingBox.remove(id);
   }
 
