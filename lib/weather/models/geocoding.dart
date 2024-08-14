@@ -90,8 +90,7 @@ class Geocoding {
     assert(SelectableForecastFields.windDirection.index == 8);
     assert(SelectableForecastFields.windGusts.index == 9);
     assert(SelectableForecastFields.cloudCover.index == 10);
-    assert(SelectableForecastFields.isDay.index == 11);
-    assert(SelectableForecastFields.localTime.index == 12);
+    assert(SelectableForecastFields.localTime.index == 11);
   }
 
   ColorPair getColorSchemeOfForecast([DateTime? selectedTime]) {

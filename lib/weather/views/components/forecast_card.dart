@@ -5,7 +5,7 @@ import 'package:not_another_weather_app/menu/views/main_menu.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
@@ -24,7 +24,7 @@ class ForecastCard extends StatefulWidget {
 }
 
 class ForecastCardState extends State<ForecastCard> with RouteAware {
-  late CurrentGeocodingProvider _geocodingProvider;
+  late ForecastCardProvider _geocodingProvider;
   late DateTime _currentDateTime;
 
   final List<String> _subPageButtonLabels = [
@@ -33,7 +33,6 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   ];
   final PageController _timeController = PageController(viewportFraction: 0.2);
 
-  bool _showTimeSlider = false;
   bool _isDragging = false;
 
   double _sliderValue = 0.0;
@@ -42,7 +41,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   void initState() {
     super.initState();
 
-    _geocodingProvider = context.read<CurrentGeocodingProvider>();
+    _geocodingProvider = context.read<ForecastCardProvider>();
     _currentDateTime = _getConvertedCurrentTime();
   }
 
@@ -95,7 +94,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
     });
   }
 
-  String _getSliderLabel(CurrentGeocodingProvider provider) {
+  String _getSliderLabel(ForecastCardProvider provider) {
     final Forecast? forecast = provider.geocoding.forecast;
     final DateTime startOfHour = DatetimeUtils.startOfHour(_currentDateTime)
         .add(Duration(hours: _sliderValue.toInt()));
@@ -153,7 +152,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
       );
     }
 
-    return Consumer<CurrentGeocodingProvider>(
+    return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
         ColorPair colorPair =
             state.geocoding.getColorSchemeOfForecast(state.selectedHour);
@@ -255,6 +254,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       trackHeight: 40,
+                      valueIndicatorShape: ForecastSliderValueIndicator(),
                       trackShape: ForecastSliderTrack(colorPair),
                       thumbShape: ForecastSliderThumb(),
                       thumbColor: colorPair.main.lightenColor(0.1),
@@ -265,7 +265,6 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                         color: colorPair.accent,
                         fontWeight: FontWeight.bold,
                       ),
-                      valueIndicatorShape: ForecastSliderValueIndicator(),
                     ),
                     child: Slider(
                         min: 0,

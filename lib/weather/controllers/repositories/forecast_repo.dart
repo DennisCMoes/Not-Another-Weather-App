@@ -32,7 +32,6 @@ class ForecastRepo {
           "precipitation_unit": precipitation.value,
           "current": [
             "surface_pressure",
-            "is_day",
           ].join(","),
           "hourly": [
             "temperature_2m",

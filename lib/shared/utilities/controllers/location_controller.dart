@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationController {
@@ -10,17 +11,17 @@ class LocationController {
     var permissions = await getLocationPermissions();
 
     if (!isEnabled) {
-      print("Location services are not enabled!");
+      debugPrint("Location services are not enabled!");
     }
 
     if (permissions == LocationPermission.denied) {
       permissions = await Geolocator.requestPermission();
 
       if (permissions == LocationPermission.denied) {
-        print("Location permissions are denied");
+        debugPrint("Location permissions are denied");
       }
     } else if (permissions == LocationPermission.deniedForever) {
-      print(
+      debugPrint(
           "Location permissions are permenantly denied, we cannot request permissions");
     }
   }

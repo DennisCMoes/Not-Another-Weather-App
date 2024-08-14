@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
-import 'package:not_another_weather_app/weather/models/forecast.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:provider/provider.dart';
 
@@ -39,7 +37,7 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CurrentGeocodingProvider>(
+    return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
         return Padding(
           padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
@@ -148,8 +146,8 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
     );
   }
 
-  Widget _fieldCard(CurrentGeocodingProvider provider,
-      SelectableForecastFields forecastField) {
+  Widget _fieldCard(
+      ForecastCardProvider provider, SelectableForecastFields forecastField) {
     int index = provider.geocoding.selectedForecastItems.indexOf(forecastField);
     bool isCurrentField = forecastField == widget.fieldToReplace;
 

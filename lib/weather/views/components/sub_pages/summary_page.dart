@@ -2,7 +2,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
@@ -20,7 +20,7 @@ class SummaryPage extends StatefulWidget {
 }
 
 class _SummaryPageState extends State<SummaryPage> {
-  late CurrentGeocodingProvider _geocodingProvider;
+  late ForecastCardProvider _geocodingProvider;
 
   void _showSelectedFieldMenu(
       SelectableForecastFields field, bool isMainField) async {
@@ -39,7 +39,7 @@ class _SummaryPageState extends State<SummaryPage> {
   void initState() {
     super.initState();
     _geocodingProvider =
-        Provider.of<CurrentGeocodingProvider>(context, listen: false);
+        Provider.of<ForecastCardProvider>(context, listen: false);
   }
 
   @override
@@ -51,7 +51,7 @@ class _SummaryPageState extends State<SummaryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CurrentGeocodingProvider>(
+    return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
         HourlyWeatherData? currentHourData =
             state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
@@ -193,8 +193,8 @@ class _SummaryPageState extends State<SummaryPage> {
     );
   }
 
-  Widget _weatherDetailItem(BuildContext context,
-      CurrentGeocodingProvider provider, SelectableForecastFields field) {
+  Widget _weatherDetailItem(BuildContext context, ForecastCardProvider provider,
+      SelectableForecastFields field) {
     ColorPair colorPair =
         provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
 

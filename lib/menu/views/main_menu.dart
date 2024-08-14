@@ -42,7 +42,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     _textEditingController = TextEditingController();
 
     _textEditingController.addListener(_onTextFieldValueChange);
-    _focusNode.addListener(_onFocusChange);
   }
 
   @override
@@ -51,10 +50,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     _textEditingController.dispose();
 
     super.dispose();
-  }
-
-  void _onFocusChange() {
-    print("Focus: ${_focusNode.hasFocus.toString()}");
   }
 
   void _onTextFieldValueChange() async {

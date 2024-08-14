@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/extensions/title_case.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +17,7 @@ class DetailWidgetsOverlay extends StatefulWidget {
 class _DetailWidgetsOverlayState extends State<DetailWidgetsOverlay> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<CurrentGeocodingProvider>(
+    return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
         return Padding(
           padding: const EdgeInsets.symmetric(
@@ -94,7 +94,7 @@ class _DetailWidgetsOverlayState extends State<DetailWidgetsOverlay> {
     );
   }
 
-  Widget _widgetSize(CurrentGeocodingProvider provider, WidgetSize size) {
+  Widget _widgetSize(ForecastCardProvider provider, WidgetSize size) {
     bool isSize = widget.selectedWidget.size == size;
 
     void setSize() {
@@ -123,7 +123,7 @@ class _DetailWidgetsOverlayState extends State<DetailWidgetsOverlay> {
     );
   }
 
-  Widget _widgetType(CurrentGeocodingProvider provider, WidgetType type) {
+  Widget _widgetType(ForecastCardProvider provider, WidgetType type) {
     bool isType = widget.selectedWidget.type == type;
 
     void setType() {

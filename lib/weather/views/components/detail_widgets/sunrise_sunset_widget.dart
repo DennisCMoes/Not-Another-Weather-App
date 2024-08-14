@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:not_another_weather_app/weather/views/painters/sun_painter.dart';
@@ -17,7 +17,7 @@ class SunriseSunsetWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CurrentGeocodingProvider>(
+    return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
         if (size == WidgetSize.small) {
           return _small(context, state);
@@ -28,7 +28,7 @@ class SunriseSunsetWidget extends StatelessWidget {
     );
   }
 
-  Widget _small(BuildContext context, CurrentGeocodingProvider provider) {
+  Widget _small(BuildContext context, ForecastCardProvider provider) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -53,7 +53,7 @@ class SunriseSunsetWidget extends StatelessWidget {
     );
   }
 
-  Widget _sunDetails(BuildContext context, CurrentGeocodingProvider provider) {
+  Widget _sunDetails(BuildContext context, ForecastCardProvider provider) {
     ColorPair colorPair =
         provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
 

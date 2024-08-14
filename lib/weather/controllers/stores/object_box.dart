@@ -1,7 +1,6 @@
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:objectbox/objectbox.dart';
 import 'package:not_another_weather_app/objectbox.g.dart';
 
 class ObjectBox {

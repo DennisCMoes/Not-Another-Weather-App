@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
-import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
 import 'package:not_another_weather_app/weather/views/painters/compass_painter.dart';
@@ -36,7 +35,7 @@ class CompassWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CurrentGeocodingProvider>(
+    return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
         HourlyWeatherData? weatherData =
             state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
@@ -58,7 +57,7 @@ class CompassWidget extends StatelessWidget {
     );
   }
 
-  Widget _small(BuildContext context, CurrentGeocodingProvider provider,
+  Widget _small(BuildContext context, ForecastCardProvider provider,
       HourlyWeatherData? weatherData) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -73,7 +72,7 @@ class CompassWidget extends StatelessWidget {
     );
   }
 
-  Widget _details(BuildContext context, CurrentGeocodingProvider provider,
+  Widget _details(BuildContext context, ForecastCardProvider provider,
       HourlyWeatherData? weatherData) {
     ColorPair colorPair =
         provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
@@ -108,7 +107,7 @@ class CompassWidget extends StatelessWidget {
     );
   }
 
-  Widget _compass(BuildContext context, CurrentGeocodingProvider provider,
+  Widget _compass(BuildContext context, ForecastCardProvider provider,
       HourlyWeatherData? weatherData) {
     ColorPair colorPair =
         provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);

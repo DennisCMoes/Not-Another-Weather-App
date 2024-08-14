@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:intl/intl.dart';
-import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
@@ -28,7 +27,6 @@ class _HomeScreenState extends State<HomeScreen>
   late WeatherProvider _weatherProvider;
   late DrawerProvider _drawerProvider;
 
-  final DateTime _refreshDate = DateTime.now();
   final LocationController locationController = LocationController();
   final ForecastRepo forecastRepo = ForecastRepo();
 
@@ -179,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen>
               children: [
                 for (int i = 0; i < state.geocodings.length; i++)
                   ChangeNotifierProvider(
-                    create: (context) => CurrentGeocodingProvider(
+                    create: (context) => ForecastCardProvider(
                       state.geocodings[i],
                     ),
                     child: const ForecastCard(),

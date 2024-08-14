@@ -12,7 +12,6 @@ enum SelectableForecastFields {
   windDirection("Wind direction", Icons.directions),
   windGusts("Wind gusts", Icons.speed),
   cloudCover("Cloud cover", Icons.cloud),
-  isDay("Day or night", Icons.access_time),
   localTime("Local time", Icons.circle);
 
   const SelectableForecastFields(this.label, this.icon);

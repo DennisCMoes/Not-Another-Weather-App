@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/detail_widgets_overlay.dart';
 import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
@@ -15,12 +15,12 @@ class PageTwo extends StatefulWidget {
 }
 
 class _PageTwoState extends State<PageTwo> {
-  late CurrentGeocodingProvider _geocodingProvider;
+  late ForecastCardProvider _geocodingProvider;
 
   @override
   void initState() {
     _geocodingProvider =
-        Provider.of<CurrentGeocodingProvider>(context, listen: false);
+        Provider.of<ForecastCardProvider>(context, listen: false);
     super.initState();
   }
 
@@ -44,7 +44,7 @@ class _PageTwoState extends State<PageTwo> {
       );
     }
 
-    return Consumer<CurrentGeocodingProvider>(
+    return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
         state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
 

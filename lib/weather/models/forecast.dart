@@ -17,7 +17,6 @@ class Forecast {
   double longitude;
   String timezome;
   double pressure;
-  int isDay;
 
   List<HourlyWeatherData> hourlyWeatherList;
   List<DailyWeatherData> dailyWeatherDataList;
@@ -32,7 +31,6 @@ class Forecast {
     this.longitude,
     this.timezome,
     this.pressure,
-    this.isDay,
     this.hourlyWeatherList,
     this.dailyWeatherDataList,
   ) {
@@ -92,7 +90,6 @@ class Forecast {
       json['longitude'],
       json['timezone_abbreviation'],
       json['current']['surface_pressure'],
-      json['current']['is_day'],
       hourlyWeatherData,
       dailyWeatherData,
     );
@@ -151,8 +148,6 @@ class Forecast {
         return "${currentHourData.windGusts.round()}km/h";
       case SelectableForecastFields.cloudCover:
         return "${currentHourData.cloudCover}%";
-      case SelectableForecastFields.isDay:
-        return "It is ${isDay == 1 ? "day" : "night"}";
       case SelectableForecastFields.localTime:
         return hourFormat.format(curDateTimeByZone(zone: timezome));
       default:
