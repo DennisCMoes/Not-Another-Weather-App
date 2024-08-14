@@ -43,6 +43,10 @@ class ForecastSliderTrack extends SliderTrackShape {
       ..color = sliderTheme.activeTrackColor!
       ..style = PaintingStyle.fill;
 
+    final Paint hourLinePaint = Paint()
+      ..color = sliderTheme.activeTrackColor!.darkenColor(0.1)
+      ..style = PaintingStyle.fill;
+
     final double trackHeight = sliderTheme.trackHeight ?? 4.0;
     final double trackWidth = parentBox.size.width;
     final double trackLeft = offset.dx;
@@ -65,45 +69,52 @@ class ForecastSliderTrack extends SliderTrackShape {
     final slidableTrackWidth = trackWidth - (trackPadding * 2);
     final slidableTrackLeft = trackLeft + trackPadding;
 
-    paintHourText(
-      context.canvas,
-      textDirection,
-      "NOW",
-      slidableTrackLeft,
-      verticalPosition,
-    );
-    paintHourText(
-      context.canvas,
-      textDirection,
-      hourText(now.add(const Duration(hours: 6)).hour),
-      slidableTrackLeft + (slidableTrackWidth / 4),
-      verticalPosition,
-    );
-    paintHourText(
-      context.canvas,
-      textDirection,
-      hourText(now.add(const Duration(hours: 12)).hour),
-      slidableTrackLeft + (slidableTrackWidth / 2),
-      verticalPosition,
-    );
-    paintHourText(
-      context.canvas,
-      textDirection,
-      hourText(now.add(const Duration(hours: 18)).hour),
-      slidableTrackLeft + ((slidableTrackWidth / 4) * 3),
-      verticalPosition,
-    );
-    paintHourText(
-      context.canvas,
-      textDirection,
-      hourText(now.add(const Duration(hours: 24)).hour),
-      slidableTrackLeft + slidableTrackWidth,
-      verticalPosition,
-    );
+    final Map<String, double> textLabels = {
+      "NOW": slidableTrackLeft,
+      hourText(now.add(const Duration(hours: 6)).hour):
+          slidableTrackLeft + (slidableTrackWidth / 4),
+      hourText(now.add(const Duration(hours: 12)).hour):
+          slidableTrackLeft + (slidableTrackWidth / 2),
+      hourText(now.add(const Duration(hours: 18)).hour):
+          slidableTrackLeft + ((slidableTrackWidth / 4) * 3),
+      hourText(now.add(const Duration(hours: 24)).hour):
+          slidableTrackLeft + slidableTrackWidth,
+    };
+
+    for (var label in textLabels.entries) {
+      paintHourText(
+        context.canvas,
+        textDirection,
+        label.key,
+        label.value,
+        verticalPosition,
+      );
+    }
+
+    for (int i = 0; i < 25; i++) {
+      drawHourLine(
+        context.canvas,
+        hourLinePaint,
+        slidableTrackLeft + (slidableTrackWidth / 24) * i,
+        thumbCenter.dy,
+        i % 6 == 0 ? 16.0 : 8.0,
+      );
+    }
   }
 
   String hourText(int num) {
     return num.toString().padLeft(2, '0');
+  }
+
+  void drawHourLine(Canvas canvas, Paint paint, double xOffset, double yOffset,
+      double height) {
+    Rect hourLineRect = Rect.fromCenter(
+        center: Offset(xOffset, yOffset), width: 2, height: height);
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(hourLineRect, const Radius.circular(8)),
+      paint,
+    );
   }
 
   void paintHourText(
