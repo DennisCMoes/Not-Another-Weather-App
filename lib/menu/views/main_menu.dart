@@ -9,6 +9,7 @@ import 'package:not_another_weather_app/weather/controllers/repositories/geocodi
 import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
@@ -338,9 +339,19 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   Widget _debugButtons() {
+    void clearSharedPrefs() async {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.clear();
+    }
+
     return Column(
       children: [
-        Text("DEBUG BUTTONS"),
+        const Divider(),
+        ListTile(
+          title: const Text("Clear Shared Preferences"),
+          leading: const Icon(Icons.delete),
+          onTap: clearSharedPrefs,
+        ),
       ],
     );
   }
