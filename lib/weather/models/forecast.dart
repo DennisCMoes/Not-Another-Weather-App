@@ -3,70 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:instant/instant.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
-import 'package:not_another_weather_app/weather/models/weather_code.dart';
+import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
+import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/weather/forecast/daily_weather.dart';
+import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
+import 'package:not_another_weather_app/weather/models/weather/weather_code.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class HourlyWeatherData {
-  final double temperature;
-  final double apparentTemperature;
-  final int humidity;
-  final int rainProbability;
-  final double rainInMM;
-  final WeatherCode weatherCode;
-  final int cloudCover;
-  final double windSpeed;
-  final int windDirection;
-  final double windGusts;
-
-  HourlyWeatherData(
-      this.temperature,
-      this.apparentTemperature,
-      this.humidity,
-      this.rainProbability,
-      this.rainInMM,
-      this.weatherCode,
-      this.cloudCover,
-      this.windSpeed,
-      this.windDirection,
-      this.windGusts);
-}
-
-class DailyWeatherData {
-  final DateTime sunrise;
-  final DateTime sunset;
-  final double uvIndex;
-  final double clearSkyUvIndex;
-
-  DailyWeatherData(
-      this.sunrise, this.sunset, this.uvIndex, this.clearSkyUvIndex);
-}
-
-enum SelectableForecastFields {
-  temperature("Temperature", Icons.thermostat),
-  apparentTemperature("Apparent temperature", Icons.person),
-  windSpeed("Wind speed", Icons.air),
-  precipitation("Precipitation", Icons.water_drop),
-  chainceOfRain("Chance of rain", Icons.umbrella),
-  sunrise("Sunrise", Icons.keyboard_arrow_up),
-  sunset("Sunset", Icons.keyboard_arrow_down),
-  humidity("Humidity", Icons.percent),
-  windDirection("Wind direction", Icons.directions),
-  windGusts("Wind gusts", Icons.speed),
-  cloudCover("Cloud cover", Icons.cloud),
-  isDay("Day or night", Icons.access_time),
-  localTime("Local time", Icons.circle);
-
-  const SelectableForecastFields(this.label, this.icon);
-
-  final String label;
-  final IconData icon;
-
-  static int fromEnumToIndex(SelectableForecastFields field) => field.index;
-
-  static SelectableForecastFields fromIndexToEnum(int index) =>
-      SelectableForecastFields.values[index];
-}
 
 class Forecast {
   late SharedPreferences _preferences;
@@ -77,11 +19,23 @@ class Forecast {
   double pressure;
   int isDay;
 
-  Map<DateTime, HourlyWeatherData> hourlyWeatherData;
-  Map<DateTime, DailyWeatherData> dailyWeatherData;
+  List<HourlyWeatherData> hourlyWeatherList;
+  List<DailyWeatherData> dailyWeatherDataList;
 
-  Forecast(this.latitude, this.longitude, this.timezome, this.pressure,
-      this.isDay, this.hourlyWeatherData, this.dailyWeatherData) {
+  Map<DateTime, HourlyWeatherData> get hourlyWeatherData =>
+      {for (var e in hourlyWeatherList) e.time: e};
+  Map<DateTime, DailyWeatherData> get dailyWeatherData =>
+      {for (var e in dailyWeatherDataList) e.time: e};
+
+  Forecast(
+    this.latitude,
+    this.longitude,
+    this.timezome,
+    this.pressure,
+    this.isDay,
+    this.hourlyWeatherList,
+    this.dailyWeatherDataList,
+  ) {
     _initialization();
   }
 
@@ -104,11 +58,12 @@ class Forecast {
     var dataMap = _extractDataMap(json['hourly']);
     var daysMap = _extractDataMap(json['daily']);
 
-    Map<DateTime, HourlyWeatherData> hourlyWeatherData = {};
-    Map<DateTime, DailyWeatherData> dailyWeatherData = {};
+    List<HourlyWeatherData> hourlyWeatherData = [];
+    List<DailyWeatherData> dailyWeatherData = [];
 
     for (int i = 0; i < times.length; i++) {
-      hourlyWeatherData[times[i]] = HourlyWeatherData(
+      hourlyWeatherData.add(HourlyWeatherData(
+        times[i],
         dataMap['temperature_2m']![i],
         dataMap['apparent_temperature']![i],
         dataMap['relative_humidity_2m']![i],
@@ -119,16 +74,17 @@ class Forecast {
         dataMap['wind_speed_10m']![i],
         dataMap['wind_direction_10m']![i],
         dataMap['wind_gusts_10m']![i],
-      );
+      ));
     }
 
     for (int i = 0; i < days.length; i++) {
-      dailyWeatherData[days[i]] = DailyWeatherData(
+      dailyWeatherData.add(DailyWeatherData(
+        days[i],
         hourFormat.parseUtc(daysMap['sunrise']![i]),
         hourFormat.parseUtc(daysMap['sunset']![i]),
         daysMap['uv_index_max']![i],
         daysMap['uv_index_clear_sky_max']![i],
-      );
+      ));
     }
 
     return Forecast(

@@ -1,5 +1,5 @@
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
-import 'package:not_another_weather_app/weather/models/weather_clipper.dart';
+import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/weather/weather_clipper.dart';
 
 enum WeatherCode {
   // Sunny

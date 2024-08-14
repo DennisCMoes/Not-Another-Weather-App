@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
+import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:provider/provider.dart';
 
 class SelectableWidgetGrid extends StatefulWidget {

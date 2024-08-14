@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 
 /// A custom painter for drawing a compass with a needle indicating a direction
 class CompassPainter extends CustomPainter {

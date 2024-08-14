@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 
 class ForecastSliderTrack extends SliderTrackShape {
   final int divisions = 24;

@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/menu/views/unit_tile.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -344,6 +345,22 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       prefs.clear();
     }
 
+    void clearAllGeocodings() {
+      objectBox.geoBox.removeAll();
+    }
+
+    void clearAllForecasts() {
+      // objectBox.forecastBox.removeAll();
+    }
+
+    void clearAllDaily() {
+      // objectBox.dailyBox.removeAll();
+    }
+
+    void clearAllHourly() {
+      // objectBox.hourlyBox.removeAll();
+    }
+
     return Column(
       children: [
         const Divider(),
@@ -351,6 +368,36 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           title: const Text("Clear Shared Preferences"),
           leading: const Icon(Icons.delete),
           onTap: clearSharedPrefs,
+        ),
+        ListTile(
+          title: const Text("Clear Persisted Forecasts"),
+          leading: const Icon(Icons.delete),
+          onTap: clearAllForecasts,
+        ),
+        ListTile(
+          title: const Text("Clear Persisted Geocodings"),
+          leading: const Icon(Icons.delete),
+          onTap: clearAllGeocodings,
+        ),
+        ListTile(
+          title: const Text("Clear Persisted Hourly Data"),
+          leading: const Icon(Icons.delete),
+          onTap: clearAllHourly,
+        ),
+        ListTile(
+          title: const Text("Clear Persisted Daily Data"),
+          leading: const Icon(Icons.delete),
+          onTap: clearAllDaily,
+        ),
+        ListTile(
+          title: const Text("Clear All Persisted Data"),
+          leading: const Icon(Icons.delete),
+          onTap: () {
+            clearAllForecasts();
+            clearAllGeocodings();
+            clearAllHourly();
+            clearAllDaily();
+          },
         ),
       ],
     );

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
+import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
-import 'package:not_another_weather_app/weather/models/widget_item.dart';
+import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:objectbox/objectbox.dart';
 
 @Entity()

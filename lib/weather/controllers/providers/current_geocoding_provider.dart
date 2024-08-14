@@ -4,7 +4,9 @@ import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
-import 'package:not_another_weather_app/weather/models/widget_item.dart';
+import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
+import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
+import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
 
 /// A provider that manages the state and logic for the currently selected geocoding
 class CurrentGeocodingProvider extends ChangeNotifier {

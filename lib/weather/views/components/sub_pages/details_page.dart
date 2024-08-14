@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
-import 'package:not_another_weather_app/weather/models/widget_item.dart';
+import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/detail_widgets_overlay.dart';
 import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
 import 'package:provider/provider.dart';
