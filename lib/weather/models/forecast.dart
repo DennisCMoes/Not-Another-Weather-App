@@ -148,7 +148,8 @@ class Forecast {
   }
 
   HourlyWeatherData getCurrentHourData([DateTime? date]) {
-    date ??= DatetimeUtils.startOfHour();
+    date ??= DatetimeUtils.startOfHour(
+        DatetimeUtils.convertToTimezone(DateTime.now(), timezome));
     return hourlyWeatherData[date]!;
   }
 

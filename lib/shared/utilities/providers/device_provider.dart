@@ -5,13 +5,20 @@ import 'package:not_another_weather_app/shared/utilities/controllers/location_co
 class DeviceProvider extends ChangeNotifier {
   final LocationController _locationController = LocationController();
 
+  DateTime _refreshTime = DateTime.now();
   bool _hasInternet = false;
   Position? _currentLocation;
 
   bool get hasInternet => _hasInternet;
+  DateTime get refreshTime => _refreshTime;
 
   void initialization() async {
     _currentLocation = await _locationController.getCurrentPosition();
+    notifyListeners();
+  }
+
+  void setRefreshTime([DateTime? time]) {
+    _refreshTime = time ?? DateTime.now();
     notifyListeners();
   }
 

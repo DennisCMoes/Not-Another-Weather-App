@@ -98,9 +98,12 @@ class Geocoding {
       return const ColorPair(Color(0xFF0327D6), Color(0xFFDBE7F6));
     }
 
-    DateTime time = selectedTime ?? DateTime.now();
-    DateTime startOfHour = DatetimeUtils.startOfHour(time);
-    DateTime startOfDay = DatetimeUtils.startOfDay(time);
+    final DateTime time = selectedTime ??
+        DatetimeUtils.convertToTimezone(
+            DateTime.now(), forecast?.timezome ?? "CEST");
+
+    final DateTime startOfHour = DatetimeUtils.startOfHour(time);
+    final DateTime startOfDay = DatetimeUtils.startOfDay(time);
 
     final dailyWeatherData = forecast?.dailyWeatherData[startOfDay];
     if (dailyWeatherData == null) {

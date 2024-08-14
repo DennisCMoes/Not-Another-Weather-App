@@ -71,29 +71,33 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  String getRefreshString() => DateFormat("HH:mm").format(_refreshDate);
+  String getRefreshString() =>
+      DateFormat("HH:mm").format(_deviceProvider.refreshTime);
 
   Future<void> _initialize() async {
     await _weatherProvider.initialization();
     FlutterNativeSplash.remove();
   }
 
-  // Future<void> _refreshData() async => await _weatherProvider.refreshData();
   Future<void> _refreshData() async {
     bool shouldRefresh =
         DateTime.now().isAfter(_refreshDate.add(const Duration(minutes: 15)));
 
-    if (shouldRefresh) await _weatherProvider.refreshData();
+    if (shouldRefresh) {
+      await _weatherProvider.refreshData();
+      _deviceProvider.setRefreshTime();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     void onStatusBarTap() {
-      if (!_drawerProvider.isOpened &&
-          _weatherProvider.pageController.page! > 0) {
-        _weatherProvider.pageController.animateToPage(0,
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeInOut);
+      if (!_weatherProvider.pageController.hasClients) {
+        if (_weatherProvider.pageController.page! > 0) {
+          _weatherProvider.pageController.animateToPage(0,
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeInOut);
+        }
       }
     }
 
@@ -175,8 +179,9 @@ class _HomeScreenState extends State<HomeScreen>
               children: [
                 for (int i = 0; i < state.geocodings.length; i++)
                   ChangeNotifierProvider(
-                    create: (context) =>
-                        CurrentGeocodingProvider(state.geocodings[i]),
+                    create: (context) => CurrentGeocodingProvider(
+                      state.geocodings[i],
+                    ),
                     child: const ForecastCard(),
                   ),
               ],
