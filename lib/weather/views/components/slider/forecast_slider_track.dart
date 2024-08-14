@@ -57,55 +57,49 @@ class ForecastSliderTrack extends SliderTrackShape {
     );
 
     // Time text section
-    const double maxWidth = 40.0;
     const double verticalOffset = 10.0;
 
-    final timeTextStyle = TextStyle(
-      color: _colorPair.main.darkenColor(0.2),
-      fontSize: 12,
-      fontWeight: FontWeight.bold,
-    );
-
     final now = DateTime.now();
-    // DateFormat
-
-    TextSpan leftText = TextSpan(text: "NOW", style: timeTextStyle);
-    TextSpan centerText = TextSpan(
-        text: hourText(now.add(const Duration(hours: 12)).hour),
-        style: timeTextStyle);
-    TextSpan rightText = TextSpan(
-        text: hourText(now.add(const Duration(hours: 24)).hour),
-        style: timeTextStyle);
-
-    TextPainter leftTextPainter =
-        TextPainter(text: leftText, textDirection: textDirection);
-    TextPainter centerTextPainter =
-        TextPainter(text: centerText, textDirection: textDirection);
-    TextPainter rightTextPainter =
-        TextPainter(text: rightText, textDirection: textDirection);
-
-    leftTextPainter.layout(minWidth: 0, maxWidth: maxWidth);
-    centerTextPainter.layout(minWidth: 0, maxWidth: maxWidth);
-    rightTextPainter.layout(minWidth: 0, maxWidth: maxWidth);
-
     final double verticalPosition = trackTop + trackHeight + verticalOffset;
 
-    Offset leftOffset = Offset(
-      trackLeft + trackPadding - (leftTextPainter.size.width / 2),
-      verticalPosition,
-    );
-    Offset centerOffset = Offset(
-      trackLeft + (trackWidth / 2) - (centerTextPainter.size.width / 2),
-      verticalPosition,
-    );
-    Offset rightOffset = Offset(
-      trackLeft + trackWidth - trackPadding - (rightTextPainter.size.width / 2),
-      verticalPosition,
-    );
+    final slidableTrackWidth = trackWidth - (trackPadding * 2);
+    final slidableTrackLeft = trackLeft + trackPadding;
 
-    leftTextPainter.paint(context.canvas, leftOffset);
-    centerTextPainter.paint(context.canvas, centerOffset);
-    rightTextPainter.paint(context.canvas, rightOffset);
+    paintHourText(
+      context.canvas,
+      textDirection,
+      "NOW",
+      slidableTrackLeft,
+      verticalPosition,
+    );
+    paintHourText(
+      context.canvas,
+      textDirection,
+      hourText(now.add(const Duration(hours: 6)).hour),
+      slidableTrackLeft + (slidableTrackWidth / 4),
+      verticalPosition,
+    );
+    paintHourText(
+      context.canvas,
+      textDirection,
+      hourText(now.add(const Duration(hours: 12)).hour),
+      slidableTrackLeft + (slidableTrackWidth / 2),
+      verticalPosition,
+    );
+    paintHourText(
+      context.canvas,
+      textDirection,
+      hourText(now.add(const Duration(hours: 18)).hour),
+      slidableTrackLeft + ((slidableTrackWidth / 4) * 3),
+      verticalPosition,
+    );
+    paintHourText(
+      context.canvas,
+      textDirection,
+      hourText(now.add(const Duration(hours: 24)).hour),
+      slidableTrackLeft + slidableTrackWidth,
+      verticalPosition,
+    );
   }
 
   String hourText(int num) {
@@ -117,9 +111,9 @@ class ForecastSliderTrack extends SliderTrackShape {
     TextDirection textDirection,
     String text,
     double xOffset,
+    double yOffset,
   ) {
     const double maxWidth = 40.0;
-    const double verticalOffset = 10.0;
 
     final timeTextStyle = TextStyle(
       color: _colorPair.main.darkenColor(0.2),
@@ -131,7 +125,7 @@ class ForecastSliderTrack extends SliderTrackShape {
     TextPainter textPainter =
         TextPainter(text: span, textDirection: textDirection);
     textPainter.layout(minWidth: 0, maxWidth: maxWidth);
-    Offset textOffset = Offset(xOffset, verticalOffset);
+    Offset textOffset = Offset(xOffset - (textPainter.size.width / 2), yOffset);
 
     textPainter.paint(canvas, textOffset);
   }
