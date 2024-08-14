@@ -52,7 +52,6 @@ class ModalOverlay extends ModalRoute<void> {
     return Material(
       type: MaterialType.transparency,
       child: overlayChild,
-      // child: SafeArea(child: overlayChild),
     );
   }
 }

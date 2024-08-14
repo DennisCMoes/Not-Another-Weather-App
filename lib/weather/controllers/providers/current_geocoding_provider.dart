@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:instant/instant.dart';
+import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
 
 /// A provider that manages the state and logic for the currently selected geocoding
 class CurrentGeocodingProvider extends ChangeNotifier {
-  final Geocoding geocoding;
+  Geocoding _geocoding;
+
   final GeocodingRepo _geocodingRepo = GeocodingRepo();
 
   final PageController _pageController = PageController(initialPage: 0);
@@ -19,7 +20,9 @@ class CurrentGeocodingProvider extends ChangeNotifier {
   int _subPageIndex = 0;
   DateTime _selectedHour = DateTime.now();
 
-  CurrentGeocodingProvider(this.geocoding) {
+  Geocoding get geocoding => _geocoding;
+
+  CurrentGeocodingProvider(this._geocoding) {
     _initializeSelectedHour();
   }
 
@@ -30,13 +33,14 @@ class CurrentGeocodingProvider extends ChangeNotifier {
   DateTime get selectedHour => _selectedHour;
 
   void _initializeSelectedHour() {
-    final now = DateTime.now();
-    _selectedHour = DateTime(now.year, now.month, now.day, now.hour);
+    final convertedNow = DatetimeUtils.convertToTimezone(DateTime.now(),
+        geocoding.forecast?.timezome ?? DateTime.now().timeZoneName);
+    final convertedStart = DatetimeUtils.startOfHour(convertedNow);
+    _selectedHour = convertedStart;
   }
 
   void _setSelectedHour(DateTime time) {
-    final now = DateTime.now();
-    _selectedHour = DateTime(now.year, now.month, time.day, time.hour);
+    _selectedHour = DatetimeUtils.startOfHour(time);
     notifyListeners();
   }
 
@@ -53,6 +57,11 @@ class CurrentGeocodingProvider extends ChangeNotifier {
     final adjustedHour = hour ?? now.hour;
     return DateTime(now.year, now.month, now.day, adjustedHour)
         .add(Duration(hours: offset));
+  }
+
+  void setGeocoding(Geocoding geocoding) {
+    _geocoding = geocoding;
+    notifyListeners();
   }
 
   /// Checks if the given [index] is the current page.
@@ -79,7 +88,7 @@ class CurrentGeocodingProvider extends ChangeNotifier {
 
   /// Sets the selected hour to [hour] and notifies it's listeners
   void setSelectedHour(DateTime time) {
-    _setSelectedHour(time);
+    _selectedHour = DatetimeUtils.startOfHour(time);
     notifyListeners();
   }
 
@@ -125,47 +134,15 @@ class CurrentGeocodingProvider extends ChangeNotifier {
     final now = DateTime.now();
     final timezone = geocoding.forecast?.timezome ?? now.timeZoneName;
 
-    final nowInTargetZone = dateTimeToZone(zone: timezone, datetime: now);
-    final selectedHourInZone =
-        dateTimeToZone(zone: timezone, datetime: selectedHour);
+    final nowInTargetzone = DatetimeUtils.convertToTimezone(now, timezone);
 
-    if (DateUtils.isSameDay(nowInTargetZone, selectedHourInZone)) {
-      return "Today at ${selectedHourInZone.hour}";
-    } else if (selectedHourInZone.isBefore(nowInTargetZone)) {
-      return "Yesterday at ${selectedHourInZone.hour}";
+    if (DateUtils.isSameDay(nowInTargetzone, selectedHour)) {
+      return "Today at ${selectedHour.hour}";
+    } else if (selectedHour.isBefore(nowInTargetzone)) {
+      return "Yesterday at ${selectedHour.hour}";
     } else {
-      return "Tomorrow at ${selectedHourInZone.hour}";
+      return "Tomorrow at ${selectedHour.hour}";
     }
-
-    // return DateUtils.isSameDay(now, selectedHour)
-    //     ? "Today at ${selectedHourInZone.hour}"
-    //     : "Tomorrow at ${selectedHourInZone.hour}";
-  }
-
-  /// Returns a color scheme based on the weather forecast and selected hour
-  ///
-  /// If no forecast data is available, return a default color scheme of purple and white.
-  /// Otherwise, it determines if the `selectedHour` falls within the daytime and retrieves
-  /// the appropriate color scheme based on the weather conditions for that hour.
-  ///
-  /// Return a `ColorPair` representing the color scheme for the selected hour's weather conditions.
-  ColorPair getWeatherColorScheme() {
-    Forecast? forecast = geocoding.forecast;
-
-    if (forecast == null) {
-      return const ColorPair(Colors.purple, Colors.white);
-    }
-
-    DateTime startOfDay =
-        DateTime(selectedHour.year, selectedHour.month, selectedHour.day);
-
-    final isInTheDay = selectedHour
-            .isBefore(forecast.dailyWeatherData[startOfDay]!.sunset) &&
-        selectedHour.isAfter(forecast.dailyWeatherData[startOfDay]!.sunrise);
-
-    final weatherData = forecast.getCurrentHourData(selectedHour);
-
-    return weatherData.weatherCode.colorScheme.getColorPair(isInTheDay);
   }
 
   List<MapEntry<DateTime, HourlyWeatherData>> get24hForecast() {

@@ -40,6 +40,24 @@ class GeocodingRepo {
     return _getAllGeocodingsFromBox();
   }
 
+  Future<List<Geocoding>> searchGeocodings(String searchValue) async {
+    final Map<String, dynamic> data = await _apiController.getRawRequest(
+      "$_baseUrl/search",
+      parameters: {
+        "name": searchValue,
+        "count": 10,
+      },
+    );
+
+    if (!data.containsKey("results")) {
+      return [];
+    } else {
+      List<Geocoding> searchedGeocodings =
+          List.from(data['results']).map((e) => Geocoding.fromJson(e)).toList();
+      return searchedGeocodings;
+    }
+  }
+
   Future<List<Geocoding>> getGeocodings(String searchValue) async {
     final storedGeocodings = _getAllGeocodingsFromBox();
 

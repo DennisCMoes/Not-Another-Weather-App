@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:not_another_weather_app/weather/views/painters/compass_painter.dart';
@@ -73,6 +74,9 @@ class CompassWidget extends StatelessWidget {
 
   Widget _details(BuildContext context, CurrentGeocodingProvider provider,
       HourlyWeatherData? weatherData) {
+    ColorPair colorPair =
+        provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
@@ -88,7 +92,7 @@ class CompassWidget extends StatelessWidget {
             ],
           ),
           Divider(
-            color: provider.getWeatherColorScheme().accent,
+            color: colorPair.accent,
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -105,10 +109,13 @@ class CompassWidget extends StatelessWidget {
 
   Widget _compass(BuildContext context, CurrentGeocodingProvider provider,
       HourlyWeatherData? weatherData) {
+    ColorPair colorPair =
+        provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
+
     return CustomPaint(
       painter: CompassPainter(
           direction: weatherData?.windDirection.toDouble() ?? 0.0,
-          colorPair: provider.getWeatherColorScheme()),
+          colorPair: colorPair),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -118,7 +125,7 @@ class CompassWidget extends StatelessWidget {
             style: Theme.of(context)
                 .textTheme
                 .displayMedium!
-                .copyWith(color: provider.getWeatherColorScheme().accent),
+                .copyWith(color: colorPair.accent),
           ),
         ],
       ),

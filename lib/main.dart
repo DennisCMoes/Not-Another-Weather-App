@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/stores/object_box.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
@@ -42,6 +43,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      navigatorObservers: [ObserverUtils.routeObserver],
       theme: ThemeData(
         // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,

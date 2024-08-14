@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
+import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:objectbox/objectbox.dart';
@@ -56,13 +59,22 @@ class Geocoding {
       {this.isCurrentLocation = false});
 
   factory Geocoding.fromJson(Map<String, dynamic> json) {
-    return Geocoding(
+    Geocoding geocoding = Geocoding(
       json['id'],
       json['name'],
       json['latitude'],
       json['longitude'],
       json['country'] ?? "Unknown",
     );
+
+    geocoding.selectedForecastItems = [
+      SelectableForecastFields.windSpeed,
+      SelectableForecastFields.precipitation,
+      SelectableForecastFields.chainceOfRain,
+      SelectableForecastFields.cloudCover,
+    ];
+
+    return geocoding;
   }
 
   void _ensureStableEnumValues() {
@@ -79,6 +91,35 @@ class Geocoding {
     assert(SelectableForecastFields.cloudCover.index == 10);
     assert(SelectableForecastFields.isDay.index == 11);
     assert(SelectableForecastFields.localTime.index == 12);
+  }
+
+  ColorPair getColorSchemeOfForecast([DateTime? selectedTime]) {
+    if (forecast == null) {
+      return const ColorPair(Color(0xFF0327D6), Color(0xFFDBE7F6));
+    }
+
+    final DateTime time = selectedTime ??
+        DatetimeUtils.convertToTimezone(
+            DateTime.now(), forecast?.timezome ?? "CEST");
+
+    final DateTime startOfHour = DatetimeUtils.startOfHour(time);
+    final DateTime startOfDay = DatetimeUtils.startOfDay(time);
+
+    final dailyWeatherData = forecast?.dailyWeatherData[startOfDay];
+    if (dailyWeatherData == null) {
+      return const ColorPair(Color(0xFF0327D6), Color(0xFFDBE7F6));
+    }
+
+    final sunrise = dailyWeatherData.sunrise;
+    final sunset = dailyWeatherData.sunset;
+
+    final isInTheDay = (time.isAfter(sunrise)) && (time.isBefore(sunset));
+
+    return forecast!
+        .getCurrentHourData(startOfHour)
+        .weatherCode
+        .colorScheme
+        .getColorPair(isInTheDay);
   }
 
   @override
