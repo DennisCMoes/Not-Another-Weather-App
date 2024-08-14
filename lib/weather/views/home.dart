@@ -80,8 +80,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _refreshData() async {
-    bool shouldRefresh =
-        DateTime.now().isAfter(_refreshDate.add(const Duration(minutes: 15)));
+    bool shouldRefresh = DateTime.now()
+        .isAfter(_deviceProvider.refreshTime.add(const Duration(minutes: 15)));
 
     if (shouldRefresh) {
       await _weatherProvider.refreshData();
@@ -92,12 +92,12 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     void onStatusBarTap() {
-      if (!_weatherProvider.pageController.hasClients) {
-        if (_weatherProvider.pageController.page! > 0) {
-          _weatherProvider.pageController.animateToPage(0,
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeInOut);
-        }
+      double pageIndex = _weatherProvider.pageController.page ?? 0;
+
+      if (pageIndex > 0) {
+        _weatherProvider.pageController.animateToPage(0,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeInOut);
       }
     }
 
