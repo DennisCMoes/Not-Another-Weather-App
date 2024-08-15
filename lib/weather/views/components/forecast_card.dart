@@ -256,7 +256,8 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                     data: SliderTheme.of(context).copyWith(
                       trackHeight: 40,
                       valueIndicatorShape: ForecastSliderValueIndicator(),
-                      trackShape: ForecastSliderTrack(colorPair),
+                      trackShape:
+                          ForecastSliderTrack(_currentDateTime, colorPair),
                       thumbShape: ForecastSliderThumb(),
                       thumbColor: colorPair.main.lightenColor(0.1),
                       overlayColor: Colors.transparent,

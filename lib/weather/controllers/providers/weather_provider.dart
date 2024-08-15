@@ -7,6 +7,7 @@ import 'package:not_another_weather_app/weather/controllers/repositories/forecas
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
+import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A provider class that manages the weather-related data and operations
@@ -36,8 +37,16 @@ class WeatherProvider extends ChangeNotifier {
           _geocodingRepo.getStoredGeocodings();
 
       if (localGeocodings.isEmpty) {
-        localGeocodings
-            .add(Geocoding(1, "Current location", 0, 0, "Current location"));
+        Geocoding geocoding =
+            Geocoding(1, "Current location", 0, 0, "Current location");
+
+        geocoding.selectedForecastItems = [
+          SelectableForecastFields.windSpeed,
+          SelectableForecastFields.precipitation,
+          SelectableForecastFields.chainceOfRain,
+          SelectableForecastFields.cloudCover,
+        ];
+        localGeocodings.add(geocoding);
       }
 
       final Geocoding localGeocoding =

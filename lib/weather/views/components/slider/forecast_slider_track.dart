@@ -7,8 +7,9 @@ class ForecastSliderTrack extends SliderTrackShape {
   final double trackPadding = 30.0;
 
   final ColorPair _colorPair;
+  final DateTime _now;
 
-  const ForecastSliderTrack(this._colorPair);
+  const ForecastSliderTrack(this._now, this._colorPair);
 
   @override
   Rect getPreferredRect({
@@ -63,7 +64,7 @@ class ForecastSliderTrack extends SliderTrackShape {
     // Time text section
     const double verticalOffset = 10.0;
 
-    final now = DateTime.now();
+    // final now = DateTime.now();
     final double verticalPosition = trackTop + trackHeight + verticalOffset;
 
     final slidableTrackWidth = trackWidth - (trackPadding * 2);
@@ -71,13 +72,13 @@ class ForecastSliderTrack extends SliderTrackShape {
 
     final Map<String, double> textLabels = {
       "NOW": slidableTrackLeft,
-      hourText(now.add(const Duration(hours: 6)).hour):
+      hourText(_now.add(const Duration(hours: 6)).hour):
           slidableTrackLeft + (slidableTrackWidth / 4),
-      hourText(now.add(const Duration(hours: 12)).hour):
+      hourText(_now.add(const Duration(hours: 12)).hour):
           slidableTrackLeft + (slidableTrackWidth / 2),
-      hourText(now.add(const Duration(hours: 18)).hour):
+      hourText(_now.add(const Duration(hours: 18)).hour):
           slidableTrackLeft + ((slidableTrackWidth / 4) * 3),
-      hourText(now.add(const Duration(hours: 24)).hour):
+      hourText(_now.add(const Duration(hours: 24)).hour):
           slidableTrackLeft + slidableTrackWidth,
     };
 
