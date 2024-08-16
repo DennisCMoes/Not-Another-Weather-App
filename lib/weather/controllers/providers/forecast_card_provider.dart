@@ -34,8 +34,8 @@ class ForecastCardProvider extends ChangeNotifier {
   DateTime get selectedHour => _selectedHour;
 
   void _initializeSelectedHour() {
-    final convertedNow = DatetimeUtils.convertToTimezone(DateTime.now(),
-        geocoding.forecast?.timezome ?? DateTime.now().timeZoneName);
+    final convertedNow = DatetimeUtils.convertToTimezone(
+        DateTime.now(), geocoding.forecast?.timezome ?? "Europe/Amsterdam");
     final convertedStart = DatetimeUtils.startOfHour(convertedNow);
     _selectedHour = convertedStart;
   }
@@ -126,7 +126,7 @@ class ForecastCardProvider extends ChangeNotifier {
   /// Returns a string indicating the relative day and hour
   String getSelectedHourDescription() {
     final now = DateTime.now();
-    final timezone = geocoding.forecast?.timezome ?? now.timeZoneName;
+    final timezone = geocoding.forecast?.timezome ?? "Europe/Amsterdam";
 
     final nowInTargetzone = DatetimeUtils.convertToTimezone(now, timezone);
 

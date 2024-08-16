@@ -66,10 +66,8 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   }
 
   DateTime _getConvertedCurrentTime() {
-    return DatetimeUtils.convertToTimezone(
-        DatetimeUtils.startOfHour(),
-        _geocodingProvider.geocoding.forecast?.timezome ??
-            DateTime.now().timeZoneName);
+    return DatetimeUtils.convertToTimezone(DatetimeUtils.startOfHour(),
+        _geocodingProvider.geocoding.forecast?.timezome ?? "Europe/Amsterdam");
   }
 
   void _onChangeSliderValue(double offset) {

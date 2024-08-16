@@ -30,6 +30,8 @@ class WeatherProvider extends ChangeNotifier {
   /// Initializes the weather provider by fetching the current location and it's forecasts, and notifying it's listeners.
   Future<void> initialization() async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
       // Check network connectivity
       final List<ConnectivityResult> connectivityResult =
           await Connectivity().checkConnectivity();
@@ -48,6 +50,10 @@ class WeatherProvider extends ChangeNotifier {
                 SelectableForecastFields.chainceOfRain,
                 SelectableForecastFields.cloudCover,
               ]);
+
+        prefs.setInt("temperature_unit", 1);
+        prefs.setInt("wind_speed_unit", 1);
+        prefs.setInt("precipitation_unit", 0);
       } else {
         localGeocodings.sort((a, b) => a.ordening - b.ordening);
       }
