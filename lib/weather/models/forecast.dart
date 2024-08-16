@@ -88,7 +88,6 @@ class Forecast {
       json['latitude'],
       json['longitude'],
       json['timezone'],
-      // json['timezone_abbreviation'],
       json['current']['surface_pressure'],
       hourlyWeatherData,
       dailyWeatherData,

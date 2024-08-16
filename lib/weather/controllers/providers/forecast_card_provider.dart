@@ -4,6 +4,7 @@ import 'package:not_another_weather_app/weather/controllers/repositories/geocodi
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 /// A provider that manages the state and logic for the currently selected geocoding
 class ForecastCardProvider extends ChangeNotifier {
@@ -20,7 +21,11 @@ class ForecastCardProvider extends ChangeNotifier {
   Geocoding get geocoding => _geocoding;
 
   ForecastCardProvider(this._geocoding) {
-    _initializeSelectedHour();
+    try {
+      _initializeSelectedHour();
+    } catch (exception, stacktrace) {
+      Sentry.captureException(exception, stackTrace: stacktrace);
+    }
   }
 
   bool get isEditing => _isEditing;

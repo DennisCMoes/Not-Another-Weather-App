@@ -8,6 +8,7 @@ import 'package:not_another_weather_app/weather/controllers/repositories/geocodi
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A provider class that manages the weather-related data and operations
@@ -66,8 +67,10 @@ class WeatherProvider extends ChangeNotifier {
 
       _geocodings.addAll(localGeocodings);
       await refreshData();
-    } catch (ex) {
-      debugPrint("Error during initialization: $ex");
+    } catch (exception, stacktrace) {
+      debugPrint("Error during initialization: $exception");
+      await Sentry.captureException(exception, stackTrace: stacktrace);
+
       rethrow;
     }
   }
