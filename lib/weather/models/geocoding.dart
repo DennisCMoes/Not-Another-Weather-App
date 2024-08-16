@@ -11,7 +11,7 @@ class Geocoding {
   @Id(assignable: true)
   int id;
 
-  // int ordening;
+  int ordening;
   String name;
   double latitude;
   double longitude;
@@ -58,7 +58,7 @@ class Geocoding {
   ];
 
   Geocoding(this.id, this.name, this.latitude, this.longitude, this.country,
-      {this.isCurrentLocation = false});
+      {this.isCurrentLocation = false, this.ordening = -1});
 
   factory Geocoding.fromJson(Map<String, dynamic> json) {
     Geocoding geocoding = Geocoding(

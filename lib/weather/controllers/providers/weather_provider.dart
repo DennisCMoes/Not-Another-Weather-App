@@ -38,21 +38,22 @@ class WeatherProvider extends ChangeNotifier {
           _geocodingRepo.getStoredGeocodings();
 
       if (localGeocodings.isEmpty) {
-        Geocoding geocoding =
-            Geocoding(1, "Current location", 0, 0, "Current location");
-
-        geocoding.selectedForecastItems = [
-          SelectableForecastFields.windSpeed,
-          SelectableForecastFields.precipitation,
-          SelectableForecastFields.chainceOfRain,
-          SelectableForecastFields.cloudCover,
-        ];
-        localGeocodings.add(geocoding);
+        localGeocodings
+            .add(Geocoding(1, "Current location", 0, 0, "Current location")
+              ..isCurrentLocation = true
+              ..ordening = 0
+              ..selectedForecastItems = [
+                SelectableForecastFields.windSpeed,
+                SelectableForecastFields.precipitation,
+                SelectableForecastFields.chainceOfRain,
+                SelectableForecastFields.cloudCover,
+              ]);
+      } else {
+        localGeocodings.sort((a, b) => a.ordening - b.ordening);
       }
 
       final Geocoding localGeocoding =
           localGeocodings.firstWhere((geocoding) => geocoding.id == 1);
-      localGeocoding.isCurrentLocation = true;
 
       // If there is network connectivity refresh and store local geocoding data
       if (!connectivityResult.contains(ConnectivityResult.none)) {
@@ -110,13 +111,29 @@ class WeatherProvider extends ChangeNotifier {
 
   // Moves a geocoding location from [oldIndex] to [newIndex] in the list
   void moveGeocodings(int oldIndex, int newIndex) {
-    final item = _geocodings.removeAt(oldIndex);
-    _geocodings.insert(newIndex, item);
+    // Checks for invalid index
+    if (oldIndex < 0 ||
+        oldIndex >= _geocodings.length ||
+        newIndex < 0 ||
+        newIndex >= _geocodings.length) {
+      return;
+    }
+
+    final oldItem = _geocodings.removeAt(oldIndex);
+
+    _geocodings.insert(newIndex, oldItem);
+
+    for (int i = 0; i < _geocodings.length; i++) {
+      _geocodings[i].ordening = i;
+    }
+
+    _geocodingRepo.updateGeocodings(_geocodings);
     notifyListeners();
   }
 
   /// Adds a new geocoding location and fetches it's forecast
   Future<void> addGeocoding(Geocoding geocoding) async {
+    geocoding.ordening = _geocodings.length;
     _geocodings.add(geocoding);
     notifyListeners();
 

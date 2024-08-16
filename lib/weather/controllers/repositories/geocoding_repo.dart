@@ -1,6 +1,7 @@
 import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/api_controller.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
+import 'package:objectbox/objectbox.dart';
 
 class GeocodingRepo {
   final String _baseUrl = "https://geocoding-api.open-meteo.com/v1";
@@ -11,7 +12,12 @@ class GeocodingRepo {
     return geocodingBox.getAll();
   }
 
-  void _saveGeocodingsToBox(List<Geocoding> geocodings) {
+  void updateGeocodings(List<Geocoding> geocodings) {
+    final geocodingBox = objectBox.geocodingBox;
+    geocodingBox.putMany(geocodings, mode: PutMode.update);
+  }
+
+  void saveGeocodingsToBox(List<Geocoding> geocodings) {
     final geocodingBox = objectBox.geocodingBox;
     geocodingBox.putMany(geocodings);
   }
@@ -76,7 +82,7 @@ class GeocodingRepo {
           List.from(data['results']).map((e) => Geocoding.fromJson(e)).toList();
 
       if (_areGeocodingsEqual(storedGeocodings, newGeocodings)) {
-        _saveGeocodingsToBox(newGeocodings);
+        saveGeocodingsToBox(newGeocodings);
       }
 
       return newGeocodings;
