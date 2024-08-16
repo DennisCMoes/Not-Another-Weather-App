@@ -17,6 +17,9 @@ class Geocoding {
   double longitude;
   String country;
 
+  @Transient()
+  bool isTestClass;
+
   @Transient() // Not stored in database
   bool isCurrentLocation;
 
@@ -58,7 +61,9 @@ class Geocoding {
   ];
 
   Geocoding(this.id, this.name, this.latitude, this.longitude, this.country,
-      {this.isCurrentLocation = false, this.ordening = -1});
+      {this.isCurrentLocation = false,
+      this.ordening = -1,
+      this.isTestClass = false});
 
   factory Geocoding.fromJson(Map<String, dynamic> json) {
     Geocoding geocoding = Geocoding(
@@ -114,7 +119,8 @@ class Geocoding {
     final sunrise = dailyWeatherData.sunrise;
     final sunset = dailyWeatherData.sunset;
 
-    final isInTheDay = (time.isAfter(sunrise)) && (time.isBefore(sunset));
+    final isInTheDay =
+        isTestClass ? true : (time.isAfter(sunrise)) && (time.isBefore(sunset));
 
     return forecast!
         .getCurrentHourData(startOfHour)

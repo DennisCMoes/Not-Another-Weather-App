@@ -1,10 +1,12 @@
 import 'dart:collection';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
+import 'package:not_another_weather_app/weather/models/dummy_data.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
@@ -58,6 +60,10 @@ class WeatherProvider extends ChangeNotifier {
         localGeocodings.sort((a, b) => a.ordening - b.ordening);
       }
 
+      if (kDebugMode) {
+        localGeocodings.add(DummyData.colorSchemeGeocoding());
+      }
+
       final Geocoding localGeocoding =
           localGeocodings.firstWhere((geocoding) => geocoding.id == 1);
 
@@ -86,6 +92,10 @@ class WeatherProvider extends ChangeNotifier {
     _geocodings = await Future.wait(
       geocodings.map(
         (coding) async {
+          if (coding.isTestClass) {
+            return coding;
+          }
+
           Forecast forecast = await _forecastRepo.getForecastOfLocation(
             coding.latitude,
             coding.longitude,
