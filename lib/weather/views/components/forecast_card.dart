@@ -28,10 +28,6 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   late ForecastCardProvider _geocodingProvider;
   late DateTime _currentDateTime;
 
-  final List<String> _subPageButtonLabels = [
-    // "Summary",
-    // "Details",
-  ];
   final PageController _timeController = PageController(viewportFraction: 0.2);
 
   bool _isDragging = false;
@@ -288,72 +284,6 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                         }),
                   ),
                 ),
-
-                // SizedBox(
-                //   height: 50,
-                //   width: double.infinity,
-                //   child: Stack(
-                //     children: [
-                //       // Align(
-                //       //   alignment: Alignment.centerLeft,
-                //       //   child: IconButton(
-                //       //     onPressed: toggleIsEditing,
-                //       //     icon: Icon(
-                //       //       state.isEditing ? Icons.edit_off : Icons.edit,
-                //       //       color: colorPair.accent,
-                //       //     ),
-                //       //   ),
-                //       // ),
-                //       // Align(
-                //       //   alignment: Alignment.centerRight,
-                //       //   child: IconButton(
-                //       //     onPressed: toggleTimeSlider,
-                //       //     icon: Icon(
-                //       //       Icons.schedule,
-                //       //       color: colorPair.accent,
-                //       //     ),
-                //       //   ),
-                //       // ),
-                //       Align(
-                //         alignment: Alignment.center,
-                //         child: Row(
-                //           mainAxisSize: MainAxisSize.max,
-                //           crossAxisAlignment: CrossAxisAlignment.center,
-                //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                //           children: List.generate(
-                //             _subPageButtonLabels.length,
-                //             (index) => GestureDetector(
-                //               onTap: () {
-                //                 state.subPageController.animateToPage(
-                //                   index,
-                //                   duration: const Duration(milliseconds: 300),
-                //                   curve: Curves.easeInOut,
-                //                 );
-                //               },
-                //               child: AnimatedContainer(
-                //                 duration: const Duration(milliseconds: 300),
-                //                 transform: state.isCurrentPage(index)
-                //                     ? Matrix4.identity()
-                //                     : (Matrix4.identity()..scale(0.9)),
-                //                 child: Text(
-                //                   _subPageButtonLabels[index],
-                //                   style: Theme.of(context)
-                //                       .textTheme
-                //                       .displaySmall!
-                //                       .copyWith(
-                //                         color: state.isCurrentPage(index)
-                //                             ? colorPair.accent
-                //                             : colorPair.accent.withOpacity(0.6),
-                //                       ),
-                //                 ),
-                //               ),
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
               ],
             ),
           ),
