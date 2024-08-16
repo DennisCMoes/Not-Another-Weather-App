@@ -10,6 +10,8 @@ import 'package:not_another_weather_app/shared/utilities/providers/drawer_provid
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/views/home.dart';
 
+import 'package:timezone/data/latest_all.dart' as tz;
+
 late ObjectBox objectBox;
 
 Future<void> main() async {
@@ -17,6 +19,8 @@ Future<void> main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   objectBox = await ObjectBox.create();
+
+  tz.initializeTimeZones();
 
   runApp(
     MultiProvider(

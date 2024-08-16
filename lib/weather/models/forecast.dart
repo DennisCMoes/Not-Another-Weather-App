@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:instant/instant.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
@@ -88,7 +87,8 @@ class Forecast {
     return Forecast(
       json['latitude'],
       json['longitude'],
-      json['timezone_abbreviation'],
+      json['timezone'],
+      // json['timezone_abbreviation'],
       json['current']['surface_pressure'],
       hourlyWeatherData,
       dailyWeatherData,
@@ -149,7 +149,9 @@ class Forecast {
       case SelectableForecastFields.cloudCover:
         return "${currentHourData.cloudCover}%";
       case SelectableForecastFields.localTime:
-        return hourFormat.format(curDateTimeByZone(zone: timezome));
+        final convertedTime =
+            DatetimeUtils.convertToTimezone(DateTime.now(), timezome);
+        return hourFormat.format(convertedTime);
       default:
         return "Unknown";
     }

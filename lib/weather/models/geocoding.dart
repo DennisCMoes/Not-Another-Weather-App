@@ -11,6 +11,7 @@ class Geocoding {
   @Id(assignable: true)
   int id;
 
+  // int ordening;
   String name;
   double latitude;
   double longitude;
@@ -100,7 +101,7 @@ class Geocoding {
 
     final DateTime time = selectedTime ??
         DatetimeUtils.convertToTimezone(
-            DateTime.now(), forecast?.timezome ?? "CEST");
+            DateTime.now(), forecast?.timezome ?? "UTC");
 
     final DateTime startOfHour = DatetimeUtils.startOfHour(time);
     final DateTime startOfDay = DatetimeUtils.startOfDay(time);

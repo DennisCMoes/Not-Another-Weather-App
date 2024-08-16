@@ -1,11 +1,9 @@
-import 'package:instant/instant.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class DatetimeUtils {
   static DateTime convertToTimezone(DateTime datetime, String targetTimezone) {
-    return dateTimeToZone(
-      datetime: datetime,
-      zone: targetTimezone,
-    );
+    final timezone = tz.getLocation(targetTimezone);
+    return tz.TZDateTime.from(datetime, timezone);
   }
 
   static DateTime startOfHour([DateTime? date]) {
