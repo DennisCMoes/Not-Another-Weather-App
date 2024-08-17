@@ -60,10 +60,6 @@ class WeatherProvider extends ChangeNotifier {
         localGeocodings.sort((a, b) => a.ordening - b.ordening);
       }
 
-      if (kDebugMode) {
-        localGeocodings.add(DummyData.colorSchemeGeocoding());
-      }
-
       final Geocoding localGeocoding =
           localGeocodings.firstWhere((geocoding) => geocoding.id == 1);
 
@@ -110,6 +106,12 @@ class WeatherProvider extends ChangeNotifier {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("refresh_date", DateTime.now().toString());
 
+    notifyListeners();
+  }
+
+  void addDummyData() {
+    _geocodings.removeWhere((element) => element.isTestClass == true);
+    _geocodings.add(DummyData.colorSchemeGeocoding());
     notifyListeners();
   }
 

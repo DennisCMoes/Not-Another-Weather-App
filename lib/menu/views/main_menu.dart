@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/main.dart';
@@ -108,7 +109,24 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Not Another Weather App")),
+      appBar: AppBar(
+        title: RawGestureDetector(
+          gestures: {
+            SerialTapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
+                SerialTapGestureRecognizer>(
+              SerialTapGestureRecognizer.new,
+              (instance) {
+                instance.onSerialTapDown = (details) {
+                  if (details.count == 3) {
+                    context.read<WeatherProvider>().addDummyData();
+                  }
+                };
+              },
+            )
+          },
+          child: const Text("Not Another Weather App"),
+        ),
+      ),
       body: GestureDetector(
         child: Consumer<WeatherProvider>(
           builder: (context, state, child) {
