@@ -6,6 +6,12 @@ import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:objectbox/objectbox.dart';
 
+enum TestClass {
+  none,
+  day,
+  night;
+}
+
 @Entity()
 class Geocoding {
   @Id(assignable: true)
@@ -18,7 +24,7 @@ class Geocoding {
   String country;
 
   @Transient()
-  bool isTestClass;
+  TestClass isTestClass;
 
   @Transient() // Not stored in database
   bool isCurrentLocation;
@@ -63,7 +69,7 @@ class Geocoding {
   Geocoding(this.id, this.name, this.latitude, this.longitude, this.country,
       {this.isCurrentLocation = false,
       this.ordening = -1,
-      this.isTestClass = false});
+      this.isTestClass = TestClass.none});
 
   factory Geocoding.fromJson(Map<String, dynamic> json) {
     Geocoding geocoding = Geocoding(
@@ -119,8 +125,18 @@ class Geocoding {
     final sunrise = dailyWeatherData.sunrise;
     final sunset = dailyWeatherData.sunset;
 
-    final isInTheDay =
-        isTestClass ? true : (time.isAfter(sunrise)) && (time.isBefore(sunset));
+    // final isInTheDay =
+    //     isTestClass ? true : (time.isAfter(sunrise)) && (time.isBefore(sunset));
+
+    bool isInTheDay;
+
+    if (isTestClass == TestClass.day) {
+      isInTheDay = true;
+    } else if (isTestClass == TestClass.night) {
+      isInTheDay = false;
+    } else {
+      isInTheDay = (time.isAfter(sunrise)) && (time.isBefore(sunset));
+    }
 
     return forecast!
         .getCurrentHourData(startOfHour)

@@ -88,7 +88,7 @@ class WeatherProvider extends ChangeNotifier {
     _geocodings = await Future.wait(
       geocodings.map(
         (coding) async {
-          if (coding.isTestClass) {
+          if (coding.isTestClass != TestClass.none) {
             return coding;
           }
 
@@ -110,8 +110,11 @@ class WeatherProvider extends ChangeNotifier {
   }
 
   void addDummyData() {
-    _geocodings.removeWhere((element) => element.isTestClass == true);
-    _geocodings.add(DummyData.colorSchemeGeocoding());
+    _geocodings.removeWhere((element) => element.isTestClass != TestClass.none);
+    _geocodings.addAll([
+      DummyData.colorSchemeGeocoding(TestClass.day),
+      DummyData.colorSchemeGeocoding(TestClass.night)
+    ]);
     notifyListeners();
   }
 

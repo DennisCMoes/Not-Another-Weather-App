@@ -19,11 +19,11 @@ enum WeatherCode {
 
   // Drizzle
   lightDrizzle(
-      51, "Light drizzle", WeatherColorScheme.rain, WeatherClipper.drizzle),
-  moderateDrizzle(
-      53, "Moderate drizzle", WeatherColorScheme.rain, WeatherClipper.drizzle),
+      51, "Light drizzle", WeatherColorScheme.drizzle, WeatherClipper.drizzle),
+  moderateDrizzle(53, "Moderate drizzle", WeatherColorScheme.drizzle,
+      WeatherClipper.drizzle),
   denseDrizzle(
-      55, "Dense drizzle", WeatherColorScheme.rain, WeatherClipper.drizzle),
+      55, "Dense drizzle", WeatherColorScheme.drizzle, WeatherClipper.drizzle),
 
   // Freezing drizzle
   lightFreezingDrizzle(56, "Light freezing drizzle", WeatherColorScheme.drizzle,

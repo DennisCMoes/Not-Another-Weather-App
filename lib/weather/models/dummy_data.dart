@@ -25,12 +25,12 @@ class DummyData {
       random.nextInt(31) + 15,
       random.nextInt(100) + 40,
       random.nextInt(100),
-      random.nextDouble() * 3,
+      num.parse((random.nextDouble() * 3).toStringAsFixed(2)).toDouble(),
       weatherCode,
       random.nextInt(100),
-      random.nextDouble() * 20,
+      num.parse((random.nextDouble() * 20).toStringAsFixed(2)).toDouble(),
       random.nextInt(360),
-      random.nextDouble() * 20,
+      num.parse((random.nextDouble() * 20).toStringAsFixed(2)).toDouble(),
     );
   }
 
@@ -46,7 +46,7 @@ class DummyData {
     );
   }
 
-  static Geocoding colorSchemeGeocoding() {
+  static Geocoding colorSchemeGeocoding(TestClass testclass) {
     List<HourlyWeatherData> hourly = [];
     List<DailyWeatherData> daily = [];
 
@@ -62,8 +62,9 @@ class DummyData {
       daily.add(getRandomDailyData(withOffset(i * 24)));
     }
 
-    Geocoding geocoding = Geocoding(11, "Color Scheme", 0, 0, "Color Scheme")
-      ..isTestClass = true
+    Geocoding geocoding = Geocoding(11, "Color Scheme (${testclass.name})", 0,
+        0, "Color Scheme (${testclass.name})")
+      ..isTestClass = testclass
       ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
       ..forecast = Forecast(
         11,
