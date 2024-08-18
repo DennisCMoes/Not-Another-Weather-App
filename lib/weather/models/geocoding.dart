@@ -105,14 +105,12 @@ class Geocoding {
     assert(SelectableForecastFields.localTime.index == 11);
   }
 
-  ColorPair getColorSchemeOfForecast([DateTime? selectedTime]) {
+  ColorPair getColorSchemeOfForecast([DateTime? time]) {
     if (forecast == null) {
       return const ColorPair(Color(0xFF0327D6), Color(0xFFDBE7F6));
     }
 
-    final DateTime time = selectedTime ??
-        DatetimeUtils.convertToTimezone(
-            DateTime.now(), forecast?.timezome ?? "UTC");
+    time ??= DateTime.now();
 
     final DateTime startOfHour = DatetimeUtils.startOfHour(time);
     final DateTime startOfDay = DatetimeUtils.startOfDay(time);
@@ -124,9 +122,6 @@ class Geocoding {
 
     final sunrise = dailyWeatherData.sunrise;
     final sunset = dailyWeatherData.sunset;
-
-    // final isInTheDay =
-    //     isTestClass ? true : (time.isAfter(sunrise)) && (time.isBefore(sunset));
 
     bool isInTheDay;
 
@@ -142,7 +137,7 @@ class Geocoding {
         .getCurrentHourData(startOfHour)
         .weatherCode
         .colorScheme
-        .getColorPair(isInTheDay);
+        .getColorPair(!isInTheDay);
   }
 
   @override
