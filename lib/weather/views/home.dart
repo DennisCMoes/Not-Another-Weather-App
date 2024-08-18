@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +25,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with WidgetsBindingObserver, RouteAware {
   late Future<void> _initializationBuilder;
+  late Timer _hourTimer;
 
   late DeviceProvider _deviceProvider;
   late WeatherProvider _weatherProvider;
@@ -58,6 +61,8 @@ class _HomeScreenState extends State<HomeScreen>
     _weatherProvider.dispose();
     _drawerProvider.dispose();
 
+    _hourTimer.cancel();
+
     super.dispose();
   }
 
@@ -75,6 +80,12 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _initialize() async {
+    final now = DateTime.now();
+    final nextHour = DateTime(now.year, now.month, now.day, now.hour + 1);
+    final durationUntilNextHour = nextHour.difference(now);
+
+    _hourTimer = Timer(durationUntilNextHour, _weatherProvider.refreshData);
+
     await _weatherProvider.initialization();
     FlutterNativeSplash.remove();
   }
