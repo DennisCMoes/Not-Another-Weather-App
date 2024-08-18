@@ -74,9 +74,10 @@ class _SummaryPageState extends State<SummaryPage> {
                             clipper: currentForecast
                                     ?.getClipperOfHour(state.selectedHour) ??
                                 WeatherClipper.unknown.getClipper(),
+                            clipBehavior: Clip.antiAlias,
                             child: SizedBox(
-                              width: 300,
-                              height: 300,
+                              width: MediaQuery.of(context).size.width - 100,
+                              height: MediaQuery.of(context).size.width - 100,
                               child: RepaintBoundary(
                                 child: CustomScrollView(
                                   physics: const NeverScrollableScrollPhysics(),
@@ -118,9 +119,10 @@ class _SummaryPageState extends State<SummaryPage> {
                   ],
                 ),
               ),
+              // Bottom Text
               IntrinsicHeight(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.only(bottom: 8.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
