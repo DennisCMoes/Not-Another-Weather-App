@@ -66,8 +66,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   }
 
   DateTime _getConvertedCurrentTime() {
-    return DatetimeUtils.convertToTimezone(
-        DatetimeUtils.startOfHour(_weatherProvider.currentHour),
+    return DatetimeUtils.convertToTimezone(DatetimeUtils.startOfHour(),
         _geocodingProvider.geocoding.forecast?.timezome ?? "Europe/Amsterdam");
   }
 
@@ -147,16 +146,6 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
           },
         ),
       );
-    }
-
-    double getSliderBottomPadding() {
-      double bottomPadding = context.padding.bottom;
-
-      if (bottomPadding < 10) {
-        bottomPadding + 10;
-      }
-
-      return bottomPadding;
     }
 
     return Consumer<ForecastCardProvider>(
