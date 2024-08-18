@@ -63,9 +63,7 @@ class ForecastSliderTrack extends SliderTrackShape {
 
     // Time text section
     const double verticalOffset = 10.0;
-
-    // final now = DateTime.now();
-    final double verticalPosition = trackTop + trackHeight + verticalOffset;
+    final double textVerticalPosition = trackTop + trackHeight + verticalOffset;
 
     final slidableTrackWidth = trackWidth - (trackPadding * 2);
     final slidableTrackLeft = trackLeft + trackPadding;
@@ -88,7 +86,7 @@ class ForecastSliderTrack extends SliderTrackShape {
         textDirection,
         label.key,
         label.value,
-        verticalPosition,
+        textVerticalPosition,
       );
     }
 

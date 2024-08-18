@@ -21,10 +21,11 @@ class WeatherProvider extends ChangeNotifier {
   final PageController _pageController = PageController();
 
   List<Geocoding> _geocodings = [];
+  DateTime _currentHour = DateTime.now();
 
   PageController get pageController => _pageController;
-
   Geocoding get currentLocation => _geocodings[0];
+  DateTime get currentHour => _currentHour;
 
   UnmodifiableListView<Geocoding> get geocodings =>
       UnmodifiableListView(_geocodings);
@@ -105,6 +106,7 @@ class WeatherProvider extends ChangeNotifier {
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("refresh_date", DateTime.now().toString());
+    _currentHour = DateTime.now();
 
     notifyListeners();
   }

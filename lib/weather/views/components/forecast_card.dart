@@ -26,7 +26,7 @@ class ForecastCard extends StatefulWidget {
 
 class ForecastCardState extends State<ForecastCard> with RouteAware {
   late ForecastCardProvider _geocodingProvider;
-  late DateTime _currentDateTime;
+  late WeatherProvider _weatherProvider;
 
   final PageController _timeController = PageController(viewportFraction: 0.2);
 
@@ -39,7 +39,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
     super.initState();
 
     _geocodingProvider = context.read<ForecastCardProvider>();
-    _currentDateTime = _getConvertedCurrentTime();
+    _weatherProvider = context.read<WeatherProvider>();
   }
 
   @override
@@ -66,15 +66,16 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   }
 
   DateTime _getConvertedCurrentTime() {
-    return DatetimeUtils.convertToTimezone(DatetimeUtils.startOfHour(),
+    return DatetimeUtils.convertToTimezone(
+        DatetimeUtils.startOfHour(_weatherProvider.currentHour),
         _geocodingProvider.geocoding.forecast?.timezome ?? "Europe/Amsterdam");
   }
 
   void _onChangeSliderValue(double offset) {
     HapticFeedback.lightImpact();
 
-    _geocodingProvider
-        .setSelectedHour(_currentDateTime.add(Duration(hours: offset.toInt())));
+    _geocodingProvider.setSelectedHour(
+        _getConvertedCurrentTime().add(Duration(hours: offset.toInt())));
 
     setState(() {
       _sliderValue = offset;
@@ -91,8 +92,9 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
 
   String _getSliderLabel(ForecastCardProvider provider) {
     final Forecast? forecast = provider.geocoding.forecast;
-    final DateTime startOfHour = DatetimeUtils.startOfHour(_currentDateTime)
-        .add(Duration(hours: _sliderValue.toInt()));
+    final DateTime startOfHour =
+        DatetimeUtils.startOfHour(_weatherProvider.currentHour)
+            .add(Duration(hours: _sliderValue.toInt()));
 
     if (forecast == null) {
       return DateFormat.Hm().format(startOfHour);
@@ -145,6 +147,16 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
           },
         ),
       );
+    }
+
+    double getSliderBottomPadding() {
+      double bottomPadding = context.padding.bottom;
+
+      if (bottomPadding < 10) {
+        bottomPadding + 10;
+      }
+
+      return bottomPadding;
     }
 
     return Consumer<ForecastCardProvider>(
@@ -236,7 +248,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                     ],
                   ),
                 ),
-
+                // Bottom Slider
                 AnimatedPadding(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.fastOutSlowIn,
@@ -244,14 +256,17 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                     top: _isDragging ? 50 : 0,
                     left: NavigationToolbar.kMiddleSpacing,
                     right: NavigationToolbar.kMiddleSpacing,
-                    bottom: context.padding.bottom,
+                    bottom: 34,
+                    // bottom: getSliderBottomPadding(),
                   ),
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       trackHeight: 40,
                       valueIndicatorShape: ForecastSliderValueIndicator(),
-                      trackShape:
-                          ForecastSliderTrack(_currentDateTime, colorPair),
+                      trackShape: ForecastSliderTrack(
+                        _weatherProvider.currentHour,
+                        colorPair,
+                      ),
                       thumbShape: ForecastSliderThumb(),
                       thumbColor: colorPair.main.lightenColor(0.1),
                       overlayColor: Colors.transparent,
@@ -263,23 +278,22 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                       ),
                     ),
                     child: Slider(
-                        min: 0,
-                        max: 24,
-                        divisions: 24,
-                        value: _sliderValue,
-                        label: _getSliderLabel(
-                          state,
-                        ),
-                        onChanged: _onChangeSliderValue,
-                        onChangeStart: (value) =>
-                            setState(() => _isDragging = true),
-                        onChangeEnd: (value) {
-                          Future.delayed(
-                            const Duration(milliseconds: 100),
-                            () => _resetSliderTime(),
-                          );
-                          setState(() => _isDragging = false);
-                        }),
+                      min: 0,
+                      max: 24,
+                      divisions: 24,
+                      value: _sliderValue,
+                      label: _getSliderLabel(state),
+                      onChanged: _onChangeSliderValue,
+                      onChangeStart: (value) =>
+                          setState(() => _isDragging = true),
+                      onChangeEnd: (value) {
+                        Future.delayed(
+                          const Duration(milliseconds: 100),
+                          () => _resetSliderTime(),
+                        );
+                        setState(() => _isDragging = false);
+                      },
+                    ),
                   ),
                 ),
               ],
