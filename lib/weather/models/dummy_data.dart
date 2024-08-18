@@ -62,19 +62,33 @@ class DummyData {
       daily.add(getRandomDailyData(withOffset(i * 24)));
     }
 
-    Geocoding geocoding = Geocoding(11, "Color Scheme (${testclass.name})", 0,
-        0, "Color Scheme (${testclass.name})")
+    return Geocoding(11, "Color Scheme (${testclass.name})", 0, 0,
+        "Color Scheme (${testclass.name})")
       ..isTestClass = testclass
       ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
-      ..forecast = Forecast(
-        11,
-        11,
-        "Europe/Amsterdam",
-        1,
-        hourly,
-        daily,
-      );
+      ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily);
+  }
 
-    return geocoding;
+  static Geocoding clipperGeocoding(TestClass testclass) {
+    List<HourlyWeatherData> hourly = [];
+    List<DailyWeatherData> daily = [];
+
+    List<WeatherCode> uniqueByClipper =
+        WeatherCode.values.uniqueBy((code) => code.clipper);
+
+    for (int i = 0; i < 48; i++) {
+      int index = i % uniqueByClipper.length;
+      hourly.add(getRandomHourlyData(withOffset(i), uniqueByClipper[index]));
+    }
+
+    for (int i = -1; i < 2; i++) {
+      daily.add(getRandomDailyData(withOffset(i * 24)));
+    }
+
+    return Geocoding(
+        12, "Clipper (${testclass.name})", 0, 0, "Clipper (${testclass.name})")
+      ..isTestClass = testclass
+      ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
+      ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily);
   }
 }
