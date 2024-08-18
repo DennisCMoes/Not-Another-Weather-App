@@ -62,7 +62,9 @@ class WeatherProvider extends ChangeNotifier {
       }
 
       final Geocoding localGeocoding =
-          localGeocodings.firstWhere((geocoding) => geocoding.id == 1);
+          localGeocodings.firstWhere((geocoding) => geocoding.id == 1)
+            ..isCurrentLocation = true
+            ..ordening = 0;
 
       // If there is network connectivity refresh and store local geocoding data
       if (!connectivityResult.contains(ConnectivityResult.none)) {
@@ -115,7 +117,9 @@ class WeatherProvider extends ChangeNotifier {
     _geocodings.removeWhere((element) => element.isTestClass != TestClass.none);
     _geocodings.addAll([
       DummyData.colorSchemeGeocoding(TestClass.day),
-      DummyData.colorSchemeGeocoding(TestClass.night)
+      DummyData.colorSchemeGeocoding(TestClass.night),
+      DummyData.clipperGeocoding(TestClass.day),
+      DummyData.clipperGeocoding(TestClass.night),
     ]);
     notifyListeners();
   }

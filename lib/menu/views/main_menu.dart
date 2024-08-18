@@ -214,12 +214,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            geocoding.name,
-            style: Theme.of(context)
-                .textTheme
-                .displayMedium!
-                .copyWith(color: colorPair.accent),
+          Flexible(
+            child: Text(
+              geocoding.name,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context)
+                  .textTheme
+                  .displayMedium!
+                  .copyWith(color: colorPair.accent),
+            ),
           ),
           const SizedBox(width: 6),
           geocoding.isCurrentLocation

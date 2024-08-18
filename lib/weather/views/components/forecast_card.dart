@@ -184,33 +184,26 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      state.geocoding.forecast == null
-                          ? Text("Loading",
-                              style: context.textTheme.displayLarge)
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  state.geocoding.name,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displayMedium!
-                                      .copyWith(
-                                        color: colorPair.accent,
-                                      ),
-                                ),
-                                Text(
-                                  state.getSelectedHourDescription(),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displaySmall!
-                                      .copyWith(
-                                        color:
-                                            colorPair.accent.withOpacity(0.6),
-                                      ),
-                                ),
-                              ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              state.geocoding.name,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textTheme.displayMedium!.copyWith(
+                                color: colorPair.accent,
+                              ),
                             ),
+                            Text(
+                              state.getSelectedHourDescription(),
+                              style: context.textTheme.displaySmall!.copyWith(
+                                color: colorPair.accent.withOpacity(0.6),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
