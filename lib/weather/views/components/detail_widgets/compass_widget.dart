@@ -37,29 +37,52 @@ class CompassWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ForecastCardProvider>(
-      builder: (context, state, child) {
-        HourlyWeatherData? weatherData =
-            state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
+      builder: (context, state, child) => FutureBuilder(
+        future: state.geocoding.forecast,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          } else {
+            final forecast = snapshot.data!;
+            final weatherData = forecast.getCurrentHourData(state.selectedHour);
 
-        switch (size) {
-          case WidgetSize.small:
-            return _small(context, state, weatherData);
-          case WidgetSize.medium:
-            return _compass(context, state, weatherData);
-          case WidgetSize.large:
-            return Row(
-              children: [
-                Expanded(child: _details(context, state, weatherData)),
-                Expanded(child: _compass(context, state, weatherData)),
-              ],
-            );
-        }
-      },
+            switch (size) {
+              case WidgetSize.small:
+                return _small(context, weatherData);
+              case WidgetSize.medium:
+                return _compass(
+                  context,
+                  forecast.getColorPair(state.selectedHour),
+                  weatherData,
+                );
+              case WidgetSize.large:
+                return Row(
+                  children: [
+                    Expanded(
+                        child: _details(
+                            context,
+                            forecast.getColorPair(state.selectedHour),
+                            weatherData)),
+                    Expanded(
+                        child: _compass(
+                            context,
+                            forecast.getColorPair(state.selectedHour),
+                            weatherData)),
+                  ],
+                );
+            }
+          }
+        },
+      ),
     );
   }
 
-  Widget _small(BuildContext context, ForecastCardProvider provider,
-      HourlyWeatherData? weatherData) {
+  Widget _small(
+    BuildContext context,
+    HourlyWeatherData? weatherData,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -73,11 +96,11 @@ class CompassWidget extends StatelessWidget {
     );
   }
 
-  Widget _details(BuildContext context, ForecastCardProvider provider,
-      HourlyWeatherData? weatherData) {
-    ColorPair colorPair =
-        provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
-
+  Widget _details(
+    BuildContext context,
+    ColorPair colorPair,
+    HourlyWeatherData? weatherData,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
@@ -108,11 +131,11 @@ class CompassWidget extends StatelessWidget {
     );
   }
 
-  Widget _compass(BuildContext context, ForecastCardProvider provider,
-      HourlyWeatherData? weatherData) {
-    ColorPair colorPair =
-        provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
-
+  Widget _compass(
+    BuildContext context,
+    ColorPair colorPair,
+    HourlyWeatherData? weatherData,
+  ) {
     return CustomPaint(
       painter: CompassPainter(
           direction: weatherData?.windDirection.toDouble() ?? 0.0,

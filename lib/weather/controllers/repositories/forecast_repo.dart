@@ -1,6 +1,7 @@
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/api_controller.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
+import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ForecastRepo {
@@ -8,7 +9,9 @@ class ForecastRepo {
   final ApiController _apiController = ApiController();
 
   Future<Forecast> getForecastOfLocation(
-      double latitude, double longitude) async {
+    double latitude,
+    double longitude,
+  ) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var temperature = TemperatureUnit

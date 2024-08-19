@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/detail_widgets_overlay.dart';
 import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
@@ -45,54 +46,63 @@ class _PageTwoState extends State<PageTwo> {
     }
 
     return Consumer<ForecastCardProvider>(
-      builder: (context, state, child) {
-        state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
+      builder: (context, state, child) => FutureBuilder(
+        future: state.geocoding.forecast,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          } else {
+            Forecast forecast = snapshot.data!;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: NavigationToolbar.kMiddleSpacing, vertical: 6),
-          child: StaggeredGrid.count(
-            axisDirection: AxisDirection.down,
-            crossAxisCount: 4,
-            crossAxisSpacing: 6,
-            mainAxisSpacing: 6,
-            children: [
-              for (int i = 0; i < state.geocoding.detailWidgets.length; i++)
-                StaggeredGridTile.count(
-                  crossAxisCellCount:
-                      state.geocoding.detailWidgets[i].size.colSpan,
-                  mainAxisCellCount:
-                      state.geocoding.detailWidgets[i].size.rowSpan,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        width: 2,
-                        color: state.geocoding
-                            .getColorSchemeOfForecast(state.selectedHour)
-                            .main
-                            .darkenColor(0.1),
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: NavigationToolbar.kMiddleSpacing, vertical: 6),
+              child: StaggeredGrid.count(
+                axisDirection: AxisDirection.down,
+                crossAxisCount: 4,
+                crossAxisSpacing: 6,
+                mainAxisSpacing: 6,
+                children: [
+                  for (int i = 0; i < state.geocoding.detailWidgets.length; i++)
+                    StaggeredGridTile.count(
+                      crossAxisCellCount:
+                          state.geocoding.detailWidgets[i].size.colSpan,
+                      mainAxisCellCount:
+                          state.geocoding.detailWidgets[i].size.rowSpan,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            width: 2,
+                            color:
+                                forecast.getColorPair().main.darkenColor(0.1),
+                          ),
+                        ),
+                        clipBehavior: Clip.hardEdge,
+                        child: InkWell(
+                          splashColor:
+                              state.isEditing ? null : Colors.transparent,
+                          highlightColor:
+                              state.isEditing ? null : Colors.transparent,
+                          onTap: () {
+                            if (state.isEditing) {
+                              openWidgetDetail(
+                                  state.geocoding.detailWidgets[i]);
+                            }
+                          },
+                          child: state.geocoding.detailWidgets[i]
+                              .getWidget(state.geocoding),
+                        ),
                       ),
                     ),
-                    clipBehavior: Clip.hardEdge,
-                    child: InkWell(
-                      splashColor: state.isEditing ? null : Colors.transparent,
-                      highlightColor:
-                          state.isEditing ? null : Colors.transparent,
-                      onTap: () {
-                        if (state.isEditing) {
-                          openWidgetDetail(state.geocoding.detailWidgets[i]);
-                        }
-                      },
-                      child: state.geocoding.detailWidgets[i]
-                          .getWidget(state.geocoding),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
+                ],
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }

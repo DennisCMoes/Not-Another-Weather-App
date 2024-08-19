@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
@@ -34,10 +35,12 @@ class ForecastCardProvider extends ChangeNotifier {
   DateTime get selectedHour => _selectedHour;
 
   void _initializeSelectedHour() {
-    final convertedNow = DatetimeUtils.convertToTimezone(
-        DateTime.now(), geocoding.forecast?.timezome ?? "Europe/Amsterdam");
-    final convertedStart = DatetimeUtils.startOfHour(convertedNow);
-    _selectedHour = convertedStart;
+    geocoding.forecast.then((forecastData) {
+      final convertedNow = DatetimeUtils.convertToTimezone(
+          DateTime.now(), forecastData.timezome);
+      final convertedStart = DatetimeUtils.startOfHour(convertedNow);
+      _selectedHour = convertedStart;
+    });
   }
 
   void _setSelectedHour(DateTime time) {
@@ -124,18 +127,23 @@ class ForecastCardProvider extends ChangeNotifier {
   /// "Today at {hour}". Otherwise, it will be "Tomorrow at {hour}"
   ///
   /// Returns a string indicating the relative day and hour
-  String getSelectedHourDescription() {
-    final now = DateTime.now();
-    final timezone = geocoding.forecast?.timezome ?? "Europe/Amsterdam";
+  String getSelectedHourDescription(Forecast forecast) {
+    try {
+      // final forecastData = await geocoding.forecast;
+      final now = DateTime.now();
+      final timezone = forecast.timezome;
 
-    final nowInTargetzone = DatetimeUtils.convertToTimezone(now, timezone);
+      final nowInTargetzone = DatetimeUtils.convertToTimezone(now, timezone);
 
-    if (DateUtils.isSameDay(nowInTargetzone, selectedHour)) {
-      return "Today at ${selectedHour.hour}";
-    } else if (selectedHour.isBefore(nowInTargetzone)) {
-      return "Yesterday at ${selectedHour.hour}";
-    } else {
-      return "Tomorrow at ${selectedHour.hour}";
+      if (DateUtils.isSameDay(nowInTargetzone, selectedHour)) {
+        return "Today at ${selectedHour.hour}";
+      } else if (selectedHour.isBefore(nowInTargetzone)) {
+        return "Yesterday at ${selectedHour.hour}";
+      } else {
+        return "Tomorrow at ${selectedHour.hour}";
+      }
+    } catch (exception) {
+      return "Error fetching data: $exception";
     }
   }
 }

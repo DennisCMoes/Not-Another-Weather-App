@@ -202,58 +202,71 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   Widget _geocodingTile(Geocoding geocoding, int index) {
-    ColorPair colorPair = geocoding.getColorSchemeOfForecast();
-
-    return ListTile(
+    return FutureBuilder(
       key: ValueKey(geocoding),
-      onTap: () => _goToPage(index),
-      dense: true,
-      tileColor: colorPair.main,
-      splashColor: colorPair.main.lightenColor(0.1),
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Flexible(
-            child: Text(
-              geocoding.name,
-              overflow: TextOverflow.ellipsis,
+      future: geocoding.forecast,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text("Error: ${snapshot.error}");
+        } else if (snapshot.hasData) {
+          final forecast = snapshot.data!;
+          final colorPair = forecast.getColorPair();
+
+          return ListTile(
+            onTap: () => _goToPage(index),
+            dense: true,
+            tileColor: colorPair.main,
+            splashColor: colorPair.main.lightenColor(0.1),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    geocoding.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context)
+                        .textTheme
+                        .displayMedium!
+                        .copyWith(color: colorPair.accent),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                geocoding.isCurrentLocation
+                    ? Icon(Icons.near_me, color: colorPair.accent)
+                    : const SizedBox.shrink(),
+              ],
+            ),
+            subtitle: Text(
+              forecast.getCurrentHourData().weatherCode.description,
               style: Theme.of(context)
                   .textTheme
-                  .displayMedium!
-                  .copyWith(color: colorPair.accent),
+                  .displaySmall!
+                  .copyWith(color: colorPair.accent.withOpacity(0.6)),
             ),
-          ),
-          const SizedBox(width: 6),
-          geocoding.isCurrentLocation
-              ? Icon(Icons.near_me, color: colorPair.accent)
-              : const SizedBox.shrink(),
-        ],
-      ),
-      subtitle: Text(
-        geocoding.forecast?.getCurrentHourData().weatherCode.description ??
-            "Unknown",
-        style: Theme.of(context)
-            .textTheme
-            .displaySmall!
-            .copyWith(color: colorPair.accent.withOpacity(0.6)),
-      ),
-      leading: _isEditing && !geocoding.isCurrentLocation
-          ? Icon(Icons.drag_indicator, color: colorPair.accent)
-          : null,
-      trailing: _isEditing && !geocoding.isCurrentLocation
-          ? IconButton(
-              onPressed: () => _removeGeocoding(geocoding),
-              visualDensity: VisualDensity.compact,
-              icon: Icon(Icons.delete, color: colorPair.accent),
-            )
-          : Text(
-              "${geocoding.forecast?.getCurrentHourData().temperature.round() ?? "XX"}º",
-              style: Theme.of(context)
-                  .textTheme
-                  .displayMedium!
-                  .copyWith(color: colorPair.accent),
-            ),
+            leading: _isEditing && !geocoding.isCurrentLocation
+                ? Icon(Icons.drag_indicator, color: colorPair.accent)
+                : null,
+            trailing: _isEditing && !geocoding.isCurrentLocation
+                ? IconButton(
+                    onPressed: () => _removeGeocoding(geocoding),
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(Icons.delete, color: colorPair.accent),
+                  )
+                : Text(
+                    "${forecast.getCurrentHourData().temperature.round()}º",
+                    style: Theme.of(context)
+                        .textTheme
+                        .displayMedium!
+                        .copyWith(color: colorPair.accent),
+                  ),
+          );
+        } else {
+          return const Text("No data available");
+        }
+      },
     );
   }
 

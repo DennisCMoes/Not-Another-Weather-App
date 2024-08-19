@@ -80,14 +80,22 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _initialize() async {
-    final now = DateTime.now();
-    final nextHour = DateTime(now.year, now.month, now.day, now.hour + 1);
-    final durationUntilNextHour = nextHour.difference(now);
+    try {
+      final now = DateTime.now();
+      final nextHour = DateTime(now.year, now.month, now.day, now.hour + 1);
+      final durationUntilNextHour = nextHour.difference(now);
 
-    _hourTimer = Timer(durationUntilNextHour, _weatherProvider.refreshData);
+      _hourTimer = Timer(durationUntilNextHour, _weatherProvider.refreshData);
 
-    await _weatherProvider.initialization();
-    FlutterNativeSplash.remove();
+      await _weatherProvider.initializeGeocodes();
+
+      Future.wait(
+          _weatherProvider.geocodings.map((element) => element.forecast));
+
+      FlutterNativeSplash.remove();
+    } catch (exception, stacktrace) {
+      print(exception);
+    }
   }
 
   Future<void> _refreshData() async {

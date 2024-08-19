@@ -4,6 +4,7 @@ import 'package:not_another_weather_app/shared/extensions/context_extensions.dar
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
+import 'package:not_another_weather_app/weather/models/weather/forecast/daily_weather.dart';
 import 'package:not_another_weather_app/weather/views/painters/sun_painter.dart';
 import 'package:provider/provider.dart';
 
@@ -19,17 +20,30 @@ class SunriseSunsetWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ForecastCardProvider>(
-      builder: (context, state, child) {
-        if (size == WidgetSize.small) {
-          return _small(context, state);
-        } else {
-          return _sunDetails(context, state);
-        }
-      },
+      builder: (context, state, child) => FutureBuilder(
+        future: state.geocoding.forecast,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          } else {
+            final forecast = snapshot.data!;
+            final weatherData = forecast.getCurrentDayData(state.selectedHour);
+            final colorPair = forecast.getColorPair(state.selectedHour);
+
+            if (size == WidgetSize.small) {
+              return _small(context, weatherData);
+            } else {
+              return _sunDetails(context, colorPair, weatherData);
+            }
+          }
+        },
+      ),
     );
   }
 
-  Widget _small(BuildContext context, ForecastCardProvider provider) {
+  Widget _small(BuildContext context, DailyWeatherData weatherData) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -38,26 +52,22 @@ class SunriseSunsetWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.keyboard_arrow_up),
-            Text(formatTime(
-                provider.geocoding.forecast?.getCurrentDayData().sunrise)),
+            Text(formatTime(weatherData.sunrise)),
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.keyboard_arrow_down),
-            Text(formatTime(
-                provider.geocoding.forecast?.getCurrentDayData().sunset)),
+            Text(formatTime(weatherData.sunset)),
           ],
         )
       ],
     );
   }
 
-  Widget _sunDetails(BuildContext context, ForecastCardProvider provider) {
-    ColorPair colorPair =
-        provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
-
+  Widget _sunDetails(
+      BuildContext context, ColorPair colorPair, DailyWeatherData weatherData) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Stack(
@@ -70,8 +80,7 @@ class SunriseSunsetWidget extends StatelessWidget {
               children: [
                 const Text("Sunrise"),
                 Text(
-                  formatTime(
-                      provider.geocoding.forecast?.getCurrentDayData().sunrise),
+                  formatTime(weatherData.sunrise),
                   style: context.textTheme.displaySmall,
                 ),
               ],
@@ -85,8 +94,7 @@ class SunriseSunsetWidget extends StatelessWidget {
               children: [
                 const Text("Sunset"),
                 Text(
-                  formatTime(
-                      provider.geocoding.forecast?.getCurrentDayData().sunset),
+                  formatTime(weatherData.sunset),
                   style: context.textTheme.displaySmall,
                 ),
               ],

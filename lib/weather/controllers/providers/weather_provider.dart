@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -29,6 +30,47 @@ class WeatherProvider extends ChangeNotifier {
 
   UnmodifiableListView<Geocoding> get geocodings =>
       UnmodifiableListView(_geocodings);
+
+  Future<void> initializeGeocodes() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final List<Geocoding> storedGeocodings =
+          _geocodingRepo.getStoredGeocodings();
+
+      if (storedGeocodings.isEmpty) {
+        storedGeocodings
+            .add(Geocoding(1, "Current location", 0, 0, "Current location")
+              ..isCurrentLocation = true
+              ..ordening = 0
+              ..selectedForecastItems = [
+                SelectableForecastFields.windSpeed,
+                SelectableForecastFields.precipitation,
+                SelectableForecastFields.chainceOfRain,
+                SelectableForecastFields.cloudCover
+              ]);
+
+        prefs.setInt("temperature_unit", 1);
+        prefs.setInt("wind_speed_unit", 1);
+        prefs.setInt("precipitation_unit", 0);
+      } else {
+        storedGeocodings.sort((a, b) => a.ordening - b.ordening);
+      }
+
+      // Set the currentlocation values
+      storedGeocodings.firstWhere((geocoding) => geocoding.id == 1)
+        ..isCurrentLocation = true
+        ..ordening = 0;
+
+      _geocodings.addAll(storedGeocodings);
+    } on DioException catch (exception) {
+      debugPrint('Dio exception: $exception');
+      rethrow;
+    } on Exception catch (exception, stacktrace) {
+      debugPrint("Exception: $exception");
+      await Sentry.captureException(exception, stackTrace: stacktrace);
+      rethrow;
+    }
+  }
 
   /// Initializes the weather provider by fetching the current location and it's forecasts, and notifying it's listeners.
   Future<void> initialization() async {
@@ -78,7 +120,7 @@ class WeatherProvider extends ChangeNotifier {
       }
 
       _geocodings.addAll(localGeocodings);
-      await refreshData();
+      // await refreshData();
     } catch (exception, stacktrace) {
       debugPrint("Error during initialization: $exception");
       await Sentry.captureException(exception, stackTrace: stacktrace);
@@ -95,12 +137,12 @@ class WeatherProvider extends ChangeNotifier {
             return coding;
           }
 
-          Forecast forecast = await _forecastRepo.getForecastOfLocation(
-            coding.latitude,
-            coding.longitude,
-          );
+          // Forecast forecast = await _forecastRepo.getForecastOfLocation(
+          //   coding.latitude,
+          //   coding.longitude,
+          // );
 
-          coding.forecast = forecast;
+          // coding.forecast = forecast;
           return coding;
         },
       ).toList(),
@@ -115,11 +157,11 @@ class WeatherProvider extends ChangeNotifier {
 
   void addDummyData() {
     _geocodings.removeWhere((element) => element.isTestClass != TestClass.none);
-    _geocodings.addAll([
+    Future.wait([
       DummyData.colorSchemeGeocoding(TestClass.day),
       DummyData.colorSchemeGeocoding(TestClass.night),
       DummyData.clipperGeocoding(TestClass.day),
-      DummyData.clipperGeocoding(TestClass.night),
+      DummyData.clipperGeocoding(TestClass.night)
     ]);
     notifyListeners();
   }
@@ -164,9 +206,12 @@ class WeatherProvider extends ChangeNotifier {
     _geocodings.add(geocoding);
     notifyListeners();
 
-    final Forecast forecast = await _forecastRepo.getForecastOfLocation(
-        geocoding.latitude, geocoding.longitude);
-    geocoding.forecast = forecast;
+    // final Forecast forecast = await _forecastRepo.getForecastOfLocation(
+    //   geocoding.latitude,
+    //   geocoding.longitude,
+    // );
+
+    // geocoding.forecast = forecast;
 
     _geocodings[_geocodings.length - 1] = geocoding;
     _geocodingRepo.storeGeocoding(geocoding);

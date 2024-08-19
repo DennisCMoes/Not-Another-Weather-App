@@ -52,153 +52,165 @@ class _SummaryPageState extends State<SummaryPage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<ForecastCardProvider>(
-      builder: (context, state, child) {
-        HourlyWeatherData? currentHourData =
-            state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
-        Forecast? currentForecast = state.geocoding.forecast;
-        ColorPair colorPair =
-            state.geocoding.getColorSchemeOfForecast(state.selectedHour);
+      builder: (context, state, child) => FutureBuilder(
+        future: state.geocoding.forecast,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          } else {
+            final forecast = snapshot.data!;
+            final colorPair = forecast.getColorPair(state.selectedHour);
+            final weatherData = forecast.getCurrentHourData(state.selectedHour);
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Column(
-            children: [
-              Expanded(
-                child: Stack(
-                  children: <Widget>[
-                    Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ClipPath(
-                            clipper: currentForecast
-                                    ?.getClipperOfHour(state.selectedHour) ??
-                                WeatherClipper.unknown.getClipper(),
-                            clipBehavior: Clip.antiAlias,
-                            child: SizedBox(
-                              width: MediaQuery.of(context).size.width - 100,
-                              height: MediaQuery.of(context).size.width - 100,
-                              child: RepaintBoundary(
-                                child: CustomScrollView(
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  slivers: [
-                                    SliverGrid(
-                                      delegate: SliverChildBuilderDelegate(
-                                        (context, index) => ClipOval(
-                                          child: Material(
-                                            color: colorPair.accent,
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Stack(
+                      children: <Widget>[
+                        Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ClipPath(
+                                clipper: forecast
+                                    .getClipperOfHour(state.selectedHour),
+                                clipBehavior: Clip.antiAlias,
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width - 100,
+                                  height:
+                                      MediaQuery.of(context).size.width - 100,
+                                  child: RepaintBoundary(
+                                    child: CustomScrollView(
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      slivers: [
+                                        SliverGrid(
+                                          delegate: SliverChildBuilderDelegate(
+                                            (context, index) => ClipOval(
+                                              child: Material(
+                                                color: colorPair.accent,
+                                              ),
+                                            ),
+                                            childCount: 400, // 20 * 20
                                           ),
-                                        ),
-                                        childCount: 400, // 20 * 20
-                                      ),
-                                      gridDelegate:
-                                          const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 20,
-                                        crossAxisSpacing: 6,
-                                        mainAxisSpacing: 6,
-                                      ),
-                                    )
-                                  ],
+                                          gridDelegate:
+                                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 20,
+                                            crossAxisSpacing: 6,
+                                            mainAxisSpacing: 6,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
+                              Text(
+                                weatherData.weatherCode.description,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .displayMedium!
+                                    .copyWith(
+                                      color: colorPair.accent,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Bottom Text
+                  IntrinsicHeight(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: state.geocoding.selectedForecastItems
+                                  .map((e) => _weatherDetailItem(
+                                      context, state, forecast, e))
+                                  .toList(),
                             ),
                           ),
-                          Text(
-                            currentHourData?.weatherCode.description ??
-                                "Unknown",
-                            style: Theme.of(context)
-                                .textTheme
-                                .displayMedium!
-                                .copyWith(
-                                  color: colorPair.accent,
+                          const SizedBox(width: 12),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            transitionBuilder: (child, animation) {
+                              final inAnimation = Tween<Offset>(
+                                begin: const Offset(0.0, 1.0),
+                                end: Offset.zero,
+                              ).animate(animation);
+
+                              final outAnimation = Tween<Offset>(
+                                begin: const Offset(0.0, -1.0),
+                                end: Offset.zero,
+                              ).animate(animation);
+
+                              ValueKey key = ValueKey(forecast.getField(
+                                  SelectableForecastFields.temperature,
+                                  state.selectedHour));
+
+                              // TODO: If the new value is lower slide in from the top, if larger slide in from the bottom
+                              return ClipRect(
+                                clipBehavior: Clip.antiAlias,
+                                child: Stack(
+                                  alignment: Alignment.centerRight,
+                                  children: [
+                                    if (child.key != key)
+                                      SlideTransition(
+                                          position: outAnimation, child: child),
+                                    if (child.key == key)
+                                      SlideTransition(
+                                          position: inAnimation, child: child),
+                                  ],
                                 ),
+                              );
+                            },
+                            child: Text(
+                              "${forecast.getField(SelectableForecastFields.temperature, state.selectedHour) ?? "XX"}",
+                              key: ValueKey(forecast.getField(
+                                  SelectableForecastFields.temperature,
+                                  state.selectedHour)),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .displayLarge!
+                                  .copyWith(
+                                    fontSize: 128,
+                                    color: colorPair.accent,
+                                  ),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-              // Bottom Text
-              IntrinsicHeight(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: state.geocoding.selectedForecastItems
-                              .map((e) => _weatherDetailItem(context, state, e))
-                              .toList(),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        transitionBuilder: (child, animation) {
-                          final inAnimation = Tween<Offset>(
-                            begin: const Offset(0.0, 1.0),
-                            end: Offset.zero,
-                          ).animate(animation);
-
-                          final outAnimation = Tween<Offset>(
-                            begin: const Offset(0.0, -1.0),
-                            end: Offset.zero,
-                          ).animate(animation);
-
-                          ValueKey key = ValueKey(currentForecast?.getField(
-                              SelectableForecastFields.temperature,
-                              state.selectedHour));
-
-                          // TODO: If the new value is lower slide in from the top, if larger slide in from the bottom
-                          return ClipRect(
-                            clipBehavior: Clip.antiAlias,
-                            child: Stack(
-                              alignment: Alignment.centerRight,
-                              children: [
-                                if (child.key != key)
-                                  SlideTransition(
-                                      position: outAnimation, child: child),
-                                if (child.key == key)
-                                  SlideTransition(
-                                      position: inAnimation, child: child),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Text(
-                          "${currentForecast?.getField(SelectableForecastFields.temperature, state.selectedHour) ?? "XX"}",
-                          key: ValueKey(currentForecast?.getField(
-                              SelectableForecastFields.temperature,
-                              state.selectedHour)),
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayLarge!
-                              .copyWith(
-                                fontSize: 128,
-                                color: colorPair.accent,
-                              ),
-                        ),
-                      ),
-                    ],
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        );
-      },
+            );
+          }
+        },
+      ),
     );
   }
 
-  Widget _weatherDetailItem(BuildContext context, ForecastCardProvider provider,
-      SelectableForecastFields field) {
-    ColorPair colorPair =
-        provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
+  Widget _weatherDetailItem(
+    BuildContext context,
+    ForecastCardProvider provider,
+    Forecast forecast,
+    SelectableForecastFields field,
+  ) {
+    final colorPair = forecast.getColorPair(provider.selectedHour);
 
     return Material(
       key: ValueKey(field),
@@ -230,10 +242,7 @@ class _SummaryPageState extends State<SummaryPage> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  provider.geocoding.forecast
-                          ?.getField(field, provider.selectedHour)
-                          .toString() ??
-                      "XX",
+                  forecast.getField(field, provider.selectedHour).toString(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
