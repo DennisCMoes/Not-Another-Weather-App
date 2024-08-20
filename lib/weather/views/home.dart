@@ -96,6 +96,13 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
+  void refreshData() {
+    setState(() {
+      _initializationFunction =
+          _weatherProvider.initializeForecastsOfGeocodings();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     void onStatusBarTap() {
@@ -118,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen>
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 FlutterNativeSplash.remove();
-                return const NoInternetScren();
+                return NoInternetScren(refresh: refreshData);
               } else {
                 FlutterNativeSplash.remove();
                 return _buildHomeScreen();
