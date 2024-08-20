@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -9,6 +10,10 @@ import 'package:not_another_weather_app/shared/extensions/context_extensions.dar
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
+import 'package:not_another_weather_app/weather/models/geocoding.dart';
+import 'package:not_another_weather_app/weather/models/weather/weather_code.dart';
+import 'package:not_another_weather_app/weather/views/components/no_internet_screen.dart';
+import 'package:not_another_weather_app/weather/views/components/summary_card_clipper.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
@@ -24,7 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with WidgetsBindingObserver, RouteAware {
-  late Future<void> _initializationBuilder;
+  late Future<void> _initializationFunction;
   late Timer _hourTimer;
 
   late DeviceProvider _deviceProvider;
@@ -50,7 +55,9 @@ class _HomeScreenState extends State<HomeScreen>
       _deviceProvider.setHasInternet(!event.contains(ConnectivityResult.none));
     });
 
-    _initializationBuilder = _initialize();
+    _weatherProvider.initializeStoredGeocodings();
+    _initializationFunction =
+        _weatherProvider.initializeForecastsOfGeocodings();
   }
 
   @override
@@ -79,25 +86,6 @@ class _HomeScreenState extends State<HomeScreen>
     return DateFormat("HH:mm").format(_deviceProvider.refreshTime);
   }
 
-  Future<void> _initialize() async {
-    try {
-      final now = DateTime.now();
-      final nextHour = DateTime(now.year, now.month, now.day, now.hour + 1);
-      final durationUntilNextHour = nextHour.difference(now);
-
-      _hourTimer = Timer(durationUntilNextHour, _weatherProvider.refreshData);
-
-      await _weatherProvider.initializeGeocodes();
-
-      Future.wait(
-          _weatherProvider.geocodings.map((element) => element.forecast));
-
-      FlutterNativeSplash.remove();
-    } catch (exception, stacktrace) {
-      print(exception);
-    }
-  }
-
   Future<void> _refreshData() async {
     bool shouldRefresh = DateTime.now()
         .isAfter(_deviceProvider.refreshTime.add(const Duration(minutes: 15)));
@@ -124,11 +112,15 @@ class _HomeScreenState extends State<HomeScreen>
       children: [
         Scaffold(
           body: FutureBuilder(
-            future: _initializationBuilder,
+            future: _initializationFunction,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                FlutterNativeSplash.remove();
+                return const NoInternetScren();
               } else {
+                FlutterNativeSplash.remove();
                 return _buildHomeScreen();
               }
             },
@@ -196,10 +188,10 @@ class _HomeScreenState extends State<HomeScreen>
               children: [
                 for (int i = 0; i < state.geocodings.length; i++)
                   ChangeNotifierProvider(
-                    create: (context) => ForecastCardProvider(
-                      state.geocodings[i],
-                    ),
-                    child: const ForecastCard(),
+                    create: (context) {
+                      return ForecastCardProvider(state.geocodings[i]);
+                    },
+                    child: ForecastCard(geocoding: state.geocodings[i]),
                   ),
               ],
             ),

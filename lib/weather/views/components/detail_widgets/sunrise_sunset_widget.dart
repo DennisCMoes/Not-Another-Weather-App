@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/daily_weather.dart';
@@ -10,8 +11,10 @@ import 'package:provider/provider.dart';
 
 class SunriseSunsetWidget extends StatelessWidget {
   final WidgetSize size;
+  final Forecast forecast;
 
-  const SunriseSunsetWidget({required this.size, super.key});
+  const SunriseSunsetWidget(
+      {required this.size, required this.forecast, super.key});
 
   String formatTime(DateTime? dateTime) {
     return dateTime == null ? "Invalid time" : DateFormat.Hm().format(dateTime);
@@ -20,26 +23,16 @@ class SunriseSunsetWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ForecastCardProvider>(
-      builder: (context, state, child) => FutureBuilder(
-        future: state.geocoding.forecast,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return Text("Error: ${snapshot.error}");
-          } else {
-            final forecast = snapshot.data!;
-            final weatherData = forecast.getCurrentDayData(state.selectedHour);
-            final colorPair = forecast.getColorPair(state.selectedHour);
+      builder: (context, state, child) {
+        final weatherData = forecast.getCurrentDayData(state.selectedHour);
+        final colorPair = forecast.getColorPair(state.selectedHour);
 
-            if (size == WidgetSize.small) {
-              return _small(context, weatherData);
-            } else {
-              return _sunDetails(context, colorPair, weatherData);
-            }
-          }
-        },
-      ),
+        if (size == WidgetSize.small) {
+          return _small(context, weatherData);
+        } else {
+          return _sunDetails(context, colorPair, weatherData);
+        }
+      },
     );
   }
 

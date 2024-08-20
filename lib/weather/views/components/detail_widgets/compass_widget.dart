@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
@@ -9,8 +10,9 @@ import 'package:provider/provider.dart';
 
 class CompassWidget extends StatelessWidget {
   final WidgetSize size;
+  final Forecast forecast;
 
-  const CompassWidget({required this.size, super.key});
+  const CompassWidget({required this.size, required this.forecast, super.key});
 
   String getHeading([int heading = 0]) {
     if (heading >= 0 && heading <= 22.5 && heading >= 337.5) {
@@ -37,45 +39,35 @@ class CompassWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ForecastCardProvider>(
-      builder: (context, state, child) => FutureBuilder(
-        future: state.geocoding.forecast,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return Text("Error: ${snapshot.error}");
-          } else {
-            final forecast = snapshot.data!;
-            final weatherData = forecast.getCurrentHourData(state.selectedHour);
+      builder: (context, state, child) {
+        final weatherData = forecast.getCurrentHourData(state.selectedHour);
 
-            switch (size) {
-              case WidgetSize.small:
-                return _small(context, weatherData);
-              case WidgetSize.medium:
-                return _compass(
-                  context,
-                  forecast.getColorPair(state.selectedHour),
-                  weatherData,
-                );
-              case WidgetSize.large:
-                return Row(
-                  children: [
-                    Expanded(
-                        child: _details(
-                            context,
-                            forecast.getColorPair(state.selectedHour),
-                            weatherData)),
-                    Expanded(
-                        child: _compass(
-                            context,
-                            forecast.getColorPair(state.selectedHour),
-                            weatherData)),
-                  ],
-                );
-            }
-          }
-        },
-      ),
+        switch (size) {
+          case WidgetSize.small:
+            return _small(context, weatherData);
+          case WidgetSize.medium:
+            return _compass(
+              context,
+              forecast.getColorPair(state.selectedHour),
+              weatherData,
+            );
+          case WidgetSize.large:
+            return Row(
+              children: [
+                Expanded(
+                    child: _details(
+                        context,
+                        forecast.getColorPair(state.selectedHour),
+                        weatherData)),
+                Expanded(
+                    child: _compass(
+                        context,
+                        forecast.getColorPair(state.selectedHour),
+                        weatherData)),
+              ],
+            );
+        }
+      },
     );
   }
 

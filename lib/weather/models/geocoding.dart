@@ -34,7 +34,7 @@ class Geocoding {
   bool isCurrentLocation;
 
   @Transient()
-  late Future<Forecast> forecast;
+  Forecast? forecast;
 
   int selectedPage = 0;
 
@@ -62,15 +62,6 @@ class Geocoding {
           ];
   }
 
-  List<WidgetItem> detailWidgets = [
-    WidgetItem(id: 1, size: WidgetSize.medium, type: WidgetType.compass),
-    WidgetItem(id: 2, size: WidgetSize.small, type: WidgetType.genericText),
-    WidgetItem(id: 3, size: WidgetSize.small, type: WidgetType.genericText),
-    WidgetItem(id: 4, size: WidgetSize.large, type: WidgetType.sunriseSunset),
-    WidgetItem(id: 5, size: WidgetSize.medium, type: WidgetType.genericText),
-    WidgetItem(id: 6, size: WidgetSize.medium, type: WidgetType.genericText),
-  ];
-
   Geocoding(
     this.id,
     this.name,
@@ -80,29 +71,7 @@ class Geocoding {
     this.isCurrentLocation = false,
     this.ordening = -1,
     this.isTestClass = TestClass.none,
-  }) {
-    final completer = Completer<Forecast>();
-    final ForecastRepo repo = ForecastRepo();
-
-    forecast = completer.future;
-
-    if (isTestClass == TestClass.none && latitude != 0 && longitude != 0) {
-      _fetchForecast(completer, repo);
-    }
-  }
-
-  void _fetchForecast(Completer<Forecast> completer, ForecastRepo repo) async {
-    try {
-      final forecastData = await repo.getForecastOfLocation(
-        latitude,
-        longitude,
-      );
-
-      completer.complete(forecastData);
-    } catch (exception, stacktrace) {
-      completer.completeError(exception, stacktrace);
-    }
-  }
+  });
 
   factory Geocoding.fromJson(Map<String, dynamic> json) {
     return Geocoding(
@@ -136,15 +105,18 @@ class Geocoding {
 
   Future<ColorPair> getColorSchemeOfForecast([DateTime? time]) async {
     try {
-      Forecast forecastData = await forecast;
+      if (forecast == null) {
+        throw Exception("No forecast available");
+      }
+
       time ??= DateTime.now();
 
       final DateTime startOfHour = DatetimeUtils.startOfHour(time);
       final DateTime startOfDay = DatetimeUtils.startOfDay(time);
 
-      final dailyWeatherData = forecastData.dailyWeatherData[startOfDay];
+      final dailyWeatherData = forecast!.dailyWeatherData[startOfDay];
       if (dailyWeatherData == null) {
-        return const ColorPair(Color(0xFF0327D6), Color(0xFFDBE7F6));
+        throw Exception("No daily weather data available");
       }
 
       final sunrise = dailyWeatherData.sunrise;
@@ -160,7 +132,7 @@ class Geocoding {
         isInTheDay = (time.isAfter(sunrise)) && (time.isBefore(sunset));
       }
 
-      return forecastData
+      return forecast!
           .getCurrentHourData(startOfHour)
           .weatherCode
           .colorScheme

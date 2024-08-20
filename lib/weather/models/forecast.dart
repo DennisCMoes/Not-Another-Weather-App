@@ -171,11 +171,15 @@ class Forecast {
   }
 
   ColorPair getColorPair([DateTime? date]) {
-    DateTime now = DateTime.now();
+    date ??= DateTime.now();
+
     DailyWeatherData daily = getCurrentDayData(date);
     HourlyWeatherData hourly = getCurrentHourData(date);
 
-    final isInTheDay = now.isBefore(daily.sunset) && now.isAfter(daily.sunrise);
+    final isBeforeSunset = date.isBefore(daily.sunset);
+    final isAfterSunrise = date.isAfter(daily.sunrise);
+
+    final isInTheDay = isBeforeSunset && isAfterSunrise;
     return hourly.weatherCode.colorScheme.getColorPair(isInTheDay);
   }
 

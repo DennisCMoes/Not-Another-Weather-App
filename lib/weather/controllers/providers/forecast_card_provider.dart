@@ -4,7 +4,6 @@ import 'package:not_another_weather_app/weather/controllers/repositories/geocodi
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
-import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 /// A provider that manages the state and logic for the currently selected geocoding
@@ -35,24 +34,16 @@ class ForecastCardProvider extends ChangeNotifier {
   DateTime get selectedHour => _selectedHour;
 
   void _initializeSelectedHour() {
-    geocoding.forecast.then((forecastData) {
-      final convertedNow = DatetimeUtils.convertToTimezone(
-          DateTime.now(), forecastData.timezome);
-      final convertedStart = DatetimeUtils.startOfHour(convertedNow);
-      _selectedHour = convertedStart;
-    });
+    final forecast = geocoding.forecast!;
+    final convertedNow =
+        DatetimeUtils.convertToTimezone(DateTime.now(), forecast.timezome);
+    final convertedStartHour = DatetimeUtils.startOfHour(convertedNow);
+
+    _selectedHour = convertedStartHour;
   }
 
   void _setSelectedHour(DateTime time) {
     _selectedHour = DatetimeUtils.startOfHour(time);
-    notifyListeners();
-  }
-
-  void _updateWidgetItem(WidgetItem item, void Function(WidgetItem) updateFn) {
-    WidgetItem widget =
-        geocoding.detailWidgets.singleWhere((widget) => widget.id == item.id);
-
-    updateFn(widget);
     notifyListeners();
   }
 
@@ -107,18 +98,6 @@ class ForecastCardProvider extends ChangeNotifier {
     } else {
       debugPrint("Error: Old field not found");
     }
-  }
-
-  /// Sets the size of the widget item identified by [item] to [size] and notifies it's listeners
-  void setGeocodingSize(WidgetItem item, WidgetSize size) {
-    _updateWidgetItem(item, (widget) => widget.size == size);
-    notifyListeners();
-  }
-
-  /// Sets the type of the widget item identified by [item] to [type] and notifies it's listeners
-  void setGeocodingType(WidgetItem item, WidgetType type) {
-    _updateWidgetItem(item, (widget) => widget.type == type);
-    notifyListeners();
   }
 
   /// Returns a string representing the selected hour relative to the current day

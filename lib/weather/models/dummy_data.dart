@@ -46,7 +46,7 @@ class DummyData {
     );
   }
 
-  static Future<Geocoding> colorSchemeGeocoding(TestClass testclass) async {
+  static Geocoding colorSchemeGeocoding(TestClass testclass) {
     List<HourlyWeatherData> hourly = [];
     List<DailyWeatherData> daily = [];
 
@@ -66,12 +66,10 @@ class DummyData {
         "Color Scheme (${testclass.name})")
       ..isTestClass = testclass
       ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
-      ..forecast = Future.value(
-        Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily),
-      );
+      ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily);
   }
 
-  static Future<Geocoding> clipperGeocoding(TestClass testclass) async {
+  static Geocoding clipperGeocoding(TestClass testclass) {
     List<HourlyWeatherData> hourly = [];
     List<DailyWeatherData> daily = [];
 
@@ -91,8 +89,6 @@ class DummyData {
         12, "Clipper (${testclass.name})", 0, 0, "Clipper (${testclass.name})")
       ..isTestClass = testclass
       ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
-      ..forecast = Future.value(
-        Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily),
-      );
+      ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily);
   }
 }

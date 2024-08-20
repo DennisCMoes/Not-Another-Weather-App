@@ -74,7 +74,7 @@ enum WeatherCode {
   moderateThunderstormWithHail(99, "Thunderstorm",
       WeatherColorScheme.thunderstorm, WeatherClipper.thunder),
 
-  unknown(-1, "Something went wrong", WeatherColorScheme.thunderstorm,
+  unknown(-1, "Something went wrong", WeatherColorScheme.unknown,
       WeatherClipper.unknown);
 
   final int code;

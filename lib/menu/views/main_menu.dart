@@ -9,13 +9,15 @@ import 'package:not_another_weather_app/shared/extensions/color_extensions.dart'
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
-import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainMenuScreen extends StatefulWidget {
-  const MainMenuScreen({super.key});
+  final Geocoding geocoding;
+
+  const MainMenuScreen({super.key, required this.geocoding});
 
   @override
   State<MainMenuScreen> createState() => _MainMenuScreenState();
@@ -25,6 +27,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   late FocusNode _focusNode;
   late TextEditingController _textEditingController;
   late WeatherProvider _weatherProvider;
+  late Forecast _forecast;
 
   final GeocodingRepo _geocodingRepo = GeocodingRepo();
 
@@ -37,6 +40,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   @override
   void initState() {
     super.initState();
+
+    _forecast = widget.geocoding.forecast!;
 
     _weatherProvider = context.read<WeatherProvider>();
 
@@ -202,71 +207,57 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   Widget _geocodingTile(Geocoding geocoding, int index) {
-    return FutureBuilder(
-      key: ValueKey(geocoding),
-      future: geocoding.forecast,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text("Error: ${snapshot.error}");
-        } else if (snapshot.hasData) {
-          final forecast = snapshot.data!;
-          final colorPair = forecast.getColorPair();
+    final colorPair = _forecast.getColorPair();
 
-          return ListTile(
-            onTap: () => _goToPage(index),
-            dense: true,
-            tileColor: colorPair.main,
-            splashColor: colorPair.main.lightenColor(0.1),
-            title: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    geocoding.name,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context)
-                        .textTheme
-                        .displayMedium!
-                        .copyWith(color: colorPair.accent),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                geocoding.isCurrentLocation
-                    ? Icon(Icons.near_me, color: colorPair.accent)
-                    : const SizedBox.shrink(),
-              ],
-            ),
-            subtitle: Text(
-              forecast.getCurrentHourData().weatherCode.description,
+    return ListTile(
+      key: ValueKey(geocoding),
+      onTap: () => _goToPage(index),
+      dense: true,
+      tileColor: colorPair.main,
+      splashColor: colorPair.main.lightenColor(0.1),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Flexible(
+            child: Text(
+              geocoding.name,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context)
                   .textTheme
-                  .displaySmall!
-                  .copyWith(color: colorPair.accent.withOpacity(0.6)),
+                  .displayMedium!
+                  .copyWith(color: colorPair.accent),
             ),
-            leading: _isEditing && !geocoding.isCurrentLocation
-                ? Icon(Icons.drag_indicator, color: colorPair.accent)
-                : null,
-            trailing: _isEditing && !geocoding.isCurrentLocation
-                ? IconButton(
-                    onPressed: () => _removeGeocoding(geocoding),
-                    visualDensity: VisualDensity.compact,
-                    icon: Icon(Icons.delete, color: colorPair.accent),
-                  )
-                : Text(
-                    "${forecast.getCurrentHourData().temperature.round()}º",
-                    style: Theme.of(context)
-                        .textTheme
-                        .displayMedium!
-                        .copyWith(color: colorPair.accent),
-                  ),
-          );
-        } else {
-          return const Text("No data available");
-        }
-      },
+          ),
+          const SizedBox(width: 6),
+          geocoding.isCurrentLocation
+              ? Icon(Icons.near_me, color: colorPair.accent)
+              : const SizedBox.shrink(),
+        ],
+      ),
+      subtitle: Text(
+        _forecast.getCurrentHourData().weatherCode.description,
+        style: Theme.of(context)
+            .textTheme
+            .displaySmall!
+            .copyWith(color: colorPair.accent.withOpacity(0.6)),
+      ),
+      leading: _isEditing && !geocoding.isCurrentLocation
+          ? Icon(Icons.drag_indicator, color: colorPair.accent)
+          : null,
+      trailing: _isEditing && !geocoding.isCurrentLocation
+          ? IconButton(
+              onPressed: () => _removeGeocoding(geocoding),
+              visualDensity: VisualDensity.compact,
+              icon: Icon(Icons.delete, color: colorPair.accent),
+            )
+          : Text(
+              "${_forecast.getCurrentHourData().temperature.round()}º",
+              style: Theme.of(context)
+                  .textTheme
+                  .displayMedium!
+                  .copyWith(color: colorPair.accent),
+            ),
     );
   }
 

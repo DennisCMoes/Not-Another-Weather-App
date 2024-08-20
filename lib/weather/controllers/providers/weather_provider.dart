@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
@@ -30,6 +31,78 @@ class WeatherProvider extends ChangeNotifier {
 
   UnmodifiableListView<Geocoding> get geocodings =>
       UnmodifiableListView(_geocodings);
+
+  void initializeStoredGeocodings() {
+    final List<Geocoding> storedGeocodings =
+        _geocodingRepo.getStoredGeocodings();
+
+    if (storedGeocodings.isEmpty) {
+      storedGeocodings
+          .add(Geocoding(1, "Current location", 0, 0, "Current location")
+            ..isCurrentLocation = true
+            ..ordening = 0
+            ..selectedForecastItems = [
+              SelectableForecastFields.windSpeed,
+              SelectableForecastFields.precipitation,
+              SelectableForecastFields.chainceOfRain,
+              SelectableForecastFields.cloudCover,
+            ]);
+    } else {
+      storedGeocodings.sort((a, b) => a.ordening - b.ordening);
+    }
+
+    storedGeocodings.firstWhere((geocoding) => geocoding.id == 1)
+      ..isCurrentLocation = true
+      ..ordening = 0;
+
+    _geocodings = storedGeocodings;
+  }
+
+  Future<void> initializeForecastsOfGeocodings() async {
+    final completer = Completer<void>();
+    _getData(completer);
+    return completer.future;
+  }
+
+  Future<void> _getData(Completer<void> completer) async {
+    try {
+      final List<ConnectivityResult> connectivityResult =
+          await Connectivity().checkConnectivity();
+
+      if (!connectivityResult.contains(ConnectivityResult.none)) {
+        final Position position =
+            await _locationController.getCurrentPosition();
+        final localGeocodingIndex =
+            _geocodings.indexWhere((geocode) => geocode.id == 1);
+
+        _geocodings[localGeocodingIndex].latitude = position.latitude;
+        _geocodings[localGeocodingIndex].longitude = position.longitude;
+
+        _geocodingRepo.storeGeocoding(_geocodings[localGeocodingIndex]);
+      }
+
+      _geocodings = await Future.wait(
+        _geocodings.map(
+          (coding) async {
+            if (coding.isTestClass != TestClass.none) {
+              return coding;
+            }
+
+            Forecast forecast = await _forecastRepo.getForecastOfLocation(
+              coding.latitude,
+              coding.longitude,
+            );
+
+            return coding..forecast = forecast;
+          },
+        ).toList(),
+      );
+
+      completer.complete();
+    } catch (exception, stacktrace) {
+      completer.completeError(exception, stacktrace);
+    }
+  }
 
   Future<void> initializeGeocodes() async {
     try {
@@ -157,12 +230,13 @@ class WeatherProvider extends ChangeNotifier {
 
   void addDummyData() {
     _geocodings.removeWhere((element) => element.isTestClass != TestClass.none);
-    Future.wait([
+    _geocodings.addAll([
       DummyData.colorSchemeGeocoding(TestClass.day),
       DummyData.colorSchemeGeocoding(TestClass.night),
       DummyData.clipperGeocoding(TestClass.day),
-      DummyData.clipperGeocoding(TestClass.night)
+      DummyData.clipperGeocoding(TestClass.night),
     ]);
+
     notifyListeners();
   }
 
