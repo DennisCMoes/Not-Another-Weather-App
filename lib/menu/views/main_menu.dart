@@ -15,9 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainMenuScreen extends StatefulWidget {
-  final Geocoding geocoding;
-
-  const MainMenuScreen({super.key, required this.geocoding});
+  const MainMenuScreen({super.key});
 
   @override
   State<MainMenuScreen> createState() => _MainMenuScreenState();
@@ -27,7 +25,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   late FocusNode _focusNode;
   late TextEditingController _textEditingController;
   late WeatherProvider _weatherProvider;
-  late Forecast _forecast;
 
   final GeocodingRepo _geocodingRepo = GeocodingRepo();
 
@@ -40,8 +37,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   @override
   void initState() {
     super.initState();
-
-    _forecast = widget.geocoding.forecast!;
 
     _weatherProvider = context.read<WeatherProvider>();
 
@@ -207,7 +202,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   Widget _geocodingTile(Geocoding geocoding, int index) {
-    final colorPair = _forecast.getColorPair();
+    final colorPair = geocoding.forecast!.getColorPair();
 
     return ListTile(
       key: ValueKey(geocoding),
@@ -236,7 +231,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         ],
       ),
       subtitle: Text(
-        _forecast.getCurrentHourData().weatherCode.description,
+        geocoding.forecast!.getCurrentHourData().weatherCode.description,
         style: Theme.of(context)
             .textTheme
             .displaySmall!
@@ -252,7 +247,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               icon: Icon(Icons.delete, color: colorPair.accent),
             )
           : Text(
-              "${_forecast.getCurrentHourData().temperature.round()}º",
+              "${geocoding.forecast!.getCurrentHourData().temperature.round()}º",
               style: Theme.of(context)
                   .textTheme
                   .displayMedium!
@@ -284,9 +279,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               ReorderableListView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                header: state.geocodings.isEmpty
-                    ? const SizedBox.shrink()
-                    : _geocodingTile(state.geocodings[0], 0),
+                header: _geocodingTile(state.geocodings[0], 0),
                 onReorder: (oldIndex, newIndex) {
                   if (newIndex > oldIndex) {
                     newIndex -= 1;

@@ -131,7 +131,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
           barrierColor: Colors.black54,
           transitionDuration: const Duration(milliseconds: 500),
           pageBuilder: (context, animation, secondaryAnimation) {
-            return MainMenuScreen(geocoding: widget.geocoding);
+            return const MainMenuScreen();
           },
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(0.0, 1.0);
