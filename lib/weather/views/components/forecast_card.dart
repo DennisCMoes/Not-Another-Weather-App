@@ -94,9 +94,10 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   }
 
   String _getSliderLabel(Forecast forecast) {
-    final DateTime startOfHour =
-        DatetimeUtils.startOfHour(_weatherProvider.currentHour)
-            .add(Duration(hours: _sliderValue.toInt()));
+    final DateTime convertedTime = DatetimeUtils.convertToTimezone(
+        _weatherProvider.currentHour, forecast.timezome);
+    final DateTime startOfHour = DatetimeUtils.startOfHour(convertedTime)
+        .add(Duration(hours: _sliderValue.toInt()));
 
     final Forecast forecastData = forecast;
     final DailyWeatherData dailyWeatherData =
@@ -236,7 +237,10 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                       trackHeight: 40,
                       valueIndicatorShape: ForecastSliderValueIndicator(),
                       trackShape: ForecastSliderTrack(
-                        _weatherProvider.currentHour,
+                        DatetimeUtils.convertToTimezone(
+                          _weatherProvider.currentHour,
+                          _forecast.timezome,
+                        ),
                         colorPair,
                       ),
                       thumbShape: ForecastSliderThumb(),

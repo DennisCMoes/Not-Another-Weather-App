@@ -75,7 +75,9 @@ enum WeatherCode {
       WeatherColorScheme.thunderstorm, WeatherClipper.thunder),
 
   unknown(-1, "Something went wrong", WeatherColorScheme.unknown,
-      WeatherClipper.unknown);
+      WeatherClipper.unknown),
+  noInternet(
+      -2, "No internet", WeatherColorScheme.unknown, WeatherClipper.unknown);
 
   final int code;
   final String description;

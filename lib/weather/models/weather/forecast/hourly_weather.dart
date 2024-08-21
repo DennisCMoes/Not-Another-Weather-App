@@ -30,6 +30,9 @@ class HourlyWeatherData {
 
   WeatherCode get weatherCode => WeatherCode.fromCode(weatherCodeNum);
 
+  @Transient()
+  bool invalidData;
+
   HourlyWeatherData(
     this.time,
     this.temperature,
@@ -41,6 +44,12 @@ class HourlyWeatherData {
     this.cloudCover,
     this.windSpeed,
     this.windDirection,
-    this.windGusts,
-  );
+    this.windGusts, {
+    this.invalidData = false,
+  });
+
+  static HourlyWeatherData invalidHour(DateTime time) {
+    return HourlyWeatherData(time, -1, -1, -1, -1, -1, -2, -1, -1, -1, -1,
+        invalidData: true);
+  }
 }

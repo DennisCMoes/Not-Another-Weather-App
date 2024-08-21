@@ -21,11 +21,19 @@ class DailyWeatherData {
 
   final forecast = ToOne<Forecast>();
 
+  @Transient()
+  bool invalidData;
+
   DailyWeatherData(
     this.time,
     this.sunrise,
     this.sunset,
     this.uvIndex,
-    this.clearSkyUvIndex,
-  );
+    this.clearSkyUvIndex, {
+    this.invalidData = false,
+  });
+
+  static DailyWeatherData invalidDay(DateTime time) {
+    return DailyWeatherData(time, time, time, -1, -1, invalidData: false);
+  }
 }

@@ -108,13 +108,25 @@ class Forecast {
 
   HourlyWeatherData getCurrentHourData([DateTime? date]) {
     date ??= DatetimeUtils.convertToTimezone(DateTime.now(), timezome);
-    return hourlyWeatherData[DatetimeUtils.startOfHour(date)]!;
+
+    if (date.isAfter(hourlyWeatherList.last.time) ||
+        date.isBefore(hourlyWeatherList.first.time)) {
+      return HourlyWeatherData.invalidHour(date);
+    } else {
+      return hourlyWeatherData[DatetimeUtils.startOfHour(date)]!;
+    }
   }
 
   DailyWeatherData getCurrentDayData([DateTime? date]) {
-    date ??= DatetimeUtils.startOfHour();
-    DateTime startOfDay = DatetimeUtils.startOfDay(date);
-    return dailyWeatherData[startOfDay]!;
+    date ??= DatetimeUtils.startOfDay(DatetimeUtils.startOfHour());
+
+    if (date.isAfter(dailyWeatherDataList.last.time) ||
+        date.isBefore(hourlyWeatherList.first.time)) {
+      return DailyWeatherData.invalidDay(date);
+    } else {
+      DateTime startOfDay = DatetimeUtils.startOfDay(date);
+      return dailyWeatherData[startOfDay]!;
+    }
   }
 
   dynamic getField(SelectableForecastFields field, [DateTime? date]) {
@@ -125,6 +137,10 @@ class Forecast {
 
     int windSpeedUnit = _preferences.getInt("wind_speed_unit") ?? 0;
     int precipitationUnit = _preferences.getInt("precipitation_unit") ?? 0;
+
+    if (currentHourData.invalidData || currentDayData.invalidData) {
+      return "XX";
+    }
 
     switch (field) {
       case SelectableForecastFields.temperature:

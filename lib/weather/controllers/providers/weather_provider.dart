@@ -106,6 +106,9 @@ class WeatherProvider extends ChangeNotifier {
       // prefs.setInt("wind_speed_unit", 0);
       // prefs.setInt("precipitation_unit", 1);
 
+      // TODO: If we try to get hourly or daily data after the last item in the list, return a [NO INTERNET] card.
+      //  Add a check that checks if the hour we want to get is after the last hour
+
       final List<ConnectivityResult> connectivityResult =
           await Connectivity().checkConnectivity();
 
