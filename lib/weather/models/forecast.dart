@@ -6,33 +6,32 @@ import 'package:not_another_weather_app/weather/models/logics/selectable_forecas
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/daily_weather.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
-import 'package:not_another_weather_app/weather/models/weather/weather_code.dart';
+import 'package:objectbox/objectbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+@Entity()
 class Forecast {
   late SharedPreferences _preferences;
+
+  @Id(assignable: true)
+  int id = 0;
 
   double latitude;
   double longitude;
   String timezome;
   double pressure;
 
-  List<HourlyWeatherData> hourlyWeatherList;
-  List<DailyWeatherData> dailyWeatherDataList;
+  @Backlink('forecast')
+  List<HourlyWeatherData> hourlyWeatherList = [];
+  @Backlink('forecast')
+  List<DailyWeatherData> dailyWeatherDataList = [];
 
   Map<DateTime, HourlyWeatherData> get hourlyWeatherData =>
       {for (var e in hourlyWeatherList) e.time: e};
   Map<DateTime, DailyWeatherData> get dailyWeatherData =>
       {for (var e in dailyWeatherDataList) e.time: e};
 
-  Forecast(
-    this.latitude,
-    this.longitude,
-    this.timezome,
-    this.pressure,
-    this.hourlyWeatherList,
-    this.dailyWeatherDataList,
-  ) {
+  Forecast(this.latitude, this.longitude, this.timezome, this.pressure) {
     _initialization();
   }
 
@@ -58,40 +57,48 @@ class Forecast {
     List<HourlyWeatherData> hourlyWeatherData = [];
     List<DailyWeatherData> dailyWeatherData = [];
 
+    Forecast forecast = Forecast(
+      json['latitude'],
+      json['longitude'],
+      json['timezone'],
+      json['current']['surface_pressure'],
+    );
+
     for (int i = 0; i < times.length; i++) {
-      hourlyWeatherData.add(HourlyWeatherData(
+      HourlyWeatherData hourly = HourlyWeatherData(
         times[i],
         dataMap['temperature_2m']![i],
         dataMap['apparent_temperature']![i],
         dataMap['relative_humidity_2m']![i],
         dataMap['precipitation_probability']![i],
         dataMap['precipitation']![i],
-        WeatherCode.fromCode(dataMap['weather_code']![i]),
+        dataMap['weather_code']![i],
         dataMap['cloud_cover']![i],
         dataMap['wind_speed_10m']![i],
         dataMap['wind_direction_10m']![i],
         dataMap['wind_gusts_10m']![i],
-      ));
+      );
+
+      hourly.forecast.target = forecast;
+      hourlyWeatherData.add(hourly);
     }
 
     for (int i = 0; i < days.length; i++) {
-      dailyWeatherData.add(DailyWeatherData(
+      DailyWeatherData daily = DailyWeatherData(
         days[i],
         hourFormat.parseUtc(daysMap['sunrise']![i]),
         hourFormat.parseUtc(daysMap['sunset']![i]),
         daysMap['uv_index_max']![i],
         daysMap['uv_index_clear_sky_max']![i],
-      ));
+      );
+
+      daily.forecast.target = forecast;
+      dailyWeatherData.add(daily);
     }
 
-    return Forecast(
-      json['latitude'],
-      json['longitude'],
-      json['timezone'],
-      json['current']['surface_pressure'],
-      hourlyWeatherData,
-      dailyWeatherData,
-    );
+    return forecast
+      ..dailyWeatherDataList = dailyWeatherData
+      ..hourlyWeatherList = hourlyWeatherData;
   }
 
   static Map<String, List<dynamic>> _extractDataMap(Map<String, dynamic> data) {
@@ -172,8 +179,10 @@ class Forecast {
   ColorPair getColorPair([DateTime? date]) {
     date ??= DateTime.now();
 
-    DailyWeatherData daily = getCurrentDayData(date);
-    HourlyWeatherData hourly = getCurrentHourData(date);
+    // DailyWeatherData daily = getCurrentDayData(date);
+    DailyWeatherData daily = getCurrentDayData();
+    // HourlyWeatherData hourly = getCurrentHourData(date);
+    HourlyWeatherData hourly = getCurrentHourData();
 
     final isBeforeSunset = date.isBefore(daily.sunset);
     final isAfterSunrise = date.isAfter(daily.sunrise);

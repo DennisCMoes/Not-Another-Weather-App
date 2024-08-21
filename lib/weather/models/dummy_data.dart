@@ -26,7 +26,7 @@ class DummyData {
       random.nextInt(100) + 40,
       random.nextInt(100),
       num.parse((random.nextDouble() * 3).toStringAsFixed(2)).toDouble(),
-      weatherCode,
+      weatherCode.code,
       random.nextInt(100),
       num.parse((random.nextDouble() * 20).toStringAsFixed(2)).toDouble(),
       random.nextInt(360),
@@ -66,7 +66,8 @@ class DummyData {
         "Color Scheme (${testclass.name})")
       ..isTestClass = testclass
       ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
-      ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily);
+      // ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily);
+      ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1);
   }
 
   static Geocoding clipperGeocoding(TestClass testclass) {
@@ -89,6 +90,7 @@ class DummyData {
         12, "Clipper (${testclass.name})", 0, 0, "Clipper (${testclass.name})")
       ..isTestClass = testclass
       ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
-      ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily);
+      // ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily);
+      ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1);
   }
 }

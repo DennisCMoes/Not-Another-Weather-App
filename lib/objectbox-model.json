@@ -51,17 +51,203 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "3:8473249143881802513",
+      "lastPropertyId": "9:5894981568594173386",
+      "name": "DailyWeatherData",
+      "properties": [
+        {
+          "id": "1:1207902785540526508",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "3:965943071278988375",
+          "name": "sunrise",
+          "type": 10
+        },
+        {
+          "id": "4:1484612392393404729",
+          "name": "sunset",
+          "type": 10
+        },
+        {
+          "id": "5:3132488025131263583",
+          "name": "uvIndex",
+          "type": 8
+        },
+        {
+          "id": "6:5481371712891885672",
+          "name": "clearSkyUvIndex",
+          "type": 8
+        },
+        {
+          "id": "7:3556370642150461096",
+          "name": "forecastId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "2:6844138676346082205",
+          "relationTarget": "Forecast"
+        },
+        {
+          "id": "8:1134278265371922395",
+          "name": "dbTime",
+          "type": 6
+        },
+        {
+          "id": "9:5894981568594173386",
+          "name": "time",
+          "type": 10
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:6420228095169690693",
+      "lastPropertyId": "5:3233924637434981959",
+      "name": "Forecast",
+      "properties": [
+        {
+          "id": "1:164024686731217540",
+          "name": "id",
+          "type": 6,
+          "flags": 129
+        },
+        {
+          "id": "2:2901474346780297146",
+          "name": "latitude",
+          "type": 8
+        },
+        {
+          "id": "3:1885365826762958758",
+          "name": "longitude",
+          "type": 8
+        },
+        {
+          "id": "4:934899536738238602",
+          "name": "timezome",
+          "type": 9
+        },
+        {
+          "id": "5:3233924637434981959",
+          "name": "pressure",
+          "type": 8
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "5:8173371938174065105",
+      "lastPropertyId": "14:1342308400042582973",
+      "name": "HourlyWeatherData",
+      "properties": [
+        {
+          "id": "1:3187230548200897399",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:966557653877511998",
+          "name": "time",
+          "type": 10
+        },
+        {
+          "id": "3:7279000057536307706",
+          "name": "temperature",
+          "type": 8
+        },
+        {
+          "id": "4:4176908954404566916",
+          "name": "apparentTemperature",
+          "type": 8
+        },
+        {
+          "id": "5:3547794455906734640",
+          "name": "humidity",
+          "type": 6
+        },
+        {
+          "id": "6:3502222474914194231",
+          "name": "rainProbability",
+          "type": 6
+        },
+        {
+          "id": "7:4344479545282929369",
+          "name": "rainInMM",
+          "type": 8
+        },
+        {
+          "id": "8:3028885842851079330",
+          "name": "weatherCodeNum",
+          "type": 6
+        },
+        {
+          "id": "9:8358054488921457027",
+          "name": "cloudCover",
+          "type": 6
+        },
+        {
+          "id": "10:1253310253006595269",
+          "name": "windSpeed",
+          "type": 8
+        },
+        {
+          "id": "11:8536476079822477782",
+          "name": "windDirection",
+          "type": 6
+        },
+        {
+          "id": "12:8866942346576763698",
+          "name": "windGusts",
+          "type": 8
+        },
+        {
+          "id": "13:8469159707373024134",
+          "name": "forecastId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "3:2791591927145922910",
+          "relationTarget": "Forecast"
+        },
+        {
+          "id": "14:1342308400042582973",
+          "name": "dbTime",
+          "type": 6
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "1:8085940287060332242",
-  "lastIndexId": "0:0",
+  "lastEntityId": "5:8173371938174065105",
+  "lastIndexId": "3:2791591927145922910",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
-  "retiredEntityUids": [],
+  "retiredEntityUids": [
+    4959212640223385591
+  ],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    2222587056346663194,
+    5241379067991271440,
+    3413672586752819897,
+    2667735000207519754,
+    3007341840825496508,
+    6508642052868466290,
+    2000977072288292402,
+    6318597669143456282,
+    471067176363371422,
+    5787941398622077731,
+    8035218165518029936,
+    355656367909523738,
+    8521224176931923367,
+    2722435669115636181,
+    3478895322221109934
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

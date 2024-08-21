@@ -94,4 +94,8 @@ enum WeatherCode {
 
     return WeatherCode.unknown;
   }
+
+  static int toCode(WeatherCode weatherCode) {
+    return weatherCode.code;
+  }
 }

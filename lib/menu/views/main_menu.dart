@@ -364,15 +364,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     }
 
     void clearAllForecasts() {
-      // objectBox.forecastBox.removeAll();
+      objectBox.forecastBox.removeAll();
     }
 
     void clearAllDaily() {
-      // objectBox.dailyBox.removeAll();
+      objectBox.dailyBox.removeAll();
     }
 
     void clearAllHourly() {
-      // objectBox.hourlyBox.removeAll();
+      objectBox.hourlyBox.removeAll();
     }
 
     return Column(

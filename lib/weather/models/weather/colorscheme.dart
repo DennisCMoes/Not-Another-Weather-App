@@ -8,22 +8,42 @@ class ColorPair {
 }
 
 enum WeatherColorScheme {
-  clear(ColorPair(Color(0xFFFFD700), Color(0xFF000000)),
-      ColorPair(Color(0xFF0E1C2E), Color(0xFFFFFFFF))),
-  partlyCloudy(ColorPair(Color(0xFF87CEEB), Color(0xFF000000)),
-      ColorPair(Color(0xFF2F4F4F), Color(0xFFFFFFFF))),
-  overcast(ColorPair(Color(0xFFDBE7F6), Color(0xFF000000)),
-      ColorPair(Color(0xFF2C2F32), Color(0xFFFFFFFF))),
-  drizzle(ColorPair(Color(0xFFA4C3D8), Color(0xFF000000)),
-      ColorPair(Color(0xFFA4C3D8), Color(0xFF000000))),
-  rain(ColorPair(Color(0xFF587176), Color(0xFF000000)),
-      ColorPair(Color(0xFF587176), Color(0xFF000000))),
-  thunderstorm(ColorPair(Color(0xFF3C444D), Color(0xFFFFFFFF)),
-      ColorPair(Color(0xFF3C444D), Color(0xFFFFFFFF))),
-  snow(ColorPair(Color(0xFFF0F8FF), Color(0xFF000000)),
-      ColorPair(Color(0xFFF0F8FF), Color(0xFF000000))),
-  fog(ColorPair(Color(0xFFC0C0C0), Color(0xFF000000)),
-      ColorPair(Color(0xFFC0C0C0), Color(0xFF000000)));
+  clear(
+    ColorPair(Color(0xFF87CEEB), Color(0xFF013366)),
+    ColorPair(Color(0xFF013366), Color(0xFFFFFFFF)),
+  ),
+  partlyCloudy(
+    ColorPair(Color(0xFFADD8E6), Color(0xFF003366)),
+    ColorPair(Color(0xFF2F4F4F), Color(0xFFFFFFFF)),
+  ),
+  overcast(
+    ColorPair(Color(0xFFDBE7F6), Color(0xFF333333)),
+    ColorPair(Color(0xFF4B5D67), Color(0xFFFFFFFF)),
+  ),
+  drizzle(
+    ColorPair(Color(0xFFA9C9D9), Color(0xFF333333)),
+    ColorPair(Color(0xFF6A7E90), Color(0xFFFFFFFF)),
+  ),
+  rain(
+    ColorPair(Color(0xFF6D8FAE), Color(0xFFFFFFFF)),
+    ColorPair(Color(0xFF2B3A4A), Color(0xFFFFFFFF)),
+  ),
+  thunderstorm(
+    ColorPair(Color(0xFF4F4F4F), Color(0xFFFFD700)),
+    ColorPair(Color(0xFF202020), Color(0xFFFFD700)),
+  ),
+  snow(
+    ColorPair(Color(0xFFF0F8FF), Color(0xFF333333)),
+    ColorPair(Color(0xFF77989B), Color(0xFF333333)),
+  ),
+  fog(
+    ColorPair(Color(0xFFC0C0C0), Color(0xFF333333)),
+    ColorPair(Color(0xFF696969), Color(0xFFFFFFFF)),
+  ),
+  unknown(
+    ColorPair(Color(0xFFF0F8FF), Color(0xFF333333)),
+    ColorPair(Color(0xFF77989B), Color(0xFF333333)),
+  );
 
   // Old colorscheme
   // silver(Color(0xFFCBC7C6), Color(0xFFCBC7C6), Color(0xFF000000)),

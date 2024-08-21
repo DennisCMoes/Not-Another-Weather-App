@@ -24,6 +24,8 @@ class ForecastCardProvider extends ChangeNotifier {
     try {
       _initializeSelectedHour();
     } catch (exception, stacktrace) {
+      debugPrint(
+          "Something went wrong with the ForecastCardProvider: $exception");
       Sentry.captureException(exception, stackTrace: stacktrace);
     }
   }

@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
@@ -32,6 +33,11 @@ class WeatherProvider extends ChangeNotifier {
   void initializeStoredGeocodings() {
     final List<Geocoding> storedGeocodings =
         _geocodingRepo.getStoredGeocodings();
+
+    // TODO: Remove these lines for builder, now used just for debugging
+    final forecasts = _forecastRepo.getAllForecastsFromBox();
+    final daily = objectBox.dailyBox.getAll();
+    final hourly = objectBox.hourlyBox.getAll();
 
     if (storedGeocodings.isEmpty) {
       storedGeocodings
@@ -94,6 +100,12 @@ class WeatherProvider extends ChangeNotifier {
 
   Future<void> _getData(Completer<void> completer) async {
     try {
+      // final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      // prefs.setInt("temperature_unit", 0);
+      // prefs.setInt("wind_speed_unit", 0);
+      // prefs.setInt("precipitation_unit", 1);
+
       final List<ConnectivityResult> connectivityResult =
           await Connectivity().checkConnectivity();
 
@@ -116,18 +128,32 @@ class WeatherProvider extends ChangeNotifier {
               return coding;
             }
 
-            Forecast forecast = await _forecastRepo.getForecastOfLocation(
-              coding.latitude,
-              coding.longitude,
-            );
+            Forecast forecast;
 
-            return coding..forecast = forecast;
+            if (connectivityResult.contains(ConnectivityResult.none)) {
+              // TODO: Remove the ! check. Try a normal if else check
+              forecast = _forecastRepo.getForecastById(coding.id);
+              coding.forecast = forecast;
+            } else {
+              // Remove all the hourly and daily data from storage
+              _forecastRepo.deleteAllDaily(coding.id);
+              _forecastRepo.deleteAllHourly(coding.id);
+
+              forecast = await _forecastRepo.getForecastOfLocation(coding);
+              forecast.id = coding.id;
+              _forecastRepo.storeForecast(forecast);
+            }
+
+            coding.forecast = forecast;
+            _geocodingRepo.storeGeocoding(coding);
+            return coding;
           },
         ).toList(),
       );
 
       completer.complete();
     } catch (exception, stacktrace) {
+      debugPrint("Something went wrong with the _getData: $exception");
       completer.completeError(exception, stacktrace);
     }
   }
