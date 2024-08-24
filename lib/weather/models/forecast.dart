@@ -120,7 +120,7 @@ class Forecast {
   DailyWeatherData getCurrentDayData([DateTime? date]) {
     date ??= DatetimeUtils.startOfDay(DatetimeUtils.startOfHour());
 
-    if (date.isAfter(dailyWeatherDataList.last.time) ||
+    if (date.isAfter(hourlyWeatherList.last.time) ||
         date.isBefore(hourlyWeatherList.first.time)) {
       return DailyWeatherData.invalidDay(date);
     } else {
@@ -195,9 +195,7 @@ class Forecast {
   ColorPair getColorPair([DateTime? date]) {
     date ??= DateTime.now();
 
-    // DailyWeatherData daily = getCurrentDayData(date);
     DailyWeatherData daily = getCurrentDayData();
-    // HourlyWeatherData hourly = getCurrentHourData(date);
     HourlyWeatherData hourly = getCurrentHourData();
 
     final isBeforeSunset = date.isBefore(daily.sunset);
@@ -205,6 +203,12 @@ class Forecast {
 
     final isInTheDay = isBeforeSunset && isAfterSunrise;
     return hourly.weatherCode.colorScheme.getColorPair(isInTheDay);
+  }
+
+  static Forecast isLoadingData() {
+    return Forecast(20, 20, "Europe/Amsterdam", 20)
+      ..dailyWeatherDataList = []
+      ..hourlyWeatherList = [];
   }
 
   @override

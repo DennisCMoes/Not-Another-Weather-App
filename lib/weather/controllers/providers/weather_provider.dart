@@ -198,6 +198,8 @@ class WeatherProvider extends ChangeNotifier {
   /// Adds a new geocoding location and fetches it's forecast
   Future<void> addGeocoding(Geocoding geocoding) async {
     geocoding.ordening = _geocodings.length;
+
+    geocoding.forecast ??= Forecast.isLoadingData();
     _geocodings.add(geocoding);
     notifyListeners();
 

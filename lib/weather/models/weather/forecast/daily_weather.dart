@@ -34,6 +34,6 @@ class DailyWeatherData {
   });
 
   static DailyWeatherData invalidDay(DateTime time) {
-    return DailyWeatherData(time, time, time, -1, -1, invalidData: false);
+    return DailyWeatherData(time, time, time, -1, -1, invalidData: true);
   }
 }
