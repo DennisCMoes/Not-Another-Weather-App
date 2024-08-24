@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/objectbox.g.dart';
@@ -5,7 +7,6 @@ import 'package:not_another_weather_app/shared/utilities/controllers/api_control
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/daily_weather.dart';
-import 'package:not_another_weather_app/weather/models/weather/forecast/has_time.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,52 +15,64 @@ class ForecastRepo {
   final ApiController _apiController = ApiController();
 
   Future<Forecast> getForecastOfLocation(Geocoding geocode) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    Completer<Forecast> completer = Completer();
+    _getForecast(geocode, completer);
+    return completer.future;
+  }
 
-    var temperature = TemperatureUnit
-        .values[prefs.getInt("temperature_unit") ?? 1]; // Celsius
-    var windSpeed =
-        WindspeedUnit.values[prefs.getInt("wind_speed_unit") ?? 1]; // "KM/H"
-    var precipitation = PrecipitationUnit
-        .values[prefs.getInt("precipitation_unit") ?? 0]; // Millimeters
+  Future<void> _getForecast(Geocoding geocode, Completer completer) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    return _apiController.getRequest(
-      "$_baseUrl/forecast",
-      parameters: Map.from(
-        {
-          "latitude": geocode.latitude,
-          "longitude": geocode.longitude,
-          "timezone": "auto",
-          "forecast_days": 2,
-          "past_days": 1,
-          "temperature_unit": temperature.value,
-          "wind_speed_unit": windSpeed.value,
-          "precipitation_unit": precipitation.value,
-          "current": [
-            "surface_pressure",
-          ].join(","),
-          "hourly": [
-            "temperature_2m",
-            "apparent_temperature",
-            "relative_humidity_2m",
-            "precipitation_probability",
-            "precipitation",
-            "weather_code",
-            "cloud_cover",
-            "wind_speed_10m",
-            "wind_direction_10m",
-            "wind_gusts_10m",
-          ].join(","),
-          "daily": [
-            "sunrise",
-            "sunset",
-            "uv_index_max",
-            "uv_index_clear_sky_max",
-          ].join(","),
-        },
-      ),
-      (json) => Forecast.fromJson(json),
-    );
+      var temperature = TemperatureUnit
+          .values[prefs.getInt("temperature_unit") ?? 1]; // Celsius
+      var windSpeed =
+          WindspeedUnit.values[prefs.getInt("wind_speed_unit") ?? 1]; // "KM/H"
+      var precipitation = PrecipitationUnit
+          .values[prefs.getInt("precipitation_unit") ?? 0]; // Millimeters
+
+      Forecast data = await _apiController.getRequest<Forecast>(
+        "$_baseUrl/forecast",
+        parameters: Map.from(
+          {
+            "latitude": geocode.latitude,
+            "longitude": geocode.longitude,
+            "timezone": "auto",
+            "forecast_days": 1,
+            "past_days": 1,
+            "temperature_unit": temperature.value,
+            "wind_speed_unit": windSpeed.value,
+            "precipitation_unit": precipitation.value,
+            "current": [
+              "surface_pressure",
+            ].join(","),
+            "hourly": [
+              "temperature_2m",
+              "apparent_temperature",
+              "relative_humidity_2m",
+              "precipitation_probability",
+              "precipitation",
+              "weather_code",
+              "cloud_cover",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m",
+            ].join(","),
+            "daily": [
+              "sunrise",
+              "sunset",
+              "uv_index_max",
+              "uv_index_clear_sky_max",
+            ].join(","),
+          },
+        ),
+        (json) => Forecast.fromJson(json),
+      );
+
+      completer.complete(data);
+    } catch (exception, stacktrace) {
+      completer.completeError(exception, stacktrace);
+    }
   }
 
   List<Forecast> getAllForecastsFromBox() {
@@ -90,24 +103,6 @@ class ForecastRepo {
     forecast.dailyWeatherDataList = dailyList;
 
     return forecast;
-  }
-
-  List<T> _getWeatherDataById<T>(
-    Box<T> box,
-    Condition<T> Function(int) condition,
-    int id,
-  ) {
-    Query<T> query = box.query(condition(id)).build();
-    final resultList = box.getMany(query.findIds()).map((element) {
-      if (element is HasTimeField) {
-        element.time = element.time.toUtc();
-      }
-
-      return element!;
-    }).toList();
-
-    query.close();
-    return resultList;
   }
 
   void updateForecasts(List<Forecast> forecasts) {
