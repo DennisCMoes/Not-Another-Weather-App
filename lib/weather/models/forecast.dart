@@ -203,8 +203,8 @@ class Forecast {
   ColorPair getColorPair([DateTime? date]) {
     date ??= DateTime.now();
 
-    DailyWeatherData daily = getCurrentDayData();
-    HourlyWeatherData hourly = getCurrentHourData();
+    DailyWeatherData daily = getCurrentDayData(date);
+    HourlyWeatherData hourly = getCurrentHourData(date);
 
     final isBeforeSunset = date.isBefore(daily.sunset);
     final isAfterSunrise = date.isAfter(daily.sunrise);

@@ -27,7 +27,7 @@ class ForecastCard extends StatefulWidget {
 }
 
 class ForecastCardState extends State<ForecastCard> with RouteAware {
-  late ForecastCardProvider _geocodingProvider;
+  late ForecastCardProvider _forecastCardProvider;
   late WeatherProvider _weatherProvider;
   late Forecast _forecast;
 
@@ -42,7 +42,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
 
     _forecast = widget.geocoding.forecast;
 
-    _geocodingProvider = context.read<ForecastCardProvider>();
+    _forecastCardProvider = context.read<ForecastCardProvider>();
     _weatherProvider = context.read<WeatherProvider>();
   }
 
@@ -63,9 +63,9 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   void didPopNext() async {
     var geo = context
         .read<WeatherProvider>()
-        .getGeocoding(_geocodingProvider.geocoding.id);
+        .getGeocoding(_forecastCardProvider.geocoding.id);
 
-    _geocodingProvider.setGeocoding(geo);
+    _forecastCardProvider.setGeocoding(geo);
     super.didPopNext();
   }
 
@@ -77,7 +77,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   Future<void> _onChangeSliderValue(double offset) async {
     HapticFeedback.lightImpact();
 
-    _geocodingProvider.setSelectedHour((await _getConvertedCurrentTime())
+    _forecastCardProvider.setSelectedHour((await _getConvertedCurrentTime())
         .add(Duration(hours: offset.toInt())));
 
     setState(() {
@@ -86,7 +86,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   }
 
   Future<void> _resetSliderTime() async {
-    _geocodingProvider.setSelectedHour(await _getConvertedCurrentTime());
+    _forecastCardProvider.setSelectedHour(await _getConvertedCurrentTime());
 
     setState(() {
       _sliderValue = 0.0;
@@ -121,7 +121,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   Widget build(BuildContext context) {
     void toggleIsEditing() {
       HapticFeedback.lightImpact();
-      _geocodingProvider.setIsEditing(!_geocodingProvider.isEditing);
+      _forecastCardProvider.setIsEditing(!_forecastCardProvider.isEditing);
     }
 
     void openMainMenu() {
