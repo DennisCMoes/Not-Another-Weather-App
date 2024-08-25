@@ -25,12 +25,10 @@ class Geocoding {
   double latitude;
   double longitude;
   String country;
+  bool isCurrentLocation;
 
   @Transient()
   TestClass isTestClass;
-
-  @Transient() // Not stored in database
-  bool isCurrentLocation;
 
   @Transient()
   late Forecast forecast;

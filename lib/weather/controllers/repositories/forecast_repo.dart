@@ -26,7 +26,7 @@ class ForecastRepo {
     var precipitation = // Millimeters
         PrecipitationUnit.values[prefs.getInt("precipitation_unit") ?? 0];
 
-    return _apiController.getRequest<Forecast>(
+    Forecast data = await _apiController.getRequest<Forecast>(
       "$_baseUrl/forecast",
       parameters: Map.from(
         {
@@ -63,6 +63,11 @@ class ForecastRepo {
       ),
       (json) => Forecast.fromJson(json),
     );
+
+    data.id = geocode.id;
+
+    storeForecast(data);
+    return data;
   }
 
   Forecast getForecastFromPersistedStorage(Geocoding geocode) {
@@ -99,6 +104,20 @@ class ForecastRepo {
       // TODO: Change to generic forecast
       return await _getForecastFromApi(geocode);
     }
+  }
+
+  void storeForecast(Forecast forecast) {
+    final forecastBox = objectBox.forecastBox;
+    final hourlyBox = objectBox.hourlyBox;
+    final dailyBox = objectBox.dailyBox;
+
+    deleteAllHourly(forecast.id);
+    deleteAllDaily(forecast.id);
+
+    hourlyBox.putMany(forecast.hourlyWeatherList);
+    dailyBox.putMany(forecast.dailyWeatherDataList);
+
+    forecastBox.put(forecast);
   }
 
   void deleteAllHourly(int forecastId) {

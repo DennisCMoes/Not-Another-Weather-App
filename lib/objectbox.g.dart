@@ -25,7 +25,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(1, 8085940287060332242),
       name: 'Geocoding',
-      lastPropertyId: const obx_int.IdUid(8, 5291511106960012626),
+      lastPropertyId: const obx_int.IdUid(9, 1558887423139959226),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -67,6 +67,11 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(8, 5291511106960012626),
             name: 'ordening',
             type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 1558887423139959226),
+            name: 'isCurrentLocation',
+            type: 1,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -316,7 +321,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final countryOffset = fbb.writeString(object.country);
           final selectedForecastItemsDbOffset =
               fbb.writeListInt64(object.selectedForecastItemsDb);
-          fbb.startTable(9);
+          fbb.startTable(10);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, nameOffset);
           fbb.addFloat64(2, object.latitude);
@@ -325,6 +330,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(5, object.selectedPage);
           fbb.addOffset(6, selectedForecastItemsDbOffset);
           fbb.addInt64(7, object.ordening);
+          fbb.addBool(8, object.isCurrentLocation);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -341,10 +347,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 10, 0);
           final countryParam = const fb.StringReader(asciiOptimization: true)
               .vTableGet(buffer, rootOffset, 12, '');
+          final isCurrentLocationParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 20, false);
           final ordeningParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0);
           final object = Geocoding(
               idParam, nameParam, latitudeParam, longitudeParam, countryParam,
+              isCurrentLocation: isCurrentLocationParam,
               ordening: ordeningParam)
             ..selectedPage =
                 const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0)
@@ -544,6 +553,10 @@ class Geocoding_ {
   /// See [Geocoding.ordening].
   static final ordening =
       obx.QueryIntegerProperty<Geocoding>(_entities[0].properties[7]);
+
+  /// See [Geocoding.isCurrentLocation].
+  static final isCurrentLocation =
+      obx.QueryBooleanProperty<Geocoding>(_entities[0].properties[8]);
 }
 
 /// [DailyWeatherData] entity fields to define ObjectBox queries.

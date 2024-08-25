@@ -1,20 +1,25 @@
 import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/api_controller.dart';
+import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
-import 'package:objectbox/objectbox.dart';
 
 class GeocodingRepo {
   final String _baseUrl = "https://geocoding-api.open-meteo.com/v1";
   final ApiController _apiController = ApiController();
 
   List<Geocoding> _getAllGeocodingsFromBox() {
+    final forecastRepo = ForecastRepo();
     final geocodingBox = objectBox.geocodingBox;
-    return geocodingBox.getAll();
+
+    return geocodingBox.getAll().map((geocode) {
+      return geocode
+        ..forecast = forecastRepo.getForecastFromPersistedStorage(geocode);
+    }).toList();
   }
 
   void updateGeocodings(List<Geocoding> geocodings) {
     final geocodingBox = objectBox.geocodingBox;
-    geocodingBox.putMany(geocodings, mode: PutMode.update);
+    geocodingBox.putMany(geocodings);
   }
 
   void saveGeocodingsToBox(List<Geocoding> geocodings) {

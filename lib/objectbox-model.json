@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:8085940287060332242",
-      "lastPropertyId": "8:5291511106960012626",
+      "lastPropertyId": "9:1558887423139959226",
       "name": "Geocoding",
       "properties": [
         {
@@ -48,6 +48,11 @@
           "id": "8:5291511106960012626",
           "name": "ordening",
           "type": 6
+        },
+        {
+          "id": "9:1558887423139959226",
+          "name": "isCurrentLocation",
+          "type": 1
         }
       ],
       "relations": []

@@ -40,7 +40,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   void initState() {
     super.initState();
 
-    _forecast = widget.geocoding.forecast!;
+    _forecast = widget.geocoding.forecast;
 
     _geocodingProvider = context.read<ForecastCardProvider>();
     _weatherProvider = context.read<WeatherProvider>();
@@ -251,6 +251,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                       valueIndicatorTextStyle: TextStyle(
                         color: colorPair.accent,
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'tabler-icons',
                       ),
                     ),
                     child: Slider(
