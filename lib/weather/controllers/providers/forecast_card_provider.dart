@@ -11,53 +11,33 @@ class ForecastCardProvider extends ChangeNotifier {
   Geocoding _geocoding;
 
   final GeocodingRepo _geocodingRepo = GeocodingRepo();
-
   final PageController _pageController = PageController(initialPage: 0);
 
   bool _isEditing = false;
-  int _subPageIndex = 0;
   DateTime _selectedHour = DateTime.now();
-
-  Geocoding get geocoding => _geocoding;
 
   ForecastCardProvider(this._geocoding) {
     try {
       _initializeSelectedHour();
     } catch (exception, stacktrace) {
-      debugPrint(
-          "Something went wrong with the ForecastCardProvider: $exception");
       Sentry.captureException(exception, stackTrace: stacktrace);
+      debugPrint(
+        "Something went wrong with the ForecastCardProvider: $exception",
+      );
     }
   }
 
+  /// Getters
+  Geocoding get geocoding => _geocoding;
   bool get isEditing => _isEditing;
-  int get subPageIndex => _subPageIndex;
   PageController get subPageController => _pageController;
   DateTime get selectedHour => _selectedHour;
 
-  void _initializeSelectedHour() {
-    final forecast = geocoding.forecast;
-    final convertedNow =
-        DatetimeUtils.convertToTimezone(DateTime.now(), forecast.timezome);
-    final convertedStartHour = DatetimeUtils.startOfHour(convertedNow);
-
-    _selectedHour = convertedStartHour;
-  }
-
-  void _setSelectedHour(DateTime time) {
-    _selectedHour = DatetimeUtils.startOfHour(time);
-    notifyListeners();
-  }
-
+  /// Sets the geocoding and notifies listeners
   void setGeocoding(Geocoding geocoding) {
     _geocoding = geocoding;
     notifyListeners();
   }
-
-  /// Checks if the given [index] is the current page.
-  ///
-  /// Returns `true` if the [index] matches the current sub-page index
-  bool isCurrentPage(int index) => _subPageIndex == index;
 
   /// Sets the editing state to [isEditing] and notifies it's listeners
   void setIsEditing(bool isEditing) {
@@ -65,21 +45,19 @@ class ForecastCardProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sets the sub-page index to [index] and notifies it's listeners
-  void setSubPageIndex(int index) {
-    _subPageIndex = index;
-    notifyListeners();
-  }
-
-  void setFutureForecastIndex(DateTime time) {
-    _setSelectedHour(time);
-    notifyListeners();
-  }
-
   /// Sets the selected hour to [hour] and notifies it's listeners
   void setSelectedHour(DateTime time) {
     _selectedHour = DatetimeUtils.startOfHour(time);
     notifyListeners();
+  }
+
+  /// Initializes the selected hour to the start of the current hour in the geocoding's timezone
+  void _initializeSelectedHour() {
+    final forecast = geocoding.forecast;
+    final convertedNow =
+        DatetimeUtils.convertToTimezone(DateTime.now(), forecast.timezome);
+
+    _selectedHour = DatetimeUtils.startOfHour(convertedNow);
   }
 
   /// Replaces the [oldField] with [newField] in the list of selected forecast items and notifies it's listeners
