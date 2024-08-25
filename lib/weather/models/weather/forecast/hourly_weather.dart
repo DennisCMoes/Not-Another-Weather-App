@@ -48,8 +48,20 @@ class HourlyWeatherData {
     this.invalidData = false,
   });
 
-  static HourlyWeatherData invalidHour(DateTime time) {
-    return HourlyWeatherData(time, -1, -1, -1, -1, -1, -2, -1, -1, -1, -1,
+  factory HourlyWeatherData.invalidData(
+    DateTime time,
+    WeatherCode weatherCode,
+  ) {
+    return HourlyWeatherData(
+        time, -1, -1, -1, -1, -1, weatherCode.code, -1, -1, -1, -1,
         invalidData: true);
+  }
+
+  static HourlyWeatherData noInternet(DateTime time) {
+    return HourlyWeatherData.invalidData(time, WeatherCode.noInternet);
+  }
+
+  static HourlyWeatherData isLoading(DateTime time) {
+    return HourlyWeatherData.invalidData(time, WeatherCode.isLoading);
   }
 }

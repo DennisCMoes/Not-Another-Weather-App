@@ -74,10 +74,24 @@ enum WeatherCode {
   moderateThunderstormWithHail(99, "Thunderstorm",
       WeatherColorScheme.thunderstorm, WeatherClipper.thunder),
 
-  unknown(-1, "Something went wrong", WeatherColorScheme.unknown,
-      WeatherClipper.unknown),
+  unknown(
+    -1,
+    "Something went wrong",
+    WeatherColorScheme.unknown,
+    WeatherClipper.unknown,
+  ),
   noInternet(
-      -2, "No internet", WeatherColorScheme.unknown, WeatherClipper.unknown);
+    -2,
+    "No internet",
+    WeatherColorScheme.unknown,
+    WeatherClipper.unknown,
+  ),
+  isLoading(
+    -3,
+    "Is loading",
+    WeatherColorScheme.unknown,
+    WeatherClipper.unknown,
+  );
 
   final int code;
   final String description;

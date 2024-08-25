@@ -9,7 +9,6 @@ import 'package:not_another_weather_app/shared/extensions/context_extensions.dar
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
-import 'package:not_another_weather_app/weather/views/components/no_internet_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
@@ -51,9 +50,7 @@ class _HomeScreenState extends State<HomeScreen>
       _deviceProvider.setHasInternet(!event.contains(ConnectivityResult.none));
     });
 
-    _weatherProvider.initializeStoredGeocodings();
-    _initializationFunction =
-        _weatherProvider.initializeForecastsOfGeocodings();
+    _initializationFunction = _weatherProvider.initializeData();
   }
 
   @override
@@ -87,16 +84,9 @@ class _HomeScreenState extends State<HomeScreen>
         .isAfter(_deviceProvider.refreshTime.add(const Duration(minutes: 15)));
 
     if (shouldRefresh) {
-      await _weatherProvider.refreshData();
+      // await _weatherProvider.refreshData();
       _deviceProvider.setRefreshTime();
     }
-  }
-
-  void refreshData() {
-    setState(() {
-      _initializationFunction =
-          _weatherProvider.initializeForecastsOfGeocodings();
-    });
   }
 
   @override

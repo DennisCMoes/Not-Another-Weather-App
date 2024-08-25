@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
@@ -69,15 +70,7 @@ class Geocoding {
     this.isCurrentLocation = false,
     this.ordening = -1,
     this.isTestClass = TestClass.none,
-  }) {
-    final forecastRepo = ForecastRepo();
-    forecast = Forecast.isLoadingData();
-
-    forecastRepo
-        .getForecastOfLocation(this)
-        .then((value) => forecast = value)
-        .onError((error, stackTrace) => forecast = Forecast.isLoadingData());
-  }
+  });
 
   factory Geocoding.fromJson(Map<String, dynamic> json) {
     return Geocoding(
@@ -109,12 +102,12 @@ class Geocoding {
     assert(SelectableForecastFields.localTime.index == 11);
   }
 
-  Future<ColorPair> getColorSchemeOfForecast([DateTime? time]) async {
+  Future<ColorPair> getColorSchemeOfForecast([DateTime? date]) async {
     try {
-      time ??= DateTime.now();
+      date ??= DateTime.now();
 
-      final DateTime startOfHour = DatetimeUtils.startOfHour(time);
-      final DateTime startOfDay = DatetimeUtils.startOfDay(time);
+      final DateTime startOfHour = DatetimeUtils.startOfHour(date);
+      final DateTime startOfDay = DatetimeUtils.startOfDay(date);
 
       final dailyWeatherData = forecast.dailyWeatherData[startOfDay];
       if (dailyWeatherData == null) {
@@ -131,14 +124,16 @@ class Geocoding {
       } else if (isTestClass == TestClass.night) {
         isInTheDay = false;
       } else {
-        isInTheDay = (time.isAfter(sunrise)) && (time.isBefore(sunset));
+        isInTheDay = (date.isAfter(sunrise)) && (date.isBefore(sunset));
       }
 
-      return forecast
-          .getCurrentHourData(startOfHour)
-          .weatherCode
-          .colorScheme
-          .getColorPair(isInTheDay);
+      return forecast.getColorPair(date);
+
+      // return forecast
+      //     .getCurrentHourData(startOfHour)
+      //     .weatherCode
+      //     .colorScheme
+      //     .getColorPair(isInTheDay);
     } catch (exception) {
       return const ColorPair(
         Color(0xFF0327D6),

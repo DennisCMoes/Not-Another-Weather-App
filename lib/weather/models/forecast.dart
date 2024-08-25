@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
+import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/daily_weather.dart';
@@ -31,12 +32,13 @@ class Forecast {
   Map<DateTime, DailyWeatherData> get dailyWeatherData =>
       {for (var e in dailyWeatherDataList) e.time: e};
 
-  Forecast(this.latitude, this.longitude, this.timezome, this.pressure) {
-    _initialization();
-  }
-
-  Future<void> _initialization() async {
-    _preferences = await SharedPreferences.getInstance();
+  Forecast(
+    this.latitude,
+    this.longitude,
+    this.timezome,
+    this.pressure,
+  ) {
+    SharedPreferences.getInstance().then((value) => _preferences = value);
   }
 
   factory Forecast.fromJson(Map<String, dynamic> json) {
@@ -109,9 +111,11 @@ class Forecast {
   HourlyWeatherData getCurrentHourData([DateTime? date]) {
     date ??= DatetimeUtils.convertToTimezone(DateTime.now(), timezome);
 
-    if (date.isAfter(hourlyWeatherList.last.time) ||
+    if (hourlyWeatherList.isEmpty) {
+      return HourlyWeatherData.noInternet(date);
+    } else if (date.isAfter(hourlyWeatherList.last.time) ||
         date.isBefore(hourlyWeatherList.first.time)) {
-      return HourlyWeatherData.invalidHour(date);
+      return HourlyWeatherData.noInternet(date);
     } else {
       return hourlyWeatherData[DatetimeUtils.startOfHour(date)]!;
     }
@@ -120,7 +124,9 @@ class Forecast {
   DailyWeatherData getCurrentDayData([DateTime? date]) {
     date ??= DatetimeUtils.startOfDay(DatetimeUtils.startOfHour());
 
-    if (date.isAfter(hourlyWeatherList.last.time) ||
+    if (hourlyWeatherList.isEmpty) {
+      return DailyWeatherData.invalidDay(date);
+    } else if (date.isAfter(hourlyWeatherList.last.time) ||
         date.isBefore(hourlyWeatherList.first.time)) {
       return DailyWeatherData.invalidDay(date);
     } else {
@@ -135,8 +141,10 @@ class Forecast {
     HourlyWeatherData currentHourData = getCurrentHourData(date);
     DailyWeatherData currentDayData = getCurrentDayData(date);
 
-    int windSpeedUnit = _preferences.getInt("wind_speed_unit") ?? 0;
-    int precipitationUnit = _preferences.getInt("precipitation_unit") ?? 0;
+    // int windSpeedUnit = _preferences.getInt("wind_speed_unit") ?? 0;
+    // int precipitationUnit = _preferences.getInt("precipitation_unit") ?? 0;
+    int windSpeedUnit = 0;
+    int precipitationUnit = 0;
 
     if (currentHourData.invalidData || currentDayData.invalidData) {
       return "XX";
@@ -201,14 +209,31 @@ class Forecast {
     final isBeforeSunset = date.isBefore(daily.sunset);
     final isAfterSunrise = date.isAfter(daily.sunrise);
 
-    final isInTheDay = isBeforeSunset && isAfterSunrise;
+    final isInTheDay = isAfterSunrise && isBeforeSunset;
     return hourly.weatherCode.colorScheme.getColorPair(isInTheDay);
   }
 
   static Forecast isLoadingData() {
+    List<DateTime> days =
+        List.generate(3, (index) => DateTime.now().add(Duration(days: index)));
+    List<DateTime> hours = List.generate(
+        24, (index) => DateTime.now().add(Duration(hours: index)));
+
+    return Forecast(20, 20, "Europe/Amsterdam", 20)
+      ..dailyWeatherDataList =
+          days.map((day) => DailyWeatherData.invalidDay(day)).toList()
+      ..hourlyWeatherList =
+          hours.map((hour) => HourlyWeatherData.isLoading(hour)).toList();
+  }
+
+  static Forecast noInternet() {
+    List<DateTime> hours = List.generate(
+        24, (index) => DateTime.now().add(Duration(hours: index)));
+
     return Forecast(20, 20, "Europe/Amsterdam", 20)
       ..dailyWeatherDataList = []
-      ..hourlyWeatherList = [];
+      ..hourlyWeatherList =
+          hours.map((hour) => HourlyWeatherData.noInternet(hour)).toList();
   }
 
   @override

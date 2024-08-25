@@ -1,6 +1,5 @@
 import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/api_controller.dart';
-import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:objectbox/objectbox.dart';
 
