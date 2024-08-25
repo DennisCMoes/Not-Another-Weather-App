@@ -1,14 +1,14 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
-import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
-import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
-import 'package:not_another_weather_app/weather/models/weather/weather_clipper.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/selectable_widget_grid.dart';
 import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +30,7 @@ class _SummaryPageState extends State<SummaryPage> {
   void initState() {
     super.initState();
 
-    _forecast = widget.geocoding.forecast!;
+    _forecast = widget.geocoding.forecast;
     _geocodingProvider = context.read<ForecastCardProvider>();
   }
 
@@ -63,6 +63,14 @@ class _SummaryPageState extends State<SummaryPage> {
       builder: (context, state, child) {
         final colorPair = _forecast.getColorPair(state.selectedHour);
         final weatherData = _forecast.getCurrentHourData(state.selectedHour);
+
+        bool isInvalidCurrent = state.geocoding.isCurrentLocation &&
+            state.geocoding.latitude == -1 &&
+            state.geocoding.longitude == -1;
+
+        if (isInvalidCurrent) {
+          return noLocationCard(context);
+        }
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -247,6 +255,32 @@ class _SummaryPageState extends State<SummaryPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget noLocationCard(BuildContext context) {
+    return Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            TablerIcons.location_off,
+            size: 64,
+          ),
+          Text(
+            "Location services are turned off",
+            style: context.textTheme.displayMedium,
+          ),
+          TextButton(
+            onPressed: () async => await Geolocator.openLocationSettings(),
+            style: TextButton.styleFrom(
+              side: const BorderSide(width: 2),
+            ),
+            child: const Text("Open Settings"),
+          )
+        ],
       ),
     );
   }

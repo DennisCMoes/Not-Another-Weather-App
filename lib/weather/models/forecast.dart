@@ -6,6 +6,7 @@ import 'package:not_another_weather_app/weather/models/logics/selectable_forecas
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/daily_weather.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
+import 'package:not_another_weather_app/weather/models/weather/weather_code.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -140,10 +141,8 @@ class Forecast {
     HourlyWeatherData currentHourData = getCurrentHourData(date);
     DailyWeatherData currentDayData = getCurrentDayData(date);
 
-    // int windSpeedUnit = _preferences.getInt("wind_speed_unit") ?? 0;
-    // int precipitationUnit = _preferences.getInt("precipitation_unit") ?? 0;
-    int windSpeedUnit = 0;
-    int precipitationUnit = 0;
+    int windSpeedUnit = _preferences.getInt("wind_speed_unit") ?? 0;
+    int precipitationUnit = _preferences.getInt("precipitation_unit") ?? 0;
 
     if (currentHourData.invalidData || currentDayData.invalidData) {
       return "XX";
@@ -233,6 +232,19 @@ class Forecast {
       ..dailyWeatherDataList = []
       ..hourlyWeatherList =
           hours.map((hour) => HourlyWeatherData.noInternet(hour)).toList();
+  }
+
+  static Forecast noLocation() {
+    List<DateTime> hours =
+        List.generate(24, (index) => DateTime.now().add(Duration(hours: index)))
+            .toList();
+
+    return Forecast(20, 20, "Europe/Amsterdam", 20)
+      ..dailyWeatherDataList = []
+      ..hourlyWeatherList = hours
+          .map((hour) =>
+              HourlyWeatherData.invalidData(hour, WeatherCode.noInternet))
+          .toList();
   }
 
   @override

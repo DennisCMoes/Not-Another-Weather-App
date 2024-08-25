@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:not_another_weather_app/exceptions/no_stored_data_exception.dart';
 import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/objectbox.g.dart';
@@ -76,7 +75,11 @@ class ForecastRepo {
     final dailyBox = objectBox.dailyBox;
 
     // TODO: Add a null check mechanism
-    Forecast forecast = forecastBox.get(geocode.id)!;
+    Forecast? forecast = forecastBox.get(geocode.id);
+
+    if (forecast == null) {
+      return Forecast.noInternet();
+    }
 
     forecast.hourlyWeatherList = _getWeatherDataList(
         geocode.id, hourlyBox, HourlyWeatherData_.forecast.equals(geocode.id));

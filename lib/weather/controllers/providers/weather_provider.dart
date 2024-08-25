@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/dummy_data.dart';
@@ -19,22 +17,16 @@ class WeatherProvider extends ChangeNotifier {
   final PageController _pageController = PageController();
 
   List<Geocoding> _geocodings = [];
-  DateTime _currentHour = DateTime.now();
+  DateTime currentHour = DateTime.now();
 
+  // Getters
   PageController get pageController => _pageController;
-  DateTime get currentHour => _currentHour;
-
   UnmodifiableListView<Geocoding> get geocodings =>
       UnmodifiableListView(_geocodings);
 
   // Initializes data asynchronously
   Future<void> initializeData() async {
     try {
-      var forecasts = objectBox.forecastBox.getAll();
-      var hourly = objectBox.hourlyBox.getAll();
-      var daily = objectBox.dailyBox.getAll();
-      var geoco = objectBox.geocodingBox.getAll();
-
       await _initializeGeocodingsAndForecasts();
     } catch (exception, stacktrace) {
       debugPrint("Error initializing data: $exception");
@@ -141,10 +133,34 @@ class WeatherProvider extends ChangeNotifier {
   }
 
   Future<void> _updateLocalPosition() async {
-    Position position = await Geolocator.getCurrentPosition();
-    _geocodings[_geocodings.indexWhere((geocode) => geocode.isCurrentLocation)]
-      ..latitude = position.latitude
-      ..longitude = position.longitude;
+    try {
+      final invalidPermissions = [
+        LocationPermission.denied,
+        LocationPermission.deniedForever,
+        LocationPermission.unableToDetermine
+      ];
+      final permission = await Geolocator.checkPermission();
+      final isAvailable = await Geolocator.isLocationServiceEnabled();
+
+      if (!isAvailable || invalidPermissions.contains(permission)) {
+        throw Exception("No location services available");
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+          timeLimit: const Duration(seconds: 5));
+
+      _geocodings[
+          _geocodings.indexWhere((geocode) => geocode.isCurrentLocation)]
+        ..latitude = position.latitude
+        ..longitude = position.longitude;
+    } catch (exception) {
+      print("LOCATION ERROR: $exception");
+
+      _geocodings[
+          _geocodings.indexWhere((geocode) => geocode.isCurrentLocation)]
+        ..latitude = -1
+        ..longitude = -1;
+    }
   }
 
   // Updates the forecasts for all geocodings asynchronously

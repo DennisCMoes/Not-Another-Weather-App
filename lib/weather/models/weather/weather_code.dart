@@ -82,7 +82,7 @@ enum WeatherCode {
   ),
   noInternet(
     -2,
-    "No internet",
+    "No network connection",
     WeatherColorScheme.unknown,
     WeatherClipper.unknown,
   ),

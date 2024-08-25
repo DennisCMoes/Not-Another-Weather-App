@@ -27,7 +27,7 @@ class ForecastCardProvider extends ChangeNotifier {
     }
   }
 
-  /// Getters
+  // Getters
   Geocoding get geocoding => _geocoding;
   bool get isEditing => _isEditing;
   PageController get subPageController => _pageController;
