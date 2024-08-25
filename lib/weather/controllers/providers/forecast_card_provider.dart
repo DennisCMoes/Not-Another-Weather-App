@@ -55,7 +55,7 @@ class ForecastCardProvider extends ChangeNotifier {
   void _initializeSelectedHour() {
     final forecast = geocoding.forecast;
     final convertedNow =
-        DatetimeUtils.convertToTimezone(DateTime.now(), forecast.timezome);
+        DatetimeUtils.convertToTimezone(DateTime.now(), forecast.timezone);
 
     _selectedHour = DatetimeUtils.startOfHour(convertedNow);
   }
@@ -90,7 +90,7 @@ class ForecastCardProvider extends ChangeNotifier {
     try {
       // final forecastData = await geocoding.forecast;
       final now = DateTime.now();
-      final timezone = forecast.timezome;
+      final timezone = forecast.timezone;
 
       final nowInTargetzone = DatetimeUtils.convertToTimezone(now, timezone);
 

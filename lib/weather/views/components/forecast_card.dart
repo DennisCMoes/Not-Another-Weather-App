@@ -71,7 +71,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
 
   Future<DateTime> _getConvertedCurrentTime() async {
     return DatetimeUtils.convertToTimezone(
-        DatetimeUtils.startOfHour(), _forecast.timezome);
+        DatetimeUtils.startOfHour(), _forecast.timezone);
   }
 
   Future<void> _onChangeSliderValue(double offset) async {
@@ -95,7 +95,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
 
   String _getSliderLabel(Forecast forecast) {
     final DateTime convertedTime = DatetimeUtils.convertToTimezone(
-        _weatherProvider.currentHour, forecast.timezome);
+        _weatherProvider.currentHour, forecast.timezone);
     final DateTime startOfHour = DatetimeUtils.startOfHour(convertedTime)
         .add(Duration(hours: _sliderValue.toInt()));
 
@@ -239,7 +239,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                       trackShape: ForecastSliderTrack(
                         DatetimeUtils.convertToTimezone(
                           _weatherProvider.currentHour,
-                          _forecast.timezome,
+                          _forecast.timezone,
                         ),
                         colorPair,
                       ),

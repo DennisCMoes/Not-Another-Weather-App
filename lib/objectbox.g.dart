@@ -130,7 +130,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(4, 6420228095169690693),
       name: 'Forecast',
-      lastPropertyId: const obx_int.IdUid(5, 3233924637434981959),
+      lastPropertyId: const obx_int.IdUid(6, 4525660178510228681),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -149,14 +149,14 @@ final _entities = <obx_int.ModelEntity>[
             type: 8,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 934899536738238602),
-            name: 'timezome',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
             id: const obx_int.IdUid(5, 3233924637434981959),
             name: 'pressure',
             type: 8,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 4525660178510228681),
+            name: 'timezone',
+            type: 9,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -300,7 +300,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         355656367909523738,
         8521224176931923367,
         2722435669115636181,
-        3478895322221109934
+        3478895322221109934,
+        934899536738238602
       ],
       retiredRelationUids: const [],
       modelVersion: 5,
@@ -416,13 +417,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.id = id;
         },
         objectToFB: (Forecast object, fb.Builder fbb) {
-          final timezomeOffset = fbb.writeString(object.timezome);
-          fbb.startTable(6);
+          final timezoneOffset = fbb.writeString(object.timezone);
+          fbb.startTable(7);
           fbb.addInt64(0, object.id);
           fbb.addFloat64(1, object.latitude);
           fbb.addFloat64(2, object.longitude);
-          fbb.addOffset(3, timezomeOffset);
           fbb.addFloat64(4, object.pressure);
+          fbb.addOffset(5, timezoneOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -433,12 +434,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 6, 0);
           final longitudeParam =
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 8, 0);
-          final timezomeParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 10, '');
+          final timezoneParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 14, '');
           final pressureParam =
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 12, 0);
           final object = Forecast(
-              latitudeParam, longitudeParam, timezomeParam, pressureParam)
+              latitudeParam, longitudeParam, timezoneParam, pressureParam)
             ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
 
           return object;
@@ -608,13 +609,13 @@ class Forecast_ {
   static final longitude =
       obx.QueryDoubleProperty<Forecast>(_entities[2].properties[2]);
 
-  /// See [Forecast.timezome].
-  static final timezome =
-      obx.QueryStringProperty<Forecast>(_entities[2].properties[3]);
-
   /// See [Forecast.pressure].
   static final pressure =
-      obx.QueryDoubleProperty<Forecast>(_entities[2].properties[4]);
+      obx.QueryDoubleProperty<Forecast>(_entities[2].properties[3]);
+
+  /// See [Forecast.timezone].
+  static final timezone =
+      obx.QueryStringProperty<Forecast>(_entities[2].properties[4]);
 }
 
 /// [HourlyWeatherData] entity fields to define ObjectBox queries.

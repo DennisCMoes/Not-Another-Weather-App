@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
-import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/daily_weather.dart';
@@ -19,7 +18,7 @@ class Forecast {
 
   double latitude;
   double longitude;
-  String timezome;
+  String timezone;
   double pressure;
 
   @Backlink('forecast')
@@ -35,7 +34,7 @@ class Forecast {
   Forecast(
     this.latitude,
     this.longitude,
-    this.timezome,
+    this.timezone,
     this.pressure,
   ) {
     SharedPreferences.getInstance().then((value) => _preferences = value);
@@ -109,7 +108,7 @@ class Forecast {
   }
 
   HourlyWeatherData getCurrentHourData([DateTime? date]) {
-    date ??= DatetimeUtils.convertToTimezone(DateTime.now(), timezome);
+    date ??= DatetimeUtils.convertToTimezone(DateTime.now(), timezone);
 
     if (hourlyWeatherList.isEmpty) {
       return HourlyWeatherData.noInternet(date);
@@ -179,7 +178,7 @@ class Forecast {
         return "${currentHourData.cloudCover}%";
       case SelectableForecastFields.localTime:
         final convertedTime =
-            DatetimeUtils.convertToTimezone(DateTime.now(), timezome);
+            DatetimeUtils.convertToTimezone(DateTime.now(), timezone);
         return hourFormat.format(convertedTime);
       default:
         return "Unknown";
