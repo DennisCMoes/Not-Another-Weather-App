@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/stores/object_box.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
-import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/views/home.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -23,6 +23,13 @@ Future<void> main() async {
   objectBox = await ObjectBox.create();
 
   tz.initializeTimeZones();
+
+  // TODO: initialze geolocation services
+  var locationPermission = await Geolocator.checkPermission();
+
+  if (locationPermission == LocationPermission.denied) {
+    locationPermission = await Geolocator.requestPermission();
+  }
 
   await SentryFlutter.init(
     (options) {
@@ -49,7 +56,6 @@ Future<void> main() async {
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => DeviceProvider()),
-          ChangeNotifierProvider(create: (context) => DrawerProvider()),
           ChangeNotifierProvider(create: (context) => WeatherProvider()),
         ],
         child: const MyApp(),

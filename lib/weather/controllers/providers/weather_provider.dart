@@ -49,25 +49,38 @@ class WeatherProvider extends ChangeNotifier {
   }
 
   /// Retrieves a specific geocoding by its ID
-  Geocoding getGeocoding(int id) {
-    return _geocodings.firstWhere((geo) => geo.id == id);
+  Geocoding? getGeocoding(int id) {
+    try {
+      return _geocodings.firstWhere((geo) => geo.id == id);
+    } catch (exception) {
+      debugPrint('Error retrieving geocoding: $exception');
+      return null;
+    }
   }
 
   /// Adds a geocoding with forecast to the list
   Future<void> addGeocoding(Geocoding geocoding) async {
-    geocoding.ordening = _geocodings.length;
+    try {
+      geocoding.ordening = _geocodings.length;
+      _geocodings.add(geocoding);
+      await _updateForecasts();
 
-    _geocodings.add(geocoding);
-    await _updateForecasts();
-
-    _geocodingRepo.updateGeocodings(_geocodings);
-    notifyListeners();
+      _geocodingRepo.updateGeocodings(_geocodings);
+      notifyListeners();
+    } catch (exception, stacktrace) {
+      debugPrint("Error adding geocoding: $exception");
+      Sentry.captureException(exception, stackTrace: stacktrace);
+    }
   }
 
   // Moves a geocoding location from [oldIndex] to [newIndex] in the list
   void moveGeocodings(int oldIndex, int newIndex) {
-    // Checks for invalid index
-    if (_isValidIndex(oldIndex) && _isValidIndex(newIndex)) {
+    if (!_isValidIndex(oldIndex) || !_isValidIndex(newIndex)) {
+      debugPrint("Invalid index for moving geocodings: $oldIndex, $newIndex");
+      return;
+    }
+
+    try {
       final oldItem = _geocodings.removeAt(oldIndex);
       _geocodings.insert(newIndex, oldItem);
 
@@ -77,6 +90,9 @@ class WeatherProvider extends ChangeNotifier {
 
       _geocodingRepo.updateGeocodings(_geocodings);
       notifyListeners();
+    } catch (exception, stacktrace) {
+      debugPrint("Error moving geocodings: $exception");
+      Sentry.captureException(exception, stackTrace: stacktrace);
     }
   }
 
@@ -84,10 +100,21 @@ class WeatherProvider extends ChangeNotifier {
   void removeGeocoding(Geocoding geocoding) {
     int geoIndex = _geocodings.indexOf(geocoding);
 
-    if (geoIndex != -1) {
+    if (geoIndex == -1) {
+      debugPrint("Error: Geocoding not found");
+      return;
+    }
+
+    try {
       _geocodings.removeAt(geoIndex);
       _geocodingRepo.removeGeocoding(geocoding.id);
       notifyListeners();
+    } catch (exception, stacktrace) {
+      debugPrint("Error removing geocoding: $exception");
+      Sentry.captureException(exception, stackTrace: stacktrace);
+    }
+
+    if (geoIndex != -1) {
     } else {
       debugPrint("Error: Geocoding not found");
     }
@@ -100,36 +127,47 @@ class WeatherProvider extends ChangeNotifier {
 
   /// Initializes geocodings and forecasts together
   Future<void> _initializeGeocodingsAndForecasts() async {
-    _geocodings = _getStoredGeocodings();
+    try {
+      _geocodings = _getStoredGeocodings();
 
-    // Updates the coordinates of the current position
-    await _updateLocalPosition();
+      // Updates the coordinates of the current position
+      await _updateLocalPosition();
 
-    // Fetch and update all forecasts
-    await _updateForecasts();
+      // Fetch and update all forecasts
+      await _updateForecasts();
+    } catch (exception, stacktrace) {
+      debugPrint("Error initializing geocodings and forecasts: $exception");
+      Sentry.captureException(exception, stackTrace: stacktrace);
+    }
   }
 
   /// Fetches stored geocodings from the repository and initializes if empty
   List<Geocoding> _getStoredGeocodings() {
-    List<Geocoding> storedGeocodings = _geocodingRepo.getStoredGeocodings();
+    try {
+      List<Geocoding> storedGeocodings = _geocodingRepo.getStoredGeocodings();
 
-    if (storedGeocodings.isEmpty) {
-      storedGeocodings
-          .add(Geocoding(1, "Current location", -1, -1, "Current location")
-            ..isCurrentLocation = true
-            ..ordening = 0
-            ..forecast = Forecast.isLoadingData()
-            ..selectedForecastItems = [
-              SelectableForecastFields.windSpeed,
-              SelectableForecastFields.precipitation,
-              SelectableForecastFields.chainceOfRain,
-              SelectableForecastFields.cloudCover
-            ]);
-    } else {
-      storedGeocodings.sort((a, b) => a.ordening - b.ordening);
+      if (storedGeocodings.isEmpty) {
+        storedGeocodings
+            .add(Geocoding(1, "Current location", -1, -1, "Current location")
+              ..isCurrentLocation = true
+              ..ordening = 0
+              ..forecast = Forecast.isLoadingData()
+              ..selectedForecastItems = [
+                SelectableForecastFields.windSpeed,
+                SelectableForecastFields.precipitation,
+                SelectableForecastFields.chainceOfRain,
+                SelectableForecastFields.cloudCover
+              ]);
+      } else {
+        storedGeocodings.sort((a, b) => a.ordening - b.ordening);
+      }
+
+      return storedGeocodings;
+    } catch (exception, stacktrace) {
+      debugPrint("Error fetching stored geocodings: $exception");
+      Sentry.captureException(exception, stackTrace: stacktrace);
+      return [];
     }
-
-    return storedGeocodings;
   }
 
   Future<void> _updateLocalPosition() async {
@@ -149,23 +187,54 @@ class WeatherProvider extends ChangeNotifier {
       Position position = await Geolocator.getCurrentPosition(
           timeLimit: const Duration(seconds: 5));
 
-      _geocodings[
-          _geocodings.indexWhere((geocode) => geocode.isCurrentLocation)]
-        ..latitude = position.latitude
-        ..longitude = position.longitude;
-    } catch (exception) {
-      print("LOCATION ERROR: $exception");
+      int currentLocationIndex =
+          _geocodings.indexWhere((geocode) => geocode.isCurrentLocation);
 
-      _geocodings[
-          _geocodings.indexWhere((geocode) => geocode.isCurrentLocation)]
-        ..latitude = -1
-        ..longitude = -1;
+      if (currentLocationIndex != -1) {
+        _geocodings[currentLocationIndex]
+          ..latitude = position.latitude
+          ..longitude = position.longitude;
+      } else {
+        // TODO: Add a function to add the current geolocation if it wasn't found
+        debugPrint("Current location geocoding not found");
+      }
+    } catch (exception, stacktrace) {
+      debugPrint("Error updating local position: $exception");
+      Sentry.captureException(exception, stackTrace: stacktrace);
+
+      int currentLocationIndex =
+          _geocodings.indexWhere((geocode) => geocode.isCurrentLocation);
+      if (currentLocationIndex != -1) {
+        _geocodings[currentLocationIndex]
+          ..latitude = -1
+          ..longitude = -1;
+      } else {
+        debugPrint(
+            'Current location geocoding not found to update error state');
+      }
     }
   }
 
   // Updates the forecasts for all geocodings asynchronously
   Future<void> _updateForecasts() async {
-    // TODO: If no internet attach forecast.nointernet to it
+    try {
+      _geocodings = await Future.wait(_geocodings.map((geocode) async {
+        try {
+          geocode.forecast = await _forecastRepo.getForecastById(geocode);
+          _geocodingRepo.storeGeocoding(geocode);
+        } catch (exception) {
+          debugPrint(
+              "Error fetching forecast for geocoding ${geocode.id}: $exception");
+          geocode.forecast = Forecast.noInternet();
+        }
+
+        return geocode;
+      }).toList());
+    } catch (exception, stacktrace) {
+      debugPrint("Error updating forecasts: $exception");
+      Sentry.captureException(exception, stackTrace: stacktrace);
+    }
+
     _geocodings = await Future.wait(_geocodings.map((geocode) async {
       geocode.forecast = await _forecastRepo.getForecastById(geocode);
       _geocodingRepo.storeGeocoding(geocode);

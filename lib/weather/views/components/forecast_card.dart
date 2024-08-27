@@ -66,7 +66,10 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
         .read<WeatherProvider>()
         .getGeocoding(_forecastCardProvider.geocoding.id);
 
-    _forecastCardProvider.setGeocoding(geo);
+    if (geo != null) {
+      _forecastCardProvider.setGeocoding(geo);
+    }
+
     super.didPopNext();
   }
 

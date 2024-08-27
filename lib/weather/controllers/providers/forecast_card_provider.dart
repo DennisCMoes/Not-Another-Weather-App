@@ -62,21 +62,26 @@ class ForecastCardProvider extends ChangeNotifier {
 
   /// Replaces the [oldField] with [newField] in the list of selected forecast items and notifies it's listeners
   void replaceSecondaryField(
-      SelectableForecastFields oldField, SelectableForecastFields newField) {
+    SelectableForecastFields oldField,
+    SelectableForecastFields newField,
+  ) {
+    final List<SelectableForecastFields> selectedFields =
+        geocoding.selectedForecastItems;
+
     int oldFieldIndex = geocoding.selectedForecastItems.indexOf(oldField);
     int newFieldIndex = geocoding.selectedForecastItems.indexOf(newField);
 
     if (oldFieldIndex != -1) {
       if (newFieldIndex != -1) {
         // Swap the fields
-        geocoding.selectedForecastItems[newFieldIndex] = oldField;
+        selectedFields[newFieldIndex] = oldField;
       }
 
-      geocoding.selectedForecastItems[oldFieldIndex] = newField;
+      selectedFields[oldFieldIndex] = newField;
       notifyListeners();
       _geocodingRepo.storeGeocoding(geocoding);
     } else {
-      debugPrint("Error: Old field not found");
+      debugPrint("Error: Old field not found in selected forecast items");
     }
   }
 
@@ -102,7 +107,8 @@ class ForecastCardProvider extends ChangeNotifier {
         return "Tomorrow at ${selectedHour.hour}";
       }
     } catch (exception) {
-      return "Error fetching data: $exception";
+      debugPrint("Error fetching selected hour description: $exception");
+      return "Error fetching data";
     }
   }
 }

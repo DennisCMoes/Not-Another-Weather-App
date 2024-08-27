@@ -7,7 +7,6 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
-import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
@@ -29,7 +28,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   late DeviceProvider _deviceProvider;
   late WeatherProvider _weatherProvider;
-  late DrawerProvider _drawerProvider;
 
   final LocationController locationController = LocationController();
   final ForecastRepo forecastRepo = ForecastRepo();
@@ -44,7 +42,6 @@ class _HomeScreenState extends State<HomeScreen>
 
     _deviceProvider = context.read<DeviceProvider>();
     _weatherProvider = context.read<WeatherProvider>();
-    _drawerProvider = context.read<DrawerProvider>();
 
     Connectivity().onConnectivityChanged.listen((event) {
       _deviceProvider.setHasInternet(!event.contains(ConnectivityResult.none));
@@ -59,7 +56,6 @@ class _HomeScreenState extends State<HomeScreen>
 
     _deviceProvider.dispose();
     _weatherProvider.dispose();
-    _drawerProvider.dispose();
 
     _hourTimer.cancel();
 
