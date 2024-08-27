@@ -1,12 +1,10 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
-import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
@@ -24,9 +22,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with WidgetsBindingObserver, RouteAware {
   late Future<void> _initializationFunction;
-  late Timer _hourTimer;
-
-  late DeviceProvider _deviceProvider;
   late WeatherProvider _weatherProvider;
 
   final LocationController locationController = LocationController();
@@ -39,26 +34,14 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
-
-    _deviceProvider = context.read<DeviceProvider>();
     _weatherProvider = context.read<WeatherProvider>();
-
-    Connectivity().onConnectivityChanged.listen((event) {
-      _deviceProvider.setHasInternet(!event.contains(ConnectivityResult.none));
-    });
-
     _initializationFunction = _weatherProvider.initializeData();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-
-    _deviceProvider.dispose();
     _weatherProvider.dispose();
-
-    _hourTimer.cancel();
-
     super.dispose();
   }
 
@@ -67,22 +50,12 @@ class _HomeScreenState extends State<HomeScreen>
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      _refreshData();
+      _weatherProvider.refreshData();
     }
   }
 
   String getRefreshString() {
-    return DateFormat("HH:mm").format(_deviceProvider.refreshTime);
-  }
-
-  Future<void> _refreshData() async {
-    bool shouldRefresh = DateTime.now()
-        .isAfter(_deviceProvider.refreshTime.add(const Duration(minutes: 15)));
-
-    if (shouldRefresh) {
-      // await _weatherProvider.refreshData();
-      _deviceProvider.setRefreshTime();
-    }
+    return DateFormat("HH:mm").format(_weatherProvider.refreshTime);
   }
 
   @override

@@ -7,7 +7,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/stores/object_box.dart';
 import 'package:provider/provider.dart';
-import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/views/home.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -53,11 +52,8 @@ Future<void> main() async {
       }
     },
     appRunner: () => runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => DeviceProvider()),
-          ChangeNotifierProvider(create: (context) => WeatherProvider()),
-        ],
+      ChangeNotifierProvider(
+        create: (context) => WeatherProvider(),
         child: const MyApp(),
       ),
     ),

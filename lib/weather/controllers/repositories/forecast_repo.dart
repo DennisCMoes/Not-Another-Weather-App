@@ -124,10 +124,10 @@ class ForecastRepo {
       final hourlyBox = objectBox.hourlyBox;
       final dailyBox = objectBox.dailyBox;
 
-      _deleteAllSubData(forecast.id, hourlyBox,
-          HourlyWeatherData_.forecast.equals(forecast.id));
-      _deleteAllSubData(forecast.id, hourlyBox,
-          DailyWeatherData_.forecast.equals(forecast.id));
+      _deleteAllSubData<DailyWeatherData>(
+          dailyBox, DailyWeatherData_.forecast.equals(forecast.id));
+      _deleteAllSubData<HourlyWeatherData>(
+          hourlyBox, HourlyWeatherData_.forecast.equals(forecast.id));
 
       hourlyBox.putMany(forecast.hourlyWeatherList);
       dailyBox.putMany(forecast.dailyWeatherDataList);
@@ -139,7 +139,6 @@ class ForecastRepo {
   }
 
   void _deleteAllSubData<T>(
-    int forecastId,
     Box<T> box,
     Condition<T> condition,
   ) {
@@ -154,7 +153,10 @@ class ForecastRepo {
 
   /// Generic method to fetch weather data lists from storage
   List<T> _getWeatherDataList<T>(
-      int geocodeId, Box<T> box, Condition<T> condition) {
+    int geocodeId,
+    Box<T> box,
+    Condition<T> condition,
+  ) {
     final Query<T> query = box.query(condition).build();
     final List<T> dataList =
         box.getMany(query.findIds()).whereType<T>().toList();

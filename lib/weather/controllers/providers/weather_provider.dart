@@ -16,15 +16,34 @@ class WeatherProvider extends ChangeNotifier {
   final GeocodingRepo _geocodingRepo = GeocodingRepo();
   final PageController _pageController = PageController();
 
+  late Timer _onNewHourTimer;
+
   List<Geocoding> _geocodings = [];
-  DateTime currentHour = DateTime.now();
+  DateTime _currentHour = DateTime.now();
+  DateTime _refreshTime = DateTime.now();
 
   // Getters
   PageController get pageController => _pageController;
+  DateTime get refreshTime => _refreshTime;
+  DateTime get currentHour => _currentHour;
   UnmodifiableListView<Geocoding> get geocodings =>
       UnmodifiableListView(_geocodings);
 
-  // Initializes data asynchronously
+  WeatherProvider() {
+    _startHourlyTimer();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _onNewHourTimer.cancel();
+  }
+
+  /// Initializes weather-related data asynchronously.
+  ///
+  /// This function attempts to initialize geocoding data and forecasts.
+  /// If an error occurs during initialization, the error is logged, and the
+  /// exception is captured usign Sentry for monitoring.
   Future<void> initializeData() async {
     try {
       await _initializeGeocodingsAndForecasts();
@@ -35,7 +54,30 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  /// Adds dummy data to the geocodings list
+  /// Refreshes the weather data if the last refresh was more than 5 minutes ago.
+  ///
+  /// This function checks if the last refresh time is more than 5 minutes old.
+  /// If so, it updates the forecasts and sets the new refresh time to the current time.
+  /// Any errors during the refresh process are logged and reported to Sentry.
+  Future<void> refreshData() async {
+    try {
+      // If the last refresh is more than 5 minutes away refresh the data
+      if (DateTime.now()
+          .isAfter(_refreshTime.add(const Duration(minutes: 5)))) {
+        _updateForecasts();
+        _refreshTime = DateTime.now();
+      }
+    } catch (exception, stacktrace) {
+      debugPrint("Error refreshing data: $exception");
+      Sentry.captureException(exception, stackTrace: stacktrace);
+    }
+  }
+
+  /// Adds dummy data to the geocodings list.
+  ///
+  /// This method clears any existing dummy data in the geocodings list and adds
+  /// a new set of dummy geocoding entries for testing or demonstration purposes.
+  /// After updating the geocodings list, it notifies listeners to update the UI.
   void addDummyData() {
     _geocodings.removeWhere((element) => element.isTestClass != TestClass.none);
     _geocodings.addAll([
@@ -48,7 +90,14 @@ class WeatherProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Retrieves a specific geocoding by its ID
+  /// Retrieves a specific geocoding by its ID.
+  ///
+  /// This method attemps to find a geocoding entry in the geocodings list that
+  /// matches the provided [id]. If found, the geocoding is returned; otherwise,
+  /// `null` is returned if an error occurs or if no match is found.
+  ///
+  /// - Parameters:
+  ///   - [id]: The unique identifier of the geocoding to retrieve.
   Geocoding? getGeocoding(int id) {
     try {
       return _geocodings.firstWhere((geo) => geo.id == id);
@@ -58,7 +107,15 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  /// Adds a geocoding with forecast to the list
+  /// Adds a geocoding with forecast to the list.
+  ///
+  /// This method adds a new geocoding to the geocodings list and updates its
+  /// ordering. After adding, it updates the forecasts and persists the updated
+  /// geocodings list to the repository. If an error occurs, it is logged and
+  /// captured using Sentry.
+  ///
+  /// - Parameters:
+  ///   - [geocoding]: The geocoding entry to add to the list.
   Future<void> addGeocoding(Geocoding geocoding) async {
     try {
       geocoding.ordening = _geocodings.length;
@@ -73,7 +130,16 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  // Moves a geocoding location from [oldIndex] to [newIndex] in the list
+  /// Moves a geocoding location from [oldIndex] to [newIndex] in the list.
+  ///
+  /// This method reorders the geocodings list by moving a geocoding from the
+  /// specified [oldIndex] to the [newIndex]. It updates the ordering of all
+  /// geocodings and persists the changes. If an error occurs, it is logged
+  /// and captured using Sentry.
+  ///
+  /// - Parameters:
+  ///   - [oldIndex]: The current index of the geocoding to move.
+  ///   - [newIndex]: The new index to move the geocoding to.
   void moveGeocodings(int oldIndex, int newIndex) {
     if (!_isValidIndex(oldIndex) || !_isValidIndex(newIndex)) {
       debugPrint("Invalid index for moving geocodings: $oldIndex, $newIndex");
@@ -96,7 +162,15 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  /// Removes the specified [geocoding] location from the list
+  /// Removes the specified [geocoding] location from the list.
+  ///
+  /// This method removes a geocoding from the geocodings list based on the
+  /// provided [geocoding] object. It also deletes the geocoding from the
+  /// repository and notifies listeners. If an error occurs, it is logged
+  /// and captured using Sentry.
+  ///
+  /// - Parameters:
+  ///   - [geocoding]: The geocoding entry to remove from the list.
   void removeGeocoding(Geocoding geocoding) {
     int geoIndex = _geocodings.indexOf(geocoding);
 
@@ -120,12 +194,26 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  /// Chekcs if the provided index is valid within the geocodings list
+  /// Checks if the provided index is valid within the geocodings list.
+  ///
+  /// This method verifies whether the given [index] is within the bounds
+  /// of the current geocodings list.
+  ///
+  /// - Parameters:
+  ///   - [index]: The index to validate.
+  ///
+  /// - Returns:
+  ///   `true` if the index is valid; `false` otherwise.
   bool _isValidIndex(int index) {
     return index >= 0 && index < _geocodings.length;
   }
 
-  /// Initializes geocodings and forecasts together
+  /// Initializes geocodings and forecasts together.
+  ///
+  /// This method initializes the geocodings list by fetching stored geocodings
+  /// from the repository and setting up the current location. It also fetches
+  /// the latest weather forecasts for each geocoding. Errors are logged and
+  /// captured using Sentry.
   Future<void> _initializeGeocodingsAndForecasts() async {
     try {
       _geocodings = _getStoredGeocodings();
@@ -141,7 +229,14 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  /// Fetches stored geocodings from the repository and initializes if empty
+  /// Fetches stored geocodings from the repository and initializes if empty.
+  ///
+  /// This method retrieves geocodings stored in the repository. If no geocodings
+  /// are found, it initializes the list with a default current location entry.
+  /// Errors are logged and captured using Sentry.
+  ///
+  /// - Returns:
+  ///   A list of stored geocodings.
   List<Geocoding> _getStoredGeocodings() {
     try {
       List<Geocoding> storedGeocodings = _geocodingRepo.getStoredGeocodings();
@@ -170,6 +265,13 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
+  /// Updates the local position of the device.
+  ///
+  /// This method checks the device's location permissions and availability,
+  /// then attempts to fetch the current position. The position is used to
+  /// update the current location geocoding in the list. Errors are logged and
+  /// captured using Sentry, and the state is updated accordingly if the location
+  /// cannot be determined.
   Future<void> _updateLocalPosition() async {
     try {
       final invalidPermissions = [
@@ -215,7 +317,12 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  // Updates the forecasts for all geocodings asynchronously
+  /// Updates the forecasts for all geocodings asynchronously.
+  ///
+  /// This method fetches the latest weather forecasts for each geocoding
+  /// in the geocodings list. If an error occurs while fetching a forecast,
+  /// a placeholder forecast indicating no internet is used. All updates
+  /// are persisted to the repository. Errors are logged and captured using Sentry.
   Future<void> _updateForecasts() async {
     try {
       _geocodings = await Future.wait(_geocodings.map((geocode) async {
@@ -234,11 +341,32 @@ class WeatherProvider extends ChangeNotifier {
       debugPrint("Error updating forecasts: $exception");
       Sentry.captureException(exception, stackTrace: stacktrace);
     }
+  }
 
-    _geocodings = await Future.wait(_geocodings.map((geocode) async {
-      geocode.forecast = await _forecastRepo.getForecastById(geocode);
-      _geocodingRepo.storeGeocoding(geocode);
-      return geocode;
-    }).toList());
+  /// Starts a timer that triggers an action at the start of every new hour.
+  ///
+  /// This method calculates the duration until the next full hour and sets
+  /// a timer to call [_onHourChange] when that time is reached. It ensures
+  /// that actions or updates that should occur at the start of each hour
+  /// are executed on time.
+  void _startHourlyTimer() {
+    DateTime now = DateTime.now();
+    DateTime nextHour = DateTime(now.year, now.month, now.day, now.hour + 1);
+
+    Duration timeUntilNextHour = nextHour.difference(now);
+    _onNewHourTimer = Timer(timeUntilNextHour, _onHourChange);
+  }
+
+  /// Called at the start of each new hour to perform necessary updates.
+  ///
+  /// This method is triggered by a timer set in [_startHourlyTimer]. It updates
+  /// the [_currentHour] and [_refreshTime] to the current time, triggers a forecast
+  /// update by calling [_updateForecasts], and then notifies listeners of the changes
+  /// to ensure that the UI or other listening components are updated accordingly.
+  void _onHourChange() {
+    _currentHour = DateTime.now();
+    _refreshTime = DateTime.now();
+    _updateForecasts();
+    notifyListeners();
   }
 }
