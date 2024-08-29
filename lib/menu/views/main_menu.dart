@@ -85,10 +85,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   void _selectNewGeocoding(Geocoding geocoding) async {
-    int index = _weatherProvider.getIndexOfGeocoding(geocoding);
+    int index = _weatherProvider.geocodings.indexOf(geocoding);
 
     if (index == -1) {
-      await _weatherProvider.addGeocoding(geocoding);
+      _weatherProvider.addGeocoding(geocoding);
       _goToPage(_weatherProvider.geocodings.length - 1);
     } else {
       _goToPage(index);
@@ -124,7 +124,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               },
             )
           },
-          child: const Text("Not Another Weather App"),
+          child: const Text("Yet Another Weather App"),
         ),
       ),
       body: GestureDetector(
@@ -202,7 +202,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   Widget _geocodingTile(Geocoding geocoding, int index) {
-    final colorPair = geocoding.forecast!.getColorPair();
+    final colorPair = geocoding.forecast.getColorPair();
 
     return ListTile(
       key: ValueKey(geocoding),
@@ -231,7 +231,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         ],
       ),
       subtitle: Text(
-        geocoding.forecast!.getCurrentHourData().weatherCode.description,
+        geocoding.forecast.getCurrentHourData().weatherCode.description,
         style: Theme.of(context)
             .textTheme
             .displaySmall!
@@ -247,7 +247,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               icon: Icon(Icons.delete, color: colorPair.accent),
             )
           : Text(
-              "${geocoding.forecast!.getCurrentHourData().temperature.round()}º",
+              "${geocoding.forecast.getCurrentHourData().temperature.round()}º",
               style: Theme.of(context)
                   .textTheme
                   .displayMedium!
@@ -312,17 +312,17 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       "precipitation_unit",
                       Icons.water_drop,
                       PrecipitationUnit.values),
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.tour),
-                    onTap: () {},
-                    title: const Text("Quick Guide"),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.cell_tower),
-                    onTap: () {},
-                    title: const Text("Data sources"),
-                  ),
+                  // const Divider(),
+                  // ListTile(
+                  //   leading: const Icon(Icons.tour),
+                  //   onTap: () {},
+                  //   title: const Text("Quick Guide"),
+                  // ),
+                  // ListTile(
+                  //   leading: const Icon(Icons.cell_tower),
+                  //   onTap: () {},
+                  //   title: const Text("Data sources"),
+                  // ),
                   // If we are in debug mode and not release display the debug buttons
                   if (kDebugMode) _debugButtons(),
                 ],

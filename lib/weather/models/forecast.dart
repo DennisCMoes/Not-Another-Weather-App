@@ -9,6 +9,7 @@ import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_w
 import 'package:not_another_weather_app/weather/models/weather/weather_code.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/timezone.dart';
 
 @Entity()
 class Forecast {
@@ -199,13 +200,14 @@ class Forecast {
   }
 
   ColorPair getColorPair([DateTime? date]) {
-    date ??= DateTime.now();
+    // Get the converted time of the timezone
+    date ??= TZDateTime.from(DateTime.now(), getLocation(timezone));
 
     DailyWeatherData daily = getCurrentDayData(date);
     HourlyWeatherData hourly = getCurrentHourData(date);
 
-    final isBeforeSunset = date.isBefore(daily.sunset);
-    final isAfterSunrise = date.isAfter(daily.sunrise);
+    final isBeforeSunset = hourly.time.isBefore(daily.sunset);
+    final isAfterSunrise = hourly.time.isAfter(daily.sunrise);
 
     final isInTheDay = isAfterSunrise && isBeforeSunset;
     return hourly.weatherCode.colorScheme.getColorPair(isInTheDay);
