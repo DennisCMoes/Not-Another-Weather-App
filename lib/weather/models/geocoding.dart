@@ -125,13 +125,11 @@ class Geocoding {
         isInTheDay = (date.isAfter(sunrise)) && (date.isBefore(sunset));
       }
 
-      return forecast.getColorPair(date);
-
-      // return forecast
-      //     .getCurrentHourData(startOfHour)
-      //     .weatherCode
-      //     .colorScheme
-      //     .getColorPair(isInTheDay);
+      return forecast
+          .getCurrentHourData(startOfHour)
+          .weatherCode
+          .colorScheme
+          .getColorPair(isInTheDay);
     } catch (exception) {
       return const ColorPair(
         Color(0xFF0327D6),

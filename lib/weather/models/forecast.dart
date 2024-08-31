@@ -42,6 +42,17 @@ class Forecast {
     SharedPreferences.getInstance().then((value) => _preferences = value);
   }
 
+  Forecast.withHourlyAndDaily(
+    this.latitude,
+    this.longitude,
+    this.timezone,
+    this.pressure,
+    this.hourlyWeatherList,
+    this.dailyWeatherDataList,
+  ) {
+    SharedPreferences.getInstance().then((value) => _preferences = value);
+  }
+
   factory Forecast.fromJson(Map<String, dynamic> json) {
     DateFormat hourFormat = DateFormat('yyyy-MM-ddTHH:mm');
     DateFormat dayFormat = DateFormat("yyyy-MM-dd");

@@ -66,8 +66,8 @@ class DummyData {
         "Color Scheme (${testclass.name})")
       ..isTestClass = testclass
       ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
-      // ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily);
-      ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1);
+      ..forecast = Forecast.withHourlyAndDaily(
+          11, 11, "Europe/Amsterdam", 1, hourly, daily);
   }
 
   static Geocoding clipperGeocoding(TestClass testclass) {
@@ -90,7 +90,7 @@ class DummyData {
         12, "Clipper (${testclass.name})", 0, 0, "Clipper (${testclass.name})")
       ..isTestClass = testclass
       ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
-      // ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1, hourly, daily);
-      ..forecast = Forecast(11, 11, "Europe/Amsterdam", 1);
+      ..forecast = Forecast.withHourlyAndDaily(
+          11, 11, "Europe/Amsterdam", 1, hourly, daily);
   }
 }
