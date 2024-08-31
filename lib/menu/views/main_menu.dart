@@ -9,7 +9,6 @@ import 'package:not_another_weather_app/shared/extensions/color_extensions.dart'
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
-import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -312,17 +311,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       "precipitation_unit",
                       Icons.water_drop,
                       PrecipitationUnit.values),
-                  // const Divider(),
-                  // ListTile(
-                  //   leading: const Icon(Icons.tour),
-                  //   onTap: () {},
-                  //   title: const Text("Quick Guide"),
-                  // ),
-                  // ListTile(
-                  //   leading: const Icon(Icons.cell_tower),
-                  //   onTap: () {},
-                  //   title: const Text("Data sources"),
-                  // ),
                   // If we are in debug mode and not release display the debug buttons
                   if (kDebugMode) _debugButtons(),
                 ],

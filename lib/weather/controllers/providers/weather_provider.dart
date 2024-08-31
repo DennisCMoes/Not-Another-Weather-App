@@ -54,6 +54,18 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> refreshWithoutWait() async {
+    try {
+      // If the last refresh is more than 5 minutes away refresh the data
+      _updateForecasts();
+      _refreshTime = DateTime.now();
+      notifyListeners();
+    } catch (exception, stacktrace) {
+      debugPrint("Error refreshing data: $exception");
+      Sentry.captureException(exception, stackTrace: stacktrace);
+    }
+  }
+
   /// Refreshes the weather data if the last refresh was more than 5 minutes ago.
   ///
   /// This function checks if the last refresh time is more than 5 minutes old.
@@ -64,8 +76,7 @@ class WeatherProvider extends ChangeNotifier {
       // If the last refresh is more than 5 minutes away refresh the data
       if (DateTime.now()
           .isAfter(_refreshTime.add(const Duration(minutes: 5)))) {
-        _updateForecasts();
-        _refreshTime = DateTime.now();
+        refreshWithoutWait();
       }
     } catch (exception, stacktrace) {
       debugPrint("Error refreshing data: $exception");
@@ -337,6 +348,8 @@ class WeatherProvider extends ChangeNotifier {
 
         return geocode;
       }).toList());
+
+      notifyListeners();
     } catch (exception, stacktrace) {
       debugPrint("Error updating forecasts: $exception");
       Sentry.captureException(exception, stackTrace: stacktrace);
