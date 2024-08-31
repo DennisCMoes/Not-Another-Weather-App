@@ -148,52 +148,16 @@ class _SummaryPageState extends State<SummaryPage> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        transitionBuilder: (child, animation) {
-                          final inAnimation = Tween<Offset>(
-                            begin: const Offset(0.0, 1.0),
-                            end: Offset.zero,
-                          ).animate(animation);
-
-                          final outAnimation = Tween<Offset>(
-                            begin: const Offset(0.0, -1.0),
-                            end: Offset.zero,
-                          ).animate(animation);
-
-                          ValueKey key = ValueKey(_forecast.getField(
-                              SelectableForecastFields.temperature,
-                              state.selectedHour));
-
-                          // TODO: If the new value is lower slide in from the top, if larger slide in from the bottom
-                          return ClipRect(
-                            clipBehavior: Clip.antiAlias,
-                            child: Stack(
-                              alignment: Alignment.centerRight,
-                              children: [
-                                if (child.key != key)
-                                  SlideTransition(
-                                      position: outAnimation, child: child),
-                                if (child.key == key)
-                                  SlideTransition(
-                                      position: inAnimation, child: child),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Text(
-                          "${_forecast.getField(SelectableForecastFields.temperature, state.selectedHour) ?? "XX"}",
-                          key: ValueKey(_forecast.getField(
-                              SelectableForecastFields.temperature,
-                              state.selectedHour)),
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayLarge!
-                              .copyWith(
-                                fontSize: 128,
-                                color: colorPair.accent,
-                              ),
-                        ),
+                      Text(
+                        "${_forecast.getField(SelectableForecastFields.temperature, state.selectedHour) ?? "XX"}",
+                        key: ValueKey(_forecast.getField(
+                            SelectableForecastFields.temperature,
+                            state.selectedHour)),
+                        style:
+                            Theme.of(context).textTheme.displayLarge!.copyWith(
+                                  fontSize: 128,
+                                  color: colorPair.accent,
+                                ),
                       ),
                     ],
                   ),
