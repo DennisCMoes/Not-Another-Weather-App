@@ -1,12 +1,14 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/menu/models/units.dart';
 import 'package:not_another_weather_app/menu/views/unit_tile.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,7 +43,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     _textEditingController = TextEditingController();
 
     _textEditingController.addListener(_onTextFieldValueChange);
-    _focusNode.addListener(_onFocusChange);
   }
 
   @override
@@ -50,10 +51,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     _textEditingController.dispose();
 
     super.dispose();
-  }
-
-  void _onFocusChange() {
-    print("Focus: ${_focusNode.hasFocus.toString()}");
   }
 
   void _onTextFieldValueChange() async {
@@ -87,10 +84,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   void _selectNewGeocoding(Geocoding geocoding) async {
-    int index = _weatherProvider.getIndexOfGeocoding(geocoding);
+    int index = _weatherProvider.geocodings.indexOf(geocoding);
 
     if (index == -1) {
-      await _weatherProvider.addGeocoding(geocoding);
+      _weatherProvider.addGeocoding(geocoding);
       _goToPage(_weatherProvider.geocodings.length - 1);
     } else {
       _goToPage(index);
@@ -111,7 +108,24 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Not Another Weather App")),
+      appBar: AppBar(
+        title: RawGestureDetector(
+          gestures: {
+            SerialTapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
+                SerialTapGestureRecognizer>(
+              SerialTapGestureRecognizer.new,
+              (instance) {
+                instance.onSerialTapDown = (details) {
+                  if (details.count == 3) {
+                    context.read<WeatherProvider>().addDummyData();
+                  }
+                };
+              },
+            )
+          },
+          child: const Text("Yet Another Weather App"),
+        ),
+      ),
       body: GestureDetector(
         child: Consumer<WeatherProvider>(
           builder: (context, state, child) {
@@ -187,7 +201,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   Widget _geocodingTile(Geocoding geocoding, int index) {
-    ColorPair colorPair = geocoding.getColorSchemeOfForecast();
+    final colorPair = geocoding.forecast.getColorPair();
 
     return ListTile(
       key: ValueKey(geocoding),
@@ -199,12 +213,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            geocoding.name,
-            style: Theme.of(context)
-                .textTheme
-                .displayMedium!
-                .copyWith(color: colorPair.accent),
+          Flexible(
+            child: Text(
+              geocoding.name,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context)
+                  .textTheme
+                  .displayMedium!
+                  .copyWith(color: colorPair.accent),
+            ),
           ),
           const SizedBox(width: 6),
           geocoding.isCurrentLocation
@@ -213,8 +230,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         ],
       ),
       subtitle: Text(
-        geocoding.forecast?.getCurrentHourData().weatherCode.description ??
-            "Unknown",
+        geocoding.forecast.getCurrentHourData().weatherCode.description,
         style: Theme.of(context)
             .textTheme
             .displaySmall!
@@ -230,7 +246,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               icon: Icon(Icons.delete, color: colorPair.accent),
             )
           : Text(
-              "${geocoding.forecast?.getCurrentHourData().temperature.round() ?? "XX"}º",
+              "${geocoding.forecast.getCurrentHourData().temperature.round()}º",
               style: Theme.of(context)
                   .textTheme
                   .displayMedium!
@@ -252,7 +268,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     final state = context.read<WeatherProvider>();
 
     return SingleChildScrollView(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.only(bottom: context.padding.bottom),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.max,
@@ -262,9 +278,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               ReorderableListView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                header: state.geocodings.isEmpty
-                    ? const SizedBox.shrink()
-                    : _geocodingTile(state.geocodings[0], 0),
+                header: _geocodingTile(state.geocodings[0], 0),
                 onReorder: (oldIndex, newIndex) {
                   if (newIndex > oldIndex) {
                     newIndex -= 1;
@@ -297,17 +311,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       "precipitation_unit",
                       Icons.water_drop,
                       PrecipitationUnit.values),
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.tour),
-                    onTap: () {},
-                    title: const Text("Quick Guide"),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.cell_tower),
-                    onTap: () {},
-                    title: const Text("Data sources"),
-                  ),
                   // If we are in debug mode and not release display the debug buttons
                   if (kDebugMode) _debugButtons(),
                 ],
@@ -324,12 +327,12 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       return Center(
         child: Text(
           "No matching locations",
-          style: Theme.of(context).textTheme.displayMedium,
+          style: context.textTheme.displayMedium,
         ),
       );
     } else {
       return ListView.separated(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        padding: EdgeInsets.only(bottom: context.padding.bottom),
         itemCount: _searchedGeocodings.length,
         separatorBuilder: (context, index) => const Divider(height: 0),
         itemBuilder: (context, index) =>
@@ -344,6 +347,22 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       prefs.clear();
     }
 
+    void clearAllGeocodings() {
+      objectBox.geocodingBox.removeAll();
+    }
+
+    void clearAllForecasts() {
+      objectBox.forecastBox.removeAll();
+    }
+
+    void clearAllDaily() {
+      objectBox.dailyBox.removeAll();
+    }
+
+    void clearAllHourly() {
+      objectBox.hourlyBox.removeAll();
+    }
+
     return Column(
       children: [
         const Divider(),
@@ -351,6 +370,36 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           title: const Text("Clear Shared Preferences"),
           leading: const Icon(Icons.delete),
           onTap: clearSharedPrefs,
+        ),
+        ListTile(
+          title: const Text("Clear Persisted Forecasts"),
+          leading: const Icon(Icons.delete),
+          onTap: clearAllForecasts,
+        ),
+        ListTile(
+          title: const Text("Clear Persisted Geocodings"),
+          leading: const Icon(Icons.delete),
+          onTap: clearAllGeocodings,
+        ),
+        ListTile(
+          title: const Text("Clear Persisted Hourly Data"),
+          leading: const Icon(Icons.delete),
+          onTap: clearAllHourly,
+        ),
+        ListTile(
+          title: const Text("Clear Persisted Daily Data"),
+          leading: const Icon(Icons.delete),
+          onTap: clearAllDaily,
+        ),
+        ListTile(
+          title: const Text("Clear All Persisted Data"),
+          leading: const Icon(Icons.delete),
+          onTap: () {
+            clearAllForecasts();
+            clearAllGeocodings();
+            clearAllHourly();
+            clearAllDaily();
+          },
         ),
       ],
     );

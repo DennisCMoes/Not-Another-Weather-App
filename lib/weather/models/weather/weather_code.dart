@@ -1,5 +1,5 @@
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
-import 'package:not_another_weather_app/weather/models/weather_clipper.dart';
+import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/weather/weather_clipper.dart';
 
 enum WeatherCode {
   // Sunny
@@ -19,11 +19,11 @@ enum WeatherCode {
 
   // Drizzle
   lightDrizzle(
-      51, "Light drizzle", WeatherColorScheme.rain, WeatherClipper.drizzle),
-  moderateDrizzle(
-      53, "Moderate drizzle", WeatherColorScheme.rain, WeatherClipper.drizzle),
+      51, "Light drizzle", WeatherColorScheme.drizzle, WeatherClipper.drizzle),
+  moderateDrizzle(53, "Moderate drizzle", WeatherColorScheme.drizzle,
+      WeatherClipper.drizzle),
   denseDrizzle(
-      55, "Dense drizzle", WeatherColorScheme.rain, WeatherClipper.drizzle),
+      55, "Dense drizzle", WeatherColorScheme.drizzle, WeatherClipper.drizzle),
 
   // Freezing drizzle
   lightFreezingDrizzle(56, "Light freezing drizzle", WeatherColorScheme.drizzle,
@@ -74,8 +74,24 @@ enum WeatherCode {
   moderateThunderstormWithHail(99, "Thunderstorm",
       WeatherColorScheme.thunderstorm, WeatherClipper.thunder),
 
-  unknown(-1, "Something went wrong", WeatherColorScheme.thunderstorm,
-      WeatherClipper.unknown);
+  unknown(
+    -1,
+    "Something went wrong",
+    WeatherColorScheme.unknown,
+    WeatherClipper.unknown,
+  ),
+  noInternet(
+    -2,
+    "No network connection",
+    WeatherColorScheme.unknown,
+    WeatherClipper.unknown,
+  ),
+  isLoading(
+    -3,
+    "Is loading",
+    WeatherColorScheme.unknown,
+    WeatherClipper.unknown,
+  );
 
   final int code;
   final String description;
@@ -93,5 +109,9 @@ enum WeatherCode {
     }
 
     return WeatherCode.unknown;
+  }
+
+  static int toCode(WeatherCode weatherCode) {
+    return weatherCode.code;
   }
 }

@@ -35,14 +35,21 @@ class WidgetItem {
   WidgetSize size;
   WidgetType type;
 
-  WidgetItem({required this.id, required this.size, required this.type});
+  Geocoding geocoding;
+
+  WidgetItem({
+    required this.id,
+    required this.size,
+    required this.type,
+    required this.geocoding,
+  });
 
   Widget getWidget(Geocoding geocoding) {
     switch (type) {
       case WidgetType.compass:
-        return CompassWidget(size: size);
+        return CompassWidget(size: size, forecast: geocoding.forecast!);
       case WidgetType.sunriseSunset:
-        return SunriseSunsetWidget(size: size);
+        return SunriseSunsetWidget(size: size, forecast: geocoding.forecast!);
       case WidgetType.genericText:
         return const Text("Generic");
     }

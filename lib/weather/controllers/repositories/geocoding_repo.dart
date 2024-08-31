@@ -1,5 +1,6 @@
 import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/api_controller.dart';
+import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 
 class GeocodingRepo {
@@ -7,12 +8,22 @@ class GeocodingRepo {
   final ApiController _apiController = ApiController();
 
   List<Geocoding> _getAllGeocodingsFromBox() {
-    final geocodingBox = objectBox.geoBox;
-    return geocodingBox.getAll();
+    final forecastRepo = ForecastRepo();
+    final geocodingBox = objectBox.geocodingBox;
+
+    return geocodingBox.getAll().map((geocode) {
+      return geocode
+        ..forecast = forecastRepo.getForecastFromPersistedStorage(geocode);
+    }).toList();
   }
 
-  void _saveGeocodingsToBox(List<Geocoding> geocodings) {
-    final geocodingBox = objectBox.geoBox;
+  void updateGeocodings(List<Geocoding> geocodings) {
+    final geocodingBox = objectBox.geocodingBox;
+    geocodingBox.putMany(geocodings);
+  }
+
+  void saveGeocodingsToBox(List<Geocoding> geocodings) {
+    final geocodingBox = objectBox.geocodingBox;
     geocodingBox.putMany(geocodings);
   }
 
@@ -27,12 +38,12 @@ class GeocodingRepo {
   }
 
   void storeGeocoding(Geocoding geocoding) {
-    final geocodingBox = objectBox.geoBox;
+    final geocodingBox = objectBox.geocodingBox;
     geocodingBox.put(geocoding);
   }
 
   void removeGeocoding(int id) {
-    final geocodingBox = objectBox.geoBox;
+    final geocodingBox = objectBox.geocodingBox;
     geocodingBox.remove(id);
   }
 
@@ -76,7 +87,7 @@ class GeocodingRepo {
           List.from(data['results']).map((e) => Geocoding.fromJson(e)).toList();
 
       if (_areGeocodingsEqual(storedGeocodings, newGeocodings)) {
-        _saveGeocodingsToBox(newGeocodings);
+        saveGeocodingsToBox(newGeocodings);
       }
 
       return newGeocodings;

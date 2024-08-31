@@ -1,24 +1,37 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
+import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
+import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
+import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
-import 'package:not_another_weather_app/weather/models/widget_item.dart';
 import 'package:objectbox/objectbox.dart';
+
+enum TestClass {
+  none,
+  day,
+  night;
+}
 
 @Entity()
 class Geocoding {
   @Id(assignable: true)
   int id;
 
+  int ordening;
   String name;
   double latitude;
   double longitude;
   String country;
-
-  @Transient() // Not stored in database
   bool isCurrentLocation;
 
-  Forecast? forecast;
+  @Transient()
+  TestClass isTestClass;
+
+  @Transient()
+  late Forecast forecast;
 
   int selectedPage = 0;
 
@@ -46,35 +59,30 @@ class Geocoding {
           ];
   }
 
-  List<WidgetItem> detailWidgets = [
-    WidgetItem(id: 1, size: WidgetSize.medium, type: WidgetType.compass),
-    WidgetItem(id: 2, size: WidgetSize.small, type: WidgetType.genericText),
-    WidgetItem(id: 3, size: WidgetSize.small, type: WidgetType.genericText),
-    WidgetItem(id: 4, size: WidgetSize.large, type: WidgetType.sunriseSunset),
-    WidgetItem(id: 5, size: WidgetSize.medium, type: WidgetType.genericText),
-    WidgetItem(id: 6, size: WidgetSize.medium, type: WidgetType.genericText),
-  ];
-
-  Geocoding(this.id, this.name, this.latitude, this.longitude, this.country,
-      {this.isCurrentLocation = false});
+  Geocoding(
+    this.id,
+    this.name,
+    this.latitude,
+    this.longitude,
+    this.country, {
+    this.isCurrentLocation = false,
+    this.ordening = -1,
+    this.isTestClass = TestClass.none,
+  });
 
   factory Geocoding.fromJson(Map<String, dynamic> json) {
-    Geocoding geocoding = Geocoding(
+    return Geocoding(
       json['id'],
       json['name'],
       json['latitude'],
       json['longitude'],
       json['country'] ?? "Unknown",
-    );
-
-    geocoding.selectedForecastItems = [
-      SelectableForecastFields.windSpeed,
-      SelectableForecastFields.precipitation,
-      SelectableForecastFields.chainceOfRain,
-      SelectableForecastFields.cloudCover,
-    ];
-
-    return geocoding;
+    )..selectedForecastItems = [
+        SelectableForecastFields.windSpeed,
+        SelectableForecastFields.precipitation,
+        SelectableForecastFields.chainceOfRain,
+        SelectableForecastFields.cloudCover,
+      ];
   }
 
   void _ensureStableEnumValues() {
@@ -89,37 +97,45 @@ class Geocoding {
     assert(SelectableForecastFields.windDirection.index == 8);
     assert(SelectableForecastFields.windGusts.index == 9);
     assert(SelectableForecastFields.cloudCover.index == 10);
-    assert(SelectableForecastFields.isDay.index == 11);
-    assert(SelectableForecastFields.localTime.index == 12);
+    assert(SelectableForecastFields.localTime.index == 11);
   }
 
-  ColorPair getColorSchemeOfForecast([DateTime? selectedTime]) {
-    if (forecast == null) {
-      return const ColorPair(Color(0xFF0327D6), Color(0xFFDBE7F6));
+  Future<ColorPair> getColorSchemeOfForecast([DateTime? date]) async {
+    try {
+      date ??= DateTime.now();
+
+      final DateTime startOfHour = DatetimeUtils.startOfHour(date);
+      final DateTime startOfDay = DatetimeUtils.startOfDay(date);
+
+      final dailyWeatherData = forecast.dailyWeatherData[startOfDay];
+      if (dailyWeatherData == null) {
+        throw Exception("No daily weather available");
+      }
+
+      final sunrise = dailyWeatherData.sunrise;
+      final sunset = dailyWeatherData.sunset;
+
+      bool isInTheDay;
+
+      if (isTestClass == TestClass.day) {
+        isInTheDay = true;
+      } else if (isTestClass == TestClass.night) {
+        isInTheDay = false;
+      } else {
+        isInTheDay = (date.isAfter(sunrise)) && (date.isBefore(sunset));
+      }
+
+      return forecast
+          .getCurrentHourData(startOfHour)
+          .weatherCode
+          .colorScheme
+          .getColorPair(isInTheDay);
+    } catch (exception) {
+      return const ColorPair(
+        Color(0xFF0327D6),
+        Color(0xFFDBE7F6),
+      );
     }
-
-    final DateTime time = selectedTime ??
-        DatetimeUtils.convertToTimezone(
-            DateTime.now(), forecast?.timezome ?? "CEST");
-
-    final DateTime startOfHour = DatetimeUtils.startOfHour(time);
-    final DateTime startOfDay = DatetimeUtils.startOfDay(time);
-
-    final dailyWeatherData = forecast?.dailyWeatherData[startOfDay];
-    if (dailyWeatherData == null) {
-      return const ColorPair(Color(0xFF0327D6), Color(0xFFDBE7F6));
-    }
-
-    final sunrise = dailyWeatherData.sunrise;
-    final sunset = dailyWeatherData.sunset;
-
-    final isInTheDay = (time.isAfter(sunrise)) && (time.isBefore(sunset));
-
-    return forecast!
-        .getCurrentHourData(startOfHour)
-        .weatherCode
-        .colorScheme
-        .getColorPair(isInTheDay);
   }
 
   @override

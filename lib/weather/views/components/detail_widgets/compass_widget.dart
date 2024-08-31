@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
-import 'package:not_another_weather_app/weather/models/widget_item.dart';
+import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
+import 'package:not_another_weather_app/weather/models/logics/widget_item.dart';
+import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
 import 'package:not_another_weather_app/weather/views/painters/compass_painter.dart';
 import 'package:provider/provider.dart';
 
 class CompassWidget extends StatelessWidget {
   final WidgetSize size;
+  final Forecast forecast;
 
-  const CompassWidget({required this.size, super.key});
+  const CompassWidget({required this.size, required this.forecast, super.key});
 
   String getHeading([int heading = 0]) {
     if (heading >= 0 && heading <= 22.5 && heading >= 337.5) {
@@ -35,21 +38,32 @@ class CompassWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CurrentGeocodingProvider>(
+    return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
-        HourlyWeatherData? weatherData =
-            state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
+        final weatherData = forecast.getCurrentHourData(state.selectedHour);
 
         switch (size) {
           case WidgetSize.small:
-            return _small(context, state, weatherData);
+            return _small(context, weatherData);
           case WidgetSize.medium:
-            return _compass(context, state, weatherData);
+            return _compass(
+              context,
+              forecast.getColorPair(state.selectedHour),
+              weatherData,
+            );
           case WidgetSize.large:
             return Row(
               children: [
-                Expanded(child: _details(context, state, weatherData)),
-                Expanded(child: _compass(context, state, weatherData)),
+                Expanded(
+                    child: _details(
+                        context,
+                        forecast.getColorPair(state.selectedHour),
+                        weatherData)),
+                Expanded(
+                    child: _compass(
+                        context,
+                        forecast.getColorPair(state.selectedHour),
+                        weatherData)),
               ],
             );
         }
@@ -57,8 +71,10 @@ class CompassWidget extends StatelessWidget {
     );
   }
 
-  Widget _small(BuildContext context, CurrentGeocodingProvider provider,
-      HourlyWeatherData? weatherData) {
+  Widget _small(
+    BuildContext context,
+    HourlyWeatherData? weatherData,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -66,17 +82,17 @@ class CompassWidget extends StatelessWidget {
         const Icon(Icons.directions),
         Text(
           "${weatherData?.windDirection ?? "XX"}º",
-          style: Theme.of(context).textTheme.displayMedium,
+          style: context.textTheme.displayMedium,
         )
       ],
     );
   }
 
-  Widget _details(BuildContext context, CurrentGeocodingProvider provider,
-      HourlyWeatherData? weatherData) {
-    ColorPair colorPair =
-        provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
-
+  Widget _details(
+    BuildContext context,
+    ColorPair colorPair,
+    HourlyWeatherData? weatherData,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
@@ -88,7 +104,7 @@ class CompassWidget extends StatelessWidget {
             children: [
               const Text("Wind speed"),
               Text("${weatherData?.windSpeed.round() ?? 0.0} km/h",
-                  style: Theme.of(context).textTheme.displayMedium),
+                  style: context.textTheme.displayMedium),
             ],
           ),
           Divider(
@@ -98,7 +114,7 @@ class CompassWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text("${weatherData?.windGusts.round() ?? 0.0} km/h",
-                  style: Theme.of(context).textTheme.displayMedium),
+                  style: context.textTheme.displayMedium),
               const Text("Wind gusts")
             ],
           ),
@@ -107,11 +123,11 @@ class CompassWidget extends StatelessWidget {
     );
   }
 
-  Widget _compass(BuildContext context, CurrentGeocodingProvider provider,
-      HourlyWeatherData? weatherData) {
-    ColorPair colorPair =
-        provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
-
+  Widget _compass(
+    BuildContext context,
+    ColorPair colorPair,
+    HourlyWeatherData? weatherData,
+  ) {
     return CustomPaint(
       painter: CompassPainter(
           direction: weatherData?.windDirection.toDouble() ?? 0.0,

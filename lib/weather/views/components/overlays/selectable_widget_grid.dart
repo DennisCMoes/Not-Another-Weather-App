@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
-import 'package:not_another_weather_app/weather/models/forecast.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
+import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:provider/provider.dart';
 
 class SelectableWidgetGrid extends StatefulWidget {
@@ -38,10 +38,10 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CurrentGeocodingProvider>(
+    return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
         return Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          padding: EdgeInsets.only(top: context.padding.top),
           child: Column(
             children: [
               Padding(
@@ -96,7 +96,7 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
                       top: NavigationToolbar.kMiddleSpacing,
                       left: NavigationToolbar.kMiddleSpacing,
                       right: NavigationToolbar.kMiddleSpacing,
-                      bottom: MediaQuery.of(context).padding.bottom,
+                      bottom: context.padding.bottom,
                     ),
                     itemBuilder: (context, index) {
                       SelectableForecastFields forecastField =
@@ -147,10 +147,21 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
     );
   }
 
-  Widget _fieldCard(CurrentGeocodingProvider provider,
-      SelectableForecastFields forecastField) {
+  Widget _fieldCard(
+      ForecastCardProvider provider, SelectableForecastFields forecastField) {
     int index = provider.geocoding.selectedForecastItems.indexOf(forecastField);
     bool isCurrentField = forecastField == widget.fieldToReplace;
+
+    void onClick() {
+      HapticFeedback.lightImpact();
+      provider.replaceSecondaryField(
+        widget.fieldToReplace,
+        forecastField,
+      );
+
+      provider.setIsEditing(false);
+      Navigator.of(context).pop(forecastField);
+    }
 
     return Stack(
       alignment: Alignment.center,
@@ -164,17 +175,7 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
           child: InkWell(
             splashColor: isCurrentField ? Colors.transparent : null,
             highlightColor: isCurrentField ? Colors.transparent : null,
-            onTap: isCurrentField
-                ? null
-                : () {
-                    HapticFeedback.lightImpact();
-                    provider.replaceSecondaryField(
-                      widget.fieldToReplace,
-                      forecastField,
-                    );
-
-                    Navigator.of(context).pop(forecastField);
-                  },
+            onTap: isCurrentField ? null : () => onClick(),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,

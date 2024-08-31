@@ -1,29 +1,53 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
-import 'package:not_another_weather_app/weather/models/colorscheme.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
+import 'package:not_another_weather_app/weather/models/geocoding.dart';
+import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';
-import 'package:not_another_weather_app/weather/models/weather_clipper.dart';
 import 'package:not_another_weather_app/weather/views/components/overlays/selectable_widget_grid.dart';
 import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
 import 'package:provider/provider.dart';
 
 class SummaryPage extends StatefulWidget {
-  const SummaryPage({super.key});
+  final Geocoding geocoding;
+
+  const SummaryPage({super.key, required this.geocoding});
 
   @override
   State<SummaryPage> createState() => _SummaryPageState();
 }
 
 class _SummaryPageState extends State<SummaryPage> {
-  late CurrentGeocodingProvider _geocodingProvider;
+  late ForecastCardProvider _geocodingProvider;
+  late Forecast _forecast;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _forecast = widget.geocoding.forecast;
+    _geocodingProvider = context.read<ForecastCardProvider>();
+  }
+
+  @override
+  void dispose() {
+    // TODO: Find another way to dispose of the provider without disposing it between subpages
+    // _geocodingProvider.dispose();
+    super.dispose();
+  }
 
   void _showSelectedFieldMenu(
-      SelectableForecastFields field, bool isMainField) async {
+    SelectableForecastFields field,
+    bool isMainField,
+  ) {
     HapticFeedback.lightImpact();
-    await Navigator.of(context).push(
+
+    Navigator.of(context).push(
       ModalOverlay(
         overlayChild: ChangeNotifierProvider.value(
           value: _geocodingProvider,
@@ -34,28 +58,19 @@ class _SummaryPageState extends State<SummaryPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _geocodingProvider =
-        Provider.of<CurrentGeocodingProvider>(context, listen: false);
-  }
-
-  @override
-  void dispose() {
-    // TODO: Find another way to dispose of the provider without disposing it between subpages
-    // _geocodingProvider.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Consumer<CurrentGeocodingProvider>(
+    return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
-        HourlyWeatherData? currentHourData =
-            state.geocoding.forecast?.getCurrentHourData(state.selectedHour);
-        Forecast? currentForecast = state.geocoding.forecast;
-        ColorPair colorPair =
-            state.geocoding.getColorSchemeOfForecast(state.selectedHour);
+        final colorPair = _forecast.getColorPair(state.selectedHour);
+        final weatherData = _forecast.getCurrentHourData(state.selectedHour);
+
+        bool isInvalidCurrent = state.geocoding.isCurrentLocation &&
+            state.geocoding.latitude == -1 &&
+            state.geocoding.longitude == -1;
+
+        if (isInvalidCurrent) {
+          return noLocationCard(context);
+        }
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -69,12 +84,13 @@ class _SummaryPageState extends State<SummaryPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ClipPath(
-                            clipper: currentForecast
-                                    ?.getClipperOfHour(state.selectedHour) ??
-                                WeatherClipper.unknown.getClipper(),
+                            clipper: _forecast.getClipperOfHour(
+                              state.selectedHour,
+                            ),
+                            clipBehavior: Clip.antiAlias,
                             child: SizedBox(
-                              width: 300,
-                              height: 300,
+                              width: MediaQuery.of(context).size.width - 100,
+                              height: MediaQuery.of(context).size.width - 100,
                               child: RepaintBoundary(
                                 child: CustomScrollView(
                                   physics: const NeverScrollableScrollPhysics(),
@@ -101,14 +117,11 @@ class _SummaryPageState extends State<SummaryPage> {
                             ),
                           ),
                           Text(
-                            currentHourData?.weatherCode.description ??
-                                "Unknown",
+                            weatherData.weatherCode.description,
                             style: Theme.of(context)
                                 .textTheme
                                 .displayMedium!
-                                .copyWith(
-                                  color: colorPair.accent,
-                                ),
+                                .copyWith(color: colorPair.accent),
                           ),
                         ],
                       ),
@@ -116,9 +129,10 @@ class _SummaryPageState extends State<SummaryPage> {
                   ],
                 ),
               ),
+              // Bottom Text
               IntrinsicHeight(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.only(bottom: 8.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -128,7 +142,8 @@ class _SummaryPageState extends State<SummaryPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: state.geocoding.selectedForecastItems
-                              .map((e) => _weatherDetailItem(context, state, e))
+                              .map((e) => _weatherDetailItem(
+                                  context, state, _forecast, e))
                               .toList(),
                         ),
                       ),
@@ -146,7 +161,7 @@ class _SummaryPageState extends State<SummaryPage> {
                             end: Offset.zero,
                           ).animate(animation);
 
-                          ValueKey key = ValueKey(currentForecast?.getField(
+                          ValueKey key = ValueKey(_forecast.getField(
                               SelectableForecastFields.temperature,
                               state.selectedHour));
 
@@ -167,8 +182,8 @@ class _SummaryPageState extends State<SummaryPage> {
                           );
                         },
                         child: Text(
-                          "${currentForecast?.getField(SelectableForecastFields.temperature, state.selectedHour) ?? "XX"}",
-                          key: ValueKey(currentForecast?.getField(
+                          "${_forecast.getField(SelectableForecastFields.temperature, state.selectedHour) ?? "XX"}",
+                          key: ValueKey(_forecast.getField(
                               SelectableForecastFields.temperature,
                               state.selectedHour)),
                           style: Theme.of(context)
@@ -191,10 +206,13 @@ class _SummaryPageState extends State<SummaryPage> {
     );
   }
 
-  Widget _weatherDetailItem(BuildContext context,
-      CurrentGeocodingProvider provider, SelectableForecastFields field) {
-    ColorPair colorPair =
-        provider.geocoding.getColorSchemeOfForecast(provider.selectedHour);
+  Widget _weatherDetailItem(
+    BuildContext context,
+    ForecastCardProvider provider,
+    Forecast forecast,
+    SelectableForecastFields field,
+  ) {
+    final colorPair = forecast.getColorPair(provider.selectedHour);
 
     return Material(
       key: ValueKey(field),
@@ -226,10 +244,7 @@ class _SummaryPageState extends State<SummaryPage> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  provider.geocoding.forecast
-                          ?.getField(field, provider.selectedHour)
-                          .toString() ??
-                      "XX",
+                  forecast.getField(field, provider.selectedHour).toString(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -240,6 +255,32 @@ class _SummaryPageState extends State<SummaryPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget noLocationCard(BuildContext context) {
+    return Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            TablerIcons.location_off,
+            size: 64,
+          ),
+          Text(
+            "Location services are turned off",
+            style: context.textTheme.displayMedium,
+          ),
+          TextButton(
+            onPressed: () async => await Geolocator.openLocationSettings(),
+            style: TextButton.styleFrom(
+              side: const BorderSide(width: 2),
+            ),
+            child: const Text("Open Settings"),
+          )
+        ],
       ),
     );
   }

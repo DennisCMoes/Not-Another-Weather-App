@@ -1,12 +1,11 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:intl/intl.dart';
-import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
-import 'package:not_another_weather_app/shared/utilities/providers/device_provider.dart';
-import 'package:not_another_weather_app/shared/utilities/providers/drawer_provider.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/current_geocoding_provider.dart';
+import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/shared/utilities/controllers/location_controller.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
@@ -22,13 +21,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with WidgetsBindingObserver, RouteAware {
-  late Future<void> _initializationBuilder;
-
-  late DeviceProvider _deviceProvider;
+  late Future<void> _initializationFunction;
   late WeatherProvider _weatherProvider;
-  late DrawerProvider _drawerProvider;
 
-  final DateTime _refreshDate = DateTime.now();
   final LocationController locationController = LocationController();
   final ForecastRepo forecastRepo = ForecastRepo();
 
@@ -39,26 +34,14 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
-
-    _deviceProvider = Provider.of<DeviceProvider>(context, listen: false);
-    _weatherProvider = Provider.of<WeatherProvider>(context, listen: false);
-    _drawerProvider = Provider.of<DrawerProvider>(context, listen: false);
-
-    Connectivity().onConnectivityChanged.listen((event) {
-      _deviceProvider.setHasInternet(!event.contains(ConnectivityResult.none));
-    });
-
-    _initializationBuilder = _initialize();
+    _weatherProvider = context.read<WeatherProvider>();
+    _initializationFunction = _weatherProvider.initializeData();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-
-    _deviceProvider.dispose();
     _weatherProvider.dispose();
-    _drawerProvider.dispose();
-
     super.dispose();
   }
 
@@ -67,26 +50,12 @@ class _HomeScreenState extends State<HomeScreen>
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      _refreshData();
+      _weatherProvider.refreshData();
     }
   }
 
-  String getRefreshString() =>
-      DateFormat("HH:mm").format(_deviceProvider.refreshTime);
-
-  Future<void> _initialize() async {
-    await _weatherProvider.initialization();
-    FlutterNativeSplash.remove();
-  }
-
-  Future<void> _refreshData() async {
-    bool shouldRefresh = DateTime.now()
-        .isAfter(_deviceProvider.refreshTime.add(const Duration(minutes: 15)));
-
-    if (shouldRefresh) {
-      await _weatherProvider.refreshData();
-      _deviceProvider.setRefreshTime();
-    }
+  String getRefreshString() {
+    return DateFormat("HH:mm").format(_weatherProvider.refreshTime);
   }
 
   @override
@@ -105,11 +74,15 @@ class _HomeScreenState extends State<HomeScreen>
       children: [
         Scaffold(
           body: FutureBuilder(
-            future: _initializationBuilder,
+            future: _initializationFunction,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                FlutterNativeSplash.remove();
+                return _buildHomeScreen();
               } else {
+                FlutterNativeSplash.remove();
                 return _buildHomeScreen();
               }
             },
@@ -119,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen>
           top: 0,
           left: 0,
           right: 0,
-          height: MediaQuery.of(context).padding.top,
+          height: context.padding.top,
           child: GestureDetector(
             excludeFromSemantics: true,
             onTap: onStatusBarTap,
@@ -137,8 +110,7 @@ class _HomeScreenState extends State<HomeScreen>
             Align(
               alignment: Alignment.topCenter,
               child: Padding(
-                padding:
-                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                padding: EdgeInsets.only(top: context.padding.top),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -153,8 +125,7 @@ class _HomeScreenState extends State<HomeScreen>
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).padding.bottom),
+                padding: EdgeInsets.only(bottom: context.padding.bottom),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -179,10 +150,10 @@ class _HomeScreenState extends State<HomeScreen>
               children: [
                 for (int i = 0; i < state.geocodings.length; i++)
                   ChangeNotifierProvider(
-                    create: (context) => CurrentGeocodingProvider(
-                      state.geocodings[i],
-                    ),
-                    child: const ForecastCard(),
+                    create: (context) {
+                      return ForecastCardProvider(state.geocodings[i]);
+                    },
+                    child: ForecastCard(geocoding: state.geocodings[i]),
                   ),
               ],
             ),

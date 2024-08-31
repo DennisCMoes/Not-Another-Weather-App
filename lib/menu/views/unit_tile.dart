@@ -55,7 +55,7 @@ class _UnitTileComponentState extends State<UnitTileComponent> {
       prefs.setInt(widget.sharedPreferenceKey, nextIndex);
     });
 
-    if (mounted) context.read<WeatherProvider>().refreshData();
+    if (mounted) context.read<WeatherProvider>().refreshWithoutWait();
   }
 
   @override
