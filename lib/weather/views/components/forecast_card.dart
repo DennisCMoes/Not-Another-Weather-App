@@ -161,17 +161,13 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
       builder: (context) {
         return Consumer<ForecastCardProvider>(
           builder: (context, state, child) {
-            ColorPair colorPair;
-
             bool isInvalidCurrent = widget.geocoding.isCurrentLocation &&
                 widget.geocoding.latitude == -1 &&
                 widget.geocoding.longitude == -1;
 
-            if (isInvalidCurrent) {
-              colorPair = WeatherColorScheme.unknown.getColorPair(true);
-            } else {
-              colorPair = _forecast.getColorPair(state.selectedHour);
-            }
+            final ColorPair colorPair = isInvalidCurrent
+                ? WeatherColorScheme.unknown.getColorPair(true)
+                : state.geocoding.getColorSchemeOfForecast(state.selectedHour);
 
             return ColoredBox(
               color: colorPair.main,

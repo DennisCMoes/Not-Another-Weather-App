@@ -100,7 +100,7 @@ class Geocoding {
     assert(SelectableForecastFields.localTime.index == 11);
   }
 
-  Future<ColorPair> getColorSchemeOfForecast([DateTime? date]) async {
+  ColorPair getColorSchemeOfForecast([DateTime? date]) {
     try {
       date ??= DateTime.now();
 
