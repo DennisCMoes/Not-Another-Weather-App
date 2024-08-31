@@ -81,6 +81,10 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   Future<void> _onChangeSliderValue(double offset) async {
     HapticFeedback.lightImpact();
 
+    if (_forecastCardProvider.isEditing) {
+      _forecastCardProvider.setIsEditing(false);
+    }
+
     _forecastCardProvider.setSelectedHour((await _getConvertedCurrentTime())
         .add(Duration(hours: offset.toInt())));
 
@@ -157,7 +161,6 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
       builder: (context) {
         return Consumer<ForecastCardProvider>(
           builder: (context, state, child) {
-            // final colorPair = _forecast.getColorPair(state.selectedHour);
             ColorPair colorPair;
 
             bool isInvalidCurrent = widget.geocoding.isCurrentLocation &&
@@ -252,8 +255,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
                                 top: _isDragging ? 50 : 0,
                                 left: NavigationToolbar.kMiddleSpacing,
                                 right: NavigationToolbar.kMiddleSpacing,
-                                bottom: 34,
-                                // bottom: getSliderBottomPadding(),
+                                bottom: MediaQuery.of(context).padding.bottom,
                               ),
                               child: SliderTheme(
                                 data: SliderTheme.of(context).copyWith(

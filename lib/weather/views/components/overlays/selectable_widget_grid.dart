@@ -152,6 +152,17 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
     int index = provider.geocoding.selectedForecastItems.indexOf(forecastField);
     bool isCurrentField = forecastField == widget.fieldToReplace;
 
+    void onClick() {
+      HapticFeedback.lightImpact();
+      provider.replaceSecondaryField(
+        widget.fieldToReplace,
+        forecastField,
+      );
+
+      provider.setIsEditing(false);
+      Navigator.of(context).pop(forecastField);
+    }
+
     return Stack(
       alignment: Alignment.center,
       fit: StackFit.expand,
@@ -164,17 +175,7 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
           child: InkWell(
             splashColor: isCurrentField ? Colors.transparent : null,
             highlightColor: isCurrentField ? Colors.transparent : null,
-            onTap: isCurrentField
-                ? null
-                : () {
-                    HapticFeedback.lightImpact();
-                    provider.replaceSecondaryField(
-                      widget.fieldToReplace,
-                      forecastField,
-                    );
-
-                    Navigator.of(context).pop(forecastField);
-                  },
+            onTap: isCurrentField ? null : () => onClick(),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,

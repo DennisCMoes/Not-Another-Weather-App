@@ -20,11 +20,11 @@ class ForecastRepo {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      var temperature = // Celsius
+      IUnit temperature = // Celsius
           TemperatureUnit.values[prefs.getInt("temperature_unit") ?? 1];
-      var windSpeed = // "KM/H"
+      IUnit windSpeed = // "KM/H"
           WindspeedUnit.values[prefs.getInt("wind_speed_unit") ?? 1];
-      var precipitation = // Millimeters
+      IUnit precipitation = // Millimeters
           PrecipitationUnit.values[prefs.getInt("precipitation_unit") ?? 0];
 
       Forecast data = await _apiController.getRequest<Forecast>(
