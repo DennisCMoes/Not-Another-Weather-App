@@ -167,7 +167,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
 
             final ColorPair colorPair = isInvalidCurrent
                 ? WeatherColorScheme.unknown.getColorPair(true)
-                : state.geocoding.getColorSchemeOfForecast(state.selectedHour);
+                : _forecast.getColorPair(state.selectedHour);
 
             return ColoredBox(
               color: colorPair.main,
