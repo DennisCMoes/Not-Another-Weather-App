@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_another_weather_app/shared/transitions/fade_transition.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/views/home.dart';
@@ -43,12 +44,39 @@ class _HomeMenuScreenState extends State<HomeMenuScreen> {
       print("Clicked on ${geocoding.name}");
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => ChangeNotifierProvider.value(
+        FadeTransitionRoute(
+          ChangeNotifierProvider.value(
             value: WeatherProvider(index),
-            child: HomeScreen(initialPageIndex: index),
+            child: const HomeScreen(),
           ),
         ),
+        // PageRouteBuilder(
+        //   pageBuilder: (context, animation, secondaryAnimation) {
+        //     return ChangeNotifierProvider.value(
+        //       value: WeatherProvider(index),
+        //       child: const HomeScreen(),
+        //     );
+        //   },
+        //   transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        //     const begin = 0.0;
+        //     const end = 1.0;
+        //     const curve = Curves.ease;
+        //     var tween =
+        //         Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        //
+        //     return FadeTransition(
+        //       opacity: animation.drive(tween),
+        //       child: child,
+        //     );
+        //   },
+        // ),
+
+        // MaterialPageRoute(
+        //   builder: (context) => ChangeNotifierProvider.value(
+        //     value: WeatherProvider(index),
+        //     child: HomeScreen(initialPageIndex: index),
+        //   ),
+        // ),
       );
     }
 

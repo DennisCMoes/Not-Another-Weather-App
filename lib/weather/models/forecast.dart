@@ -13,7 +13,7 @@ import 'package:timezone/timezone.dart';
 
 @Entity()
 class Forecast {
-  late SharedPreferences _preferences;
+  SharedPreferences? _preferences;
 
   @Id(assignable: true)
   int id = 0;
@@ -37,23 +37,22 @@ class Forecast {
     this.latitude,
     this.longitude,
     this.timezone,
-    this.pressure,
-  ) {
-    SharedPreferences.getInstance().then((value) => _preferences = value);
-  }
+    this.pressure, [
+    this._preferences,
+  ]);
 
   Forecast.withHourlyAndDaily(
     this.latitude,
     this.longitude,
     this.timezone,
     this.pressure,
+    this._preferences,
     this.hourlyWeatherList,
     this.dailyWeatherDataList,
-  ) {
-    SharedPreferences.getInstance().then((value) => _preferences = value);
-  }
+  );
 
-  factory Forecast.fromJson(Map<String, dynamic> json) {
+  factory Forecast.fromJson(
+      Map<String, dynamic> json, SharedPreferences preferences) {
     DateFormat hourFormat = DateFormat('yyyy-MM-ddTHH:mm');
     DateFormat dayFormat = DateFormat("yyyy-MM-dd");
 
@@ -76,6 +75,7 @@ class Forecast {
       json['longitude'],
       json['timezone'],
       json['current']['surface_pressure'],
+      preferences,
     );
 
     for (int i = 0; i < times.length; i++) {
@@ -153,8 +153,8 @@ class Forecast {
     HourlyWeatherData currentHourData = getCurrentHourData(date);
     DailyWeatherData currentDayData = getCurrentDayData(date);
 
-    int windSpeedUnit = _preferences.getInt("wind_speed_unit") ?? 0;
-    int precipitationUnit = _preferences.getInt("precipitation_unit") ?? 0;
+    int windSpeedUnit = _preferences?.getInt("wind_speed_unit") ?? 0;
+    int precipitationUnit = _preferences?.getInt("precipitation_unit") ?? 0;
 
     if (currentHourData.invalidData || currentDayData.invalidData) {
       return "XX";

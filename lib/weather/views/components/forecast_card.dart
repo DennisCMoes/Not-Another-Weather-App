@@ -5,6 +5,7 @@ import 'package:not_another_weather_app/menu/views/home_menu.dart';
 import 'package:not_another_weather_app/menu/views/main_menu.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
+import 'package:not_another_weather_app/shared/transitions/fade_transition.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
@@ -137,9 +138,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
       HapticFeedback.lightImpact();
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const HomeMenuScreen(),
-        ),
+        FadeTransitionRoute(const HomeMenuScreen()),
       );
 
       // Navigator.of(context).push(

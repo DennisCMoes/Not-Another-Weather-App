@@ -60,7 +60,7 @@ class ForecastRepo {
             "uv_index_clear_sky_max",
           ].join(","),
         },
-        (json) => Forecast.fromJson(json),
+        (json) => Forecast.fromJson(json, prefs),
       );
 
       data.id = geocode.id;

@@ -13,9 +13,7 @@ import 'package:not_another_weather_app/weather/controllers/repositories/forecas
 import 'package:not_another_weather_app/weather/views/components/forecast_card.dart';
 
 class HomeScreen extends StatefulWidget {
-  final int initialPageIndex;
-
-  const HomeScreen({super.key, this.initialPageIndex = 0});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -75,20 +73,26 @@ class _HomeScreenState extends State<HomeScreen>
     return Stack(
       children: [
         Scaffold(
-          body: FutureBuilder(
-            future: _initializationFunction,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                FlutterNativeSplash.remove();
-                return _buildHomeScreen();
-              } else {
-                FlutterNativeSplash.remove();
-                return _buildHomeScreen();
-              }
+          body: Builder(
+            builder: (context) {
+              FlutterNativeSplash.remove();
+              return _buildHomeScreen();
             },
           ),
+          // body: FutureBuilder(
+          //   future: _initializationFunction,
+          //   builder: (context, snapshot) {
+          //     if (snapshot.connectionState == ConnectionState.waiting) {
+          //       return const Center(child: CircularProgressIndicator());
+          //     } else if (snapshot.hasError) {
+          //       FlutterNativeSplash.remove();
+          //       return _buildHomeScreen();
+          //     } else {
+          //       FlutterNativeSplash.remove();
+          //       return _buildHomeScreen();
+          //     }
+          //   },
+          // ),
         ),
         Positioned(
           top: 0,

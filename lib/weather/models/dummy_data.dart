@@ -67,7 +67,7 @@ class DummyData {
       ..isTestClass = testclass
       ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
       ..forecast = Forecast.withHourlyAndDaily(
-          11, 11, "Europe/Amsterdam", 1, hourly, daily);
+          11, 11, "Europe/Amsterdam", 1, null, hourly, daily);
   }
 
   static Geocoding clipperGeocoding(TestClass testclass) {
@@ -91,6 +91,6 @@ class DummyData {
       ..isTestClass = testclass
       ..selectedForecastItems = SelectableForecastFields.values.take(4).toList()
       ..forecast = Forecast.withHourlyAndDaily(
-          11, 11, "Europe/Amsterdam", 1, hourly, daily);
+          11, 11, "Europe/Amsterdam", 1, null, hourly, daily);
   }
 }
