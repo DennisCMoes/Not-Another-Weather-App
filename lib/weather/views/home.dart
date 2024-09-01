@@ -13,7 +13,9 @@ import 'package:not_another_weather_app/weather/controllers/repositories/forecas
 import 'package:not_another_weather_app/weather/views/components/forecast_card.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final int initialPageIndex;
+
+  const HomeScreen({super.key, this.initialPageIndex = 0});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();

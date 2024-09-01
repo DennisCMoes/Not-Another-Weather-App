@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:not_another_weather_app/menu/views/home_menu.dart';
 import 'package:not_another_weather_app/menu/views/main_menu.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
@@ -134,27 +135,34 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
 
     void openMainMenu() {
       HapticFeedback.lightImpact();
-      Navigator.of(context).push(
-        PageRouteBuilder(
-          fullscreenDialog: true,
-          barrierColor: Colors.black54,
-          transitionDuration: const Duration(milliseconds: 500),
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return const MainMenuScreen();
-          },
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(0.0, 1.0);
-            const end = Offset.zero;
-            final tween = Tween(begin: begin, end: end)
-                .chain(CurveTween(curve: Curves.fastOutSlowIn));
 
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const HomeMenuScreen(),
         ),
       );
+
+      // Navigator.of(context).push(
+      //   PageRouteBuilder(
+      //     fullscreenDialog: true,
+      //     barrierColor: Colors.black54,
+      //     transitionDuration: const Duration(milliseconds: 500),
+      //     pageBuilder: (context, animation, secondaryAnimation) {
+      //       return const MainMenuScreen();
+      //     },
+      //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      //       const begin = Offset(0.0, 1.0);
+      //       const end = Offset.zero;
+      //       final tween = Tween(begin: begin, end: end)
+      //           .chain(CurveTween(curve: Curves.fastOutSlowIn));
+
+      //       return SlideTransition(
+      //         position: animation.drive(tween),
+      //         child: child,
+      //       );
+      //     },
+      //   ),
+      // );
     }
 
     return Builder(

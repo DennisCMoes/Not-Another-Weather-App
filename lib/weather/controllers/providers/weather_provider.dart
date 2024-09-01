@@ -14,8 +14,8 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 class WeatherProvider extends ChangeNotifier {
   final ForecastRepo _forecastRepo = ForecastRepo();
   final GeocodingRepo _geocodingRepo = GeocodingRepo();
-  final PageController _pageController = PageController();
 
+  late PageController _pageController;
   late Timer _onNewHourTimer;
 
   List<Geocoding> _geocodings = [];
@@ -29,15 +29,15 @@ class WeatherProvider extends ChangeNotifier {
   UnmodifiableListView<Geocoding> get geocodings =>
       UnmodifiableListView(_geocodings);
 
-  WeatherProvider() {
+  WeatherProvider([int pageIndex = 0]) {
+    _pageController = PageController(initialPage: pageIndex);
     _startHourlyTimer();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _onNewHourTimer.cancel();
-  }
+  // @override
+  // void dispose() {
+  //   _onNewHourTimer.cancel();
+  // }
 
   /// Initializes weather-related data asynchronously.
   ///

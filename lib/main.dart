@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:not_another_weather_app/menu/views/home_menu.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/stores/object_box.dart';
 import 'package:provider/provider.dart';
@@ -75,7 +76,6 @@ class _MyAppState extends State<MyApp> {
       title: 'Flutter Demo',
       navigatorObservers: [ObserverUtils.routeObserver],
       theme: ThemeData(
-        // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
         textTheme: const TextTheme(
           displayLarge: TextStyle(fontSize: 42, fontWeight: FontWeight.w800),
@@ -84,6 +84,7 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       home: const HomeScreen(),
+      // home: const HomeMenuScreen(),
     );
   }
 }
