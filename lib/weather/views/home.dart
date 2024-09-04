@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen>
     with WidgetsBindingObserver, RouteAware {
   late Future<void> _initializationFunction;
   late WeatherProvider _weatherProvider;
+  late ForecastCardProvider _forecastCardProvider;
 
   final LocationController locationController = LocationController();
   final ForecastRepo forecastRepo = ForecastRepo();
@@ -35,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     WidgetsBinding.instance.addObserver(this);
     _weatherProvider = context.read<WeatherProvider>();
+    _forecastCardProvider = context.read<ForecastCardProvider>();
     _initializationFunction = _weatherProvider.initializeData();
   }
 
@@ -56,6 +58,16 @@ class _HomeScreenState extends State<HomeScreen>
 
   String getRefreshString() {
     return DateFormat("HH:mm").format(_weatherProvider.refreshTime);
+  }
+
+  void _onForecastPageChange(int page) {
+    HapticFeedback.mediumImpact();
+    _forecastCardProvider.setGeocoding(_weatherProvider.geocodings[page]);
+
+    print("$page - ${_forecastCardProvider.geocoding}");
+    setState(() {
+      _selectedPageIndex = page;
+    });
   }
 
   @override
@@ -141,20 +153,10 @@ class _HomeScreenState extends State<HomeScreen>
               scrollDirection: Axis.vertical,
               controller: state.pageController,
               clipBehavior: Clip.none,
-              onPageChanged: (page) {
-                HapticFeedback.mediumImpact();
-                setState(() {
-                  _selectedPageIndex = page;
-                });
-              },
+              onPageChanged: _onForecastPageChange,
               children: [
                 for (int i = 0; i < state.geocodings.length; i++)
-                  ChangeNotifierProvider(
-                    create: (context) {
-                      return ForecastCardProvider(state.geocodings[i]);
-                    },
-                    child: ForecastCard(geocoding: state.geocodings[i]),
-                  ),
+                  ForecastCard(geocoding: state.geocodings[i])
               ],
             ),
             Positioned.fill(

@@ -8,30 +8,15 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 /// A provider that manages the state and logic for the currently selected geocoding
 class ForecastCardProvider extends ChangeNotifier {
-  Geocoding _geocoding;
+  Geocoding? _geocoding;
 
   final GeocodingRepo _geocodingRepo = GeocodingRepo();
-  final PageController _pageController = PageController(initialPage: 0);
 
   bool _isEditing = false;
-  DateTime _selectedHour = DateTime.now();
-
-  ForecastCardProvider(this._geocoding) {
-    try {
-      _initializeSelectedHour();
-    } catch (exception, stacktrace) {
-      Sentry.captureException(exception, stackTrace: stacktrace);
-      debugPrint(
-        "Something went wrong with the ForecastCardProvider: $exception",
-      );
-    }
-  }
 
   // Getters
-  Geocoding get geocoding => _geocoding;
+  Geocoding? get geocoding => _geocoding;
   bool get isEditing => _isEditing;
-  PageController get subPageController => _pageController;
-  DateTime get selectedHour => _selectedHour;
 
   /// Sets the geocoding and notifies listeners
   void setGeocoding(Geocoding geocoding) {
@@ -45,23 +30,18 @@ class ForecastCardProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sets the selected hour to [hour] and notifies it's listeners
-  void setSelectedHour(DateTime time) {
-    _selectedHour = DatetimeUtils.startOfHour(time);
-    notifyListeners();
-  }
-
   /// Initializes the selected hour to the start of the current hour in the geocoding's timezone
-  void _initializeSelectedHour() {
-    final forecast = geocoding.forecast;
-    final convertedNow =
-        DatetimeUtils.convertToTimezone(DateTime.now(), forecast.timezone);
+  // void _initializeSelectedHour() {
+  //   final forecast = geocoding.forecast;
+  //   final convertedNow =
+  //       DatetimeUtils.convertToTimezone(DateTime.now(), forecast.timezone);
 
-    _selectedHour = DatetimeUtils.startOfHour(convertedNow);
-  }
+  //   _selectedHour = DatetimeUtils.startOfHour(convertedNow);
+  // }
 
   /// Replaces the [oldField] with [newField] in the list of selected forecast items and notifies it's listeners
   void replaceSecondaryField(
+    Geocoding geocoding,
     SelectableForecastFields oldField,
     SelectableForecastFields newField,
   ) {
@@ -91,7 +71,7 @@ class ForecastCardProvider extends ChangeNotifier {
   /// "Today at {hour}". Otherwise, it will be "Tomorrow at {hour}"
   ///
   /// Returns a string indicating the relative day and hour
-  String getSelectedHourDescription(Forecast forecast) {
+  String getSelectedHourDescription(Forecast forecast, DateTime selectedHour) {
     try {
       // final forecastData = await geocoding.forecast;
       final now = DateTime.now();

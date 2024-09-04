@@ -30,9 +30,7 @@ class ForecastCard extends StatefulWidget {
 class ForecastCardState extends State<ForecastCard> with RouteAware {
   late ForecastCardProvider _forecastCardProvider;
   late WeatherProvider _weatherProvider;
-  late Forecast _forecast;
-
-  final PageController _timeController = PageController(viewportFraction: 0.2);
+  late DateTime _selectedTime;
 
   bool _isDragging = false;
   double _sliderValue = 0.0;
@@ -41,15 +39,14 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
   void initState() {
     super.initState();
 
-    _forecast = widget.geocoding.forecast;
-
     _forecastCardProvider = context.read<ForecastCardProvider>();
     _weatherProvider = context.read<WeatherProvider>();
+
+    _selectedTime = _getConvertedTime(time: DateTime.now());
   }
 
   @override
   void dispose() {
-    _timeController.dispose();
     ObserverUtils.routeObserver.unsubscribe(this);
     super.dispose();
   }
@@ -62,9 +59,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
 
   @override
   void didPopNext() async {
-    var geo = context
-        .read<WeatherProvider>()
-        .getGeocoding(_forecastCardProvider.geocoding.id);
+    var geo = context.read<WeatherProvider>().getGeocoding(widget.geocoding.id);
 
     if (geo != null) {
       _forecastCardProvider.setGeocoding(geo);
@@ -73,9 +68,14 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
     super.didPopNext();
   }
 
-  Future<DateTime> _getConvertedCurrentTime() async {
+  DateTime _getConvertedTime({DateTime? time, int? offset}) {
+    time ??= DatetimeUtils.startOfHour();
+    offset ??= 0;
+
     return DatetimeUtils.convertToTimezone(
-        DatetimeUtils.startOfHour(), _forecast.timezone);
+      time,
+      widget.geocoding.forecast.timezone,
+    ).add(Duration(hours: offset));
   }
 
   Future<void> _onChangeSliderValue(double offset) async {
@@ -85,18 +85,15 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
       _forecastCardProvider.setIsEditing(false);
     }
 
-    _forecastCardProvider.setSelectedHour((await _getConvertedCurrentTime())
-        .add(Duration(hours: offset.toInt())));
-
     setState(() {
+      _selectedTime = _getConvertedTime(offset: offset.toInt());
       _sliderValue = offset;
     });
   }
 
-  Future<void> _resetSliderTime() async {
-    _forecastCardProvider.setSelectedHour(await _getConvertedCurrentTime());
-
+  void _resetSliderTime() async {
     setState(() {
+      _selectedTime = _getConvertedTime(offset: 0);
       _sliderValue = 0.0;
     });
   }
@@ -136,6 +133,7 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
       HapticFeedback.lightImpact();
       Navigator.of(context).push(
         PageRouteBuilder(
+          maintainState: true,
           fullscreenDialog: true,
           barrierColor: Colors.black54,
           transitionDuration: const Duration(milliseconds: 500),
@@ -157,156 +155,156 @@ class ForecastCardState extends State<ForecastCard> with RouteAware {
       );
     }
 
-    return Builder(
-      builder: (context) {
-        return Consumer<ForecastCardProvider>(
-          builder: (context, state, child) {
-            ColorPair colorPair;
+    return Consumer<ForecastCardProvider>(
+      builder: (context, state, child) {
+        ColorPair colorPair;
 
-            bool isInvalidCurrent = widget.geocoding.isCurrentLocation &&
-                widget.geocoding.latitude == -1 &&
-                widget.geocoding.longitude == -1;
+        bool isInvalidCurrent = widget.geocoding.isCurrentLocation &&
+            widget.geocoding.latitude == -1 &&
+            widget.geocoding.longitude == -1;
 
-            if (isInvalidCurrent) {
-              colorPair = WeatherColorScheme.unknown.getColorPair(true);
-            } else {
-              colorPair = _forecast.getColorPair(state.selectedHour);
-            }
+        if (isInvalidCurrent) {
+          colorPair = WeatherColorScheme.unknown.getColorPair(true);
+        } else {
+          colorPair = widget.geocoding.forecast
+              .getColorPair(_getConvertedTime(offset: _sliderValue.toInt()));
+        }
 
-            return ColoredBox(
-              color: colorPair.main,
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 34),
-                  child: Column(
-                    children: [
-                      // Top bar
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: NavigationToolbar.kMiddleSpacing,
-                          right: NavigationToolbar.kMiddleSpacing,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget.geocoding.name,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: context.textTheme.displayMedium!
-                                        .copyWith(
-                                      color: colorPair.accent,
-                                    ),
-                                  ),
-                                  Text(
-                                    state.getSelectedHourDescription(_forecast),
-                                    style: context.textTheme.displaySmall!
-                                        .copyWith(
-                                      color: colorPair.accent.withOpacity(0.6),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                isInvalidCurrent
-                                    ? const SizedBox.shrink()
-                                    : Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: IconButton(
-                                          onPressed: toggleIsEditing,
-                                          icon: Icon(
-                                            state.isEditing
-                                                ? Icons.edit_off
-                                                : Icons.edit,
-                                            color: colorPair.accent,
-                                          ),
-                                        ),
-                                      ),
-                                IconButton(
-                                  onPressed: openMainMenu,
-                                  visualDensity: VisualDensity.compact,
-                                  icon: Icon(
-                                    Icons.reorder,
-                                    color: colorPair.accent,
-                                  ),
+        return ColoredBox(
+          color: colorPair.main,
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 34),
+              child: Column(
+                children: [
+                  // Top bar
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: NavigationToolbar.kMiddleSpacing,
+                      right: NavigationToolbar.kMiddleSpacing,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.geocoding.name,
+                                overflow: TextOverflow.ellipsis,
+                                style:
+                                    context.textTheme.displayMedium!.copyWith(
+                                  color: colorPair.accent,
                                 ),
-                              ],
+                              ),
+                              Text(
+                                state.getSelectedHourDescription(
+                                    widget.geocoding.forecast, _selectedTime),
+                                style: context.textTheme.displaySmall!.copyWith(
+                                  color: colorPair.accent.withOpacity(0.6),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            isInvalidCurrent
+                                ? const SizedBox.shrink()
+                                : Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: IconButton(
+                                      onPressed: toggleIsEditing,
+                                      icon: Icon(
+                                        state.isEditing
+                                            ? Icons.edit_off
+                                            : Icons.edit,
+                                        color: colorPair.accent,
+                                      ),
+                                    ),
+                                  ),
+                            IconButton(
+                              onPressed: openMainMenu,
+                              visualDensity: VisualDensity.compact,
+                              icon: Icon(
+                                Icons.reorder,
+                                color: colorPair.accent,
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                      // Page view
-                      Expanded(child: SummaryPage(geocoding: widget.geocoding)),
-                      // Bottom Slider
-                      isInvalidCurrent
-                          ? const SizedBox.shrink()
-                          : AnimatedPadding(
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.fastOutSlowIn,
-                              padding: EdgeInsets.only(
-                                top: _isDragging ? 50 : 0,
-                                left: NavigationToolbar.kMiddleSpacing,
-                                right: NavigationToolbar.kMiddleSpacing,
-                                bottom: MediaQuery.of(context).padding.bottom,
+                      ],
+                    ),
+                  ),
+                  // Page view
+                  Expanded(
+                      child: SummaryPage(
+                    geocoding: widget.geocoding,
+                    forecastHour: _selectedTime,
+                  )),
+                  // Bottom Slider
+                  isInvalidCurrent
+                      ? const SizedBox.shrink()
+                      : AnimatedPadding(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.fastOutSlowIn,
+                          padding: EdgeInsets.only(
+                            top: _isDragging ? 50 : 0,
+                            left: NavigationToolbar.kMiddleSpacing,
+                            right: NavigationToolbar.kMiddleSpacing,
+                            bottom: MediaQuery.of(context).padding.bottom,
+                          ),
+                          child: SliderTheme(
+                            data: SliderTheme.of(context).copyWith(
+                              trackHeight: 40,
+                              valueIndicatorShape:
+                                  ForecastSliderValueIndicator(),
+                              trackShape: ForecastSliderTrack(
+                                DatetimeUtils.convertToTimezone(
+                                  _weatherProvider.currentHour,
+                                  widget.geocoding.forecast.timezone,
+                                ),
+                                colorPair,
                               ),
-                              child: SliderTheme(
-                                data: SliderTheme.of(context).copyWith(
-                                  trackHeight: 40,
-                                  valueIndicatorShape:
-                                      ForecastSliderValueIndicator(),
-                                  trackShape: ForecastSliderTrack(
-                                    DatetimeUtils.convertToTimezone(
-                                      _weatherProvider.currentHour,
-                                      _forecast.timezone,
-                                    ),
-                                    colorPair,
-                                  ),
-                                  thumbShape: ForecastSliderThumb(),
-                                  thumbColor: colorPair.main.lightenColor(0.1),
-                                  overlayColor: Colors.transparent,
-                                  activeTrackColor:
-                                      colorPair.main.darkenColor(0.1),
-                                  valueIndicatorColor:
-                                      colorPair.main.lightenColor(0.1),
-                                  valueIndicatorTextStyle: TextStyle(
-                                    color: colorPair.accent,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'tabler-icons',
-                                  ),
-                                ),
-                                child: Slider(
-                                  min: 0,
-                                  max: 24,
-                                  divisions: 24,
-                                  value: _sliderValue,
-                                  label: _getSliderLabel(_forecast),
-                                  onChanged: _onChangeSliderValue,
-                                  onChangeStart: (value) =>
-                                      setState(() => _isDragging = true),
-                                  onChangeEnd: (value) {
-                                    Future.delayed(
-                                      const Duration(milliseconds: 100),
-                                      () => _resetSliderTime(),
-                                    );
-                                    setState(() => _isDragging = false);
-                                  },
-                                ),
+                              thumbShape: ForecastSliderThumb(),
+                              thumbColor: colorPair.main.lightenColor(0.1),
+                              overlayColor: Colors.transparent,
+                              activeTrackColor: colorPair.main.darkenColor(0.1),
+                              valueIndicatorColor:
+                                  colorPair.main.lightenColor(0.1),
+                              valueIndicatorTextStyle: TextStyle(
+                                color: colorPair.accent,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'tabler-icons',
                               ),
                             ),
-                    ],
-                  ),
-                ),
+                            child: Slider(
+                              min: 0,
+                              max: 24,
+                              divisions: 24,
+                              value: _sliderValue,
+                              label: _getSliderLabel(widget.geocoding.forecast),
+                              onChanged: _onChangeSliderValue,
+                              onChangeStart: (value) =>
+                                  setState(() => _isDragging = true),
+                              onChangeEnd: (value) {
+                                Future.delayed(
+                                  const Duration(milliseconds: 100),
+                                  () => _resetSliderTime(),
+                                );
+                                setState(() => _isDragging = false);
+                              },
+                            ),
+                          ),
+                        ),
+                ],
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );

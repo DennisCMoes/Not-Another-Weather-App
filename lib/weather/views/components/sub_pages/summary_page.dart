@@ -15,15 +15,16 @@ import 'package:provider/provider.dart';
 
 class SummaryPage extends StatefulWidget {
   final Geocoding geocoding;
+  final DateTime forecastHour;
 
-  const SummaryPage({super.key, required this.geocoding});
+  const SummaryPage(
+      {super.key, required this.geocoding, required this.forecastHour});
 
   @override
   State<SummaryPage> createState() => _SummaryPageState();
 }
 
 class _SummaryPageState extends State<SummaryPage> {
-  late ForecastCardProvider _geocodingProvider;
   late Forecast _forecast;
 
   @override
@@ -31,13 +32,11 @@ class _SummaryPageState extends State<SummaryPage> {
     super.initState();
 
     _forecast = widget.geocoding.forecast;
-    _geocodingProvider = context.read<ForecastCardProvider>();
   }
 
   @override
   void dispose() {
     // TODO: Find another way to dispose of the provider without disposing it between subpages
-    // _geocodingProvider.dispose();
     super.dispose();
   }
 
@@ -50,8 +49,11 @@ class _SummaryPageState extends State<SummaryPage> {
     Navigator.of(context).push(
       ModalOverlay(
         overlayChild: ChangeNotifierProvider.value(
-          value: _geocodingProvider,
-          child: SelectableWidgetGrid(fieldToReplace: field),
+          value: context.read<ForecastCardProvider>(),
+          child: SelectableWidgetGrid(
+            geocoding: widget.geocoding,
+            fieldToReplace: field,
+          ),
         ),
       ),
     );
@@ -61,12 +63,12 @@ class _SummaryPageState extends State<SummaryPage> {
   Widget build(BuildContext context) {
     return Consumer<ForecastCardProvider>(
       builder: (context, state, child) {
-        final colorPair = _forecast.getColorPair(state.selectedHour);
-        final weatherData = _forecast.getCurrentHourData(state.selectedHour);
+        final colorPair = _forecast.getColorPair(widget.forecastHour);
+        final weatherData = _forecast.getCurrentHourData(widget.forecastHour);
 
-        bool isInvalidCurrent = state.geocoding.isCurrentLocation &&
-            state.geocoding.latitude == -1 &&
-            state.geocoding.longitude == -1;
+        bool isInvalidCurrent = widget.geocoding.isCurrentLocation &&
+            widget.geocoding.latitude == -1 &&
+            widget.geocoding.longitude == -1;
 
         if (isInvalidCurrent) {
           return noLocationCard(context);
@@ -85,7 +87,7 @@ class _SummaryPageState extends State<SummaryPage> {
                         children: [
                           ClipPath(
                             clipper: _forecast.getClipperOfHour(
-                              state.selectedHour,
+                              widget.forecastHour,
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: SizedBox(
@@ -141,59 +143,22 @@ class _SummaryPageState extends State<SummaryPage> {
                       Expanded(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: state.geocoding.selectedForecastItems
+                          children: widget.geocoding.selectedForecastItems
                               .map((e) => _weatherDetailItem(
                                   context, state, _forecast, e))
                               .toList(),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        transitionBuilder: (child, animation) {
-                          final inAnimation = Tween<Offset>(
-                            begin: const Offset(0.0, 1.0),
-                            end: Offset.zero,
-                          ).animate(animation);
-
-                          final outAnimation = Tween<Offset>(
-                            begin: const Offset(0.0, -1.0),
-                            end: Offset.zero,
-                          ).animate(animation);
-
-                          ValueKey key = ValueKey(_forecast.getField(
-                              SelectableForecastFields.temperature,
-                              state.selectedHour));
-
-                          // TODO: If the new value is lower slide in from the top, if larger slide in from the bottom
-                          return ClipRect(
-                            clipBehavior: Clip.antiAlias,
-                            child: Stack(
-                              alignment: Alignment.centerRight,
-                              children: [
-                                if (child.key != key)
-                                  SlideTransition(
-                                      position: outAnimation, child: child),
-                                if (child.key == key)
-                                  SlideTransition(
-                                      position: inAnimation, child: child),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Text(
-                          "${_forecast.getField(SelectableForecastFields.temperature, state.selectedHour) ?? "XX"}",
-                          key: ValueKey(_forecast.getField(
-                              SelectableForecastFields.temperature,
-                              state.selectedHour)),
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayLarge!
-                              .copyWith(
-                                fontSize: 128,
-                                color: colorPair.accent,
-                              ),
-                        ),
+                      Text(
+                        "${_forecast.getField(SelectableForecastFields.temperature, widget.forecastHour) ?? "XX"}",
+                        key: ValueKey(_forecast.getField(
+                            SelectableForecastFields.temperature,
+                            widget.forecastHour)),
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayLarge!
+                            .copyWith(fontSize: 128, color: colorPair.accent),
                       ),
                     ],
                   ),
@@ -212,7 +177,7 @@ class _SummaryPageState extends State<SummaryPage> {
     Forecast forecast,
     SelectableForecastFields field,
   ) {
-    final colorPair = forecast.getColorPair(provider.selectedHour);
+    final colorPair = forecast.getColorPair(widget.forecastHour);
 
     return Material(
       key: ValueKey(field),
@@ -244,7 +209,7 @@ class _SummaryPageState extends State<SummaryPage> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  forecast.getField(field, provider.selectedHour).toString(),
+                  forecast.getField(field, widget.forecastHour).toString(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,

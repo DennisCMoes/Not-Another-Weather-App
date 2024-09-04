@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
+import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/stores/object_box.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
@@ -52,8 +53,11 @@ Future<void> main() async {
       }
     },
     appRunner: () => runApp(
-      ChangeNotifierProvider(
-        create: (context) => WeatherProvider(),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => WeatherProvider()),
+          ChangeNotifierProvider(create: (context) => ForecastCardProvider()),
+        ],
         child: const MyApp(),
       ),
     ),

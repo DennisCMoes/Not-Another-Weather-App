@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
+import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:provider/provider.dart';
 
 class SelectableWidgetGrid extends StatefulWidget {
+  final Geocoding geocoding;
   final SelectableForecastFields fieldToReplace;
 
-  const SelectableWidgetGrid({required this.fieldToReplace, super.key});
+  const SelectableWidgetGrid(
+      {required this.fieldToReplace, required this.geocoding, super.key});
 
   @override
   State<SelectableWidgetGrid> createState() => _SelectableWidgetGridState();
@@ -149,15 +152,13 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
 
   Widget _fieldCard(
       ForecastCardProvider provider, SelectableForecastFields forecastField) {
-    int index = provider.geocoding.selectedForecastItems.indexOf(forecastField);
+    int index = widget.geocoding.selectedForecastItems.indexOf(forecastField);
     bool isCurrentField = forecastField == widget.fieldToReplace;
 
     void onClick() {
       HapticFeedback.lightImpact();
       provider.replaceSecondaryField(
-        widget.fieldToReplace,
-        forecastField,
-      );
+          widget.geocoding, widget.fieldToReplace, forecastField);
 
       provider.setIsEditing(false);
       Navigator.of(context).pop(forecastField);
