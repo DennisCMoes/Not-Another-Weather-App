@@ -72,22 +72,46 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late Future<void> _initializationFunction;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializationFunction = context.read<WeatherProvider>().initializeData();
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      navigatorObservers: [ObserverUtils.routeObserver],
-      theme: ThemeData(
-        // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(fontSize: 42, fontWeight: FontWeight.w800),
-          displayMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-          displaySmall: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-        ),
-      ),
-      home: const HomeScreen(),
+    return FutureBuilder(
+      future: _initializationFunction,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          FlutterNativeSplash.remove();
+          return Center(child: Text(snapshot.error.toString()));
+        } else {
+          FlutterNativeSplash.remove();
+          return MaterialApp(
+            title: 'Flutter Demo',
+            navigatorObservers: [ObserverUtils.routeObserver],
+            theme: ThemeData(
+              // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+              textTheme: const TextTheme(
+                displayLarge:
+                    TextStyle(fontSize: 42, fontWeight: FontWeight.w800),
+                displayMedium:
+                    TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+                displaySmall:
+                    TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+            ),
+            home: const HomeScreen(initialIndex: 0),
+          );
+        }
+      },
     );
   }
 }

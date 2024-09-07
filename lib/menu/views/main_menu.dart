@@ -1,11 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:not_another_weather_app/main.dart';
-import 'package:not_another_weather_app/menu/models/units.dart';
-import 'package:not_another_weather_app/menu/views/unit_tile.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
@@ -13,6 +9,7 @@ import 'package:not_another_weather_app/weather/controllers/providers/weather_pr
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/views/home.dart';
+import 'package:not_another_weather_app/menu/views/geocoding_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -81,9 +78,25 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   void _goToPage(int pageIndex) {
     HapticFeedback.lightImpact();
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => HomeScreen(initialIndex: pageIndex),
-        fullscreenDialog: true,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 400),
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return HomeScreen(initialIndex: pageIndex);
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.8, end: 1.0).animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeInOut,
+                ),
+              ),
+              child: child,
+            ),
+          );
+        },
       ),
     );
 
@@ -207,7 +220,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     );
   }
 
-  Widget _geocodingTile(Geocoding geocoding, int index) {
+  Widget _geocodingTile2(Geocoding geocoding, int index) {
     final colorPair = geocoding.forecast.getColorPair();
 
     return Hero(
@@ -282,53 +295,18 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     return SingleChildScrollView(
       padding: EdgeInsets.only(bottom: context.padding.bottom),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.max,
         children: [
-          Column(
-            children: [
-              ReorderableListView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                header: _geocodingTile(state.geocodings[0], 0),
-                onReorder: (oldIndex, newIndex) {
-                  if (newIndex > oldIndex) {
-                    newIndex -= 1;
-                  }
-
-                  state.moveGeocodings(oldIndex + 1, newIndex + 1);
-                },
-                buildDefaultDragHandles: _isEditing,
-                children: [
-                  for (int i = 1; i < state.geocodings.length; i++)
-                    _geocodingTile(state.geocodings[i], i)
-                ],
-              ),
-              const Divider(),
-              Column(
-                children: [
-                  const UnitTileComponent<WindspeedUnit>(
-                    "Windspeed",
-                    "wind_speed_unit",
-                    Icons.speed,
-                    WindspeedUnit.values,
-                  ),
-                  const UnitTileComponent<TemperatureUnit>(
-                      "Temperature",
-                      "temperature_unit",
-                      Icons.thermostat,
-                      TemperatureUnit.values),
-                  const UnitTileComponent<PrecipitationUnit>(
-                      "Precipitation",
-                      "precipitation_unit",
-                      Icons.water_drop,
-                      PrecipitationUnit.values),
-                  // If we are in debug mode and not release display the debug buttons
-                  if (kDebugMode) _debugButtons(),
-                ],
-              ),
-            ],
-          ),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            itemCount: state.geocodings.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              return GeocodingTile(
+                  pageIndex: index, geocoding: state.geocodings[index]);
+            },
+          )
         ],
       ),
     );

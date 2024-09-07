@@ -81,13 +81,13 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     void onStatusBarTap() {
-      double pageIndex = _weatherProvider.pageController.page ?? 0;
+      // double pageIndex = _weatherProvider.pageController.page ?? 0;
 
-      if (pageIndex > 0) {
-        _weatherProvider.pageController.animateToPage(0,
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeInOut);
-      }
+      // if (pageIndex > 0) {
+      //   _weatherProvider.pageController.animateToPage(0,
+      //       duration: const Duration(milliseconds: 600),
+      //       curve: Curves.easeInOut);
+      // }
     }
 
     return Stack(
