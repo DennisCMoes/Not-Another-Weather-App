@@ -33,12 +33,6 @@ class WeatherProvider extends ChangeNotifier {
     _startHourlyTimer();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _onNewHourTimer.cancel();
-  }
-
   /// Initializes weather-related data asynchronously.
   ///
   /// This function attempts to initialize geocoding data and forecasts.
@@ -115,6 +109,15 @@ class WeatherProvider extends ChangeNotifier {
     } catch (exception) {
       debugPrint('Error retrieving geocoding: $exception');
       return null;
+    }
+  }
+
+  int getGeocodingIndex(int id) {
+    try {
+      return _geocodings.indexWhere((geo) => geo.id == id);
+    } catch (exception) {
+      debugPrint('Error retrieving geocoding: $exception');
+      return -1;
     }
   }
 

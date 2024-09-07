@@ -153,8 +153,11 @@ class Forecast {
     HourlyWeatherData currentHourData = getCurrentHourData(date);
     DailyWeatherData currentDayData = getCurrentDayData(date);
 
-    int windSpeedUnit = _preferences.getInt("wind_speed_unit") ?? 0;
-    int precipitationUnit = _preferences.getInt("precipitation_unit") ?? 0;
+    // int windSpeedUnit = _preferences.getInt("wind_speed_unit") ?? 0;
+    // int precipitationUnit = _preferences.getInt("precipitation_unit") ?? 0;
+
+    int windSpeedUnit = 0;
+    int precipitationUnit = 0;
 
     if (currentHourData.invalidData || currentDayData.invalidData) {
       return "XX";
@@ -188,40 +191,40 @@ class Forecast {
       case SelectableForecastFields.cloudCover:
         return "${currentHourData.cloudCover}%";
       case SelectableForecastFields.localTime:
-        final convertedTime =
-            DatetimeUtils.convertToTimezone(DateTime.now(), timezone);
+        final convertedTime = DatetimeUtils.convertToTimezone(
+          DateTime.now(),
+          timezone,
+        );
+
         return hourFormat.format(convertedTime);
       default:
         return "Unknown";
     }
   }
 
-  CustomClipper<Path> getClipperOfHour(DateTime date) {
-    HourlyWeatherData hourlyWeatherData = getCurrentHourData(date);
-    DailyWeatherData dailyWeatherData = getCurrentDayData(date);
+  bool _isInTheDay(DateTime dateToCheck) {
+    HourlyWeatherData hourly = getCurrentHourData(dateToCheck);
+    DailyWeatherData daily = getCurrentDayData(dateToCheck);
 
-    bool isBeforeSunset = date.isBefore(dailyWeatherData.sunset) ||
-        date.isAtSameMomentAs(dailyWeatherData.sunset);
-    bool isAfterSunrise = date.isAfter(dailyWeatherData.sunrise) ||
-        date.isAtSameMomentAs(dailyWeatherData.sunrise);
+    final isBeforeSunset = hourly.time.isBefore(daily.sunset);
+    final isAfterSunrise = hourly.time.isAfter(daily.sunrise);
 
-    bool isInTheDay = isBeforeSunset && isAfterSunrise;
+    return isAfterSunrise && isBeforeSunset;
+  }
 
-    return hourlyWeatherData.weatherCode.clipper.getClipper(isInTheDay);
+  CustomClipper<Path> getClipperOfHour([DateTime? date]) {
+    date ??= TZDateTime.from(DateTime.now(), getLocation(timezone));
+
+    HourlyWeatherData hourly = getCurrentHourData(date);
+    return hourly.weatherCode.clipper.getClipper(_isInTheDay(date));
   }
 
   ColorPair getColorPair([DateTime? date]) {
     // Get the converted time of the timezone
     date ??= TZDateTime.from(DateTime.now(), getLocation(timezone));
 
-    DailyWeatherData daily = getCurrentDayData(date);
     HourlyWeatherData hourly = getCurrentHourData(date);
-
-    final isBeforeSunset = hourly.time.isBefore(daily.sunset);
-    final isAfterSunrise = hourly.time.isAfter(daily.sunrise);
-
-    final isInTheDay = isAfterSunrise && isBeforeSunset;
-    return hourly.weatherCode.colorScheme.getColorPair(isInTheDay);
+    return hourly.weatherCode.colorScheme.getColorPair(_isInTheDay(date));
   }
 
   static Forecast isLoadingData() {

@@ -4,7 +4,6 @@ import 'package:not_another_weather_app/weather/controllers/repositories/geocodi
 import 'package:not_another_weather_app/weather/models/forecast.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 /// A provider that manages the state and logic for the currently selected geocoding
 class ForecastCardProvider extends ChangeNotifier {
