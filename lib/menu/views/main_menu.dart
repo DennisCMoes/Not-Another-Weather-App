@@ -2,8 +2,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/main.dart';
+import 'package:not_another_weather_app/menu/views/settings.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
+import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
@@ -23,7 +25,6 @@ class MainMenuScreen extends StatefulWidget {
 class _MainMenuScreenState extends State<MainMenuScreen> {
   late FocusNode _focusNode;
   late TextEditingController _textEditingController;
-
   late WeatherProvider _weatherProvider;
   late ForecastCardProvider _cardProvider;
 
@@ -107,7 +108,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     int index = _weatherProvider.geocodings.indexOf(geocoding);
 
     if (index == -1) {
-      _weatherProvider.addGeocoding(geocoding);
+      await _weatherProvider.addGeocoding(geocoding);
       _goToPage(_weatherProvider.geocodings.length - 1);
     } else {
       _goToPage(index);
@@ -293,21 +294,22 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     final state = context.read<WeatherProvider>();
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.only(bottom: context.padding.bottom),
-      child: Column(
-        children: [
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            itemCount: state.geocodings.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              return GeocodingTile(
-                  pageIndex: index, geocoding: state.geocodings[index]);
-            },
-          )
-        ],
+      child: GridView.builder(
+        shrinkWrap: true,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        itemCount: state.geocodings.length,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+        ),
+        itemBuilder: (context, index) => GeocodingTile(
+          pageIndex: index,
+          geocoding: state.geocodings[index],
+        ),
       ),
     );
   }

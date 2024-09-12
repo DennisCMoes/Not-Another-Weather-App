@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
-import 'package:not_another_weather_app/weather/controllers/repositories/forecast_repo.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/forecast.dart';

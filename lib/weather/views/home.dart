@@ -112,36 +112,6 @@ class _HomeScreenState extends State<HomeScreen>
       builder: (context, state, child) {
         return Stack(
           children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: EdgeInsets.only(top: context.padding.top),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("End of the list"),
-                    Text("Refreshed at ${getRefreshString()}"),
-                  ],
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: context.padding.bottom),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("End of the list"),
-                    Text("Refreshed at ${getRefreshString()}"),
-                  ],
-                ),
-              ),
-            ),
             PageView(
               scrollDirection: Axis.vertical,
               controller: _pageController,
