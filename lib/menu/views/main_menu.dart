@@ -2,10 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:not_another_weather_app/main.dart';
-import 'package:not_another_weather_app/menu/views/settings.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
-import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
@@ -309,6 +307,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         itemBuilder: (context, index) => GeocodingTile(
           pageIndex: index,
           geocoding: state.geocodings[index],
+          isEditing: _isEditing,
         ),
       ),
     );
