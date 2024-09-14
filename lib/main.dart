@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:not_another_weather_app/shared/utilities/observer_utils.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/stores/object_box.dart';
+import 'package:not_another_weather_app/weather/views/list.dart';
 import 'package:provider/provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/views/home.dart';
@@ -108,7 +109,7 @@ class _MyAppState extends State<MyApp> {
                     TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
               ),
             ),
-            home: const HomeScreen(initialIndex: 0),
+            home: const ForecastListScreen(),
           );
         }
       },
