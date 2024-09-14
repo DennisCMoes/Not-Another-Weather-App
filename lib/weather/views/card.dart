@@ -138,6 +138,13 @@ class GeocodingCardState extends State<GeocodingCard> {
                           "Edit",
                           () => debugPrint("Left clicked"),
                         ),
+                        widget.geocoding.isCurrentLocation
+                            ? const SizedBox.shrink()
+                            : const SizedBox(width: 12),
+                        widget.geocoding.isCurrentLocation
+                            ? const SizedBox.shrink()
+                            : _bottomButton(
+                                "Remove", () => debugPrint("Removing")),
                         const SizedBox(width: 12),
                         _bottomButton("Add", widget.onPressAdd),
                       ],

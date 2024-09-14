@@ -25,22 +25,13 @@ class ForecastListScreen extends StatefulWidget {
 
 class _ForecastListScreenState extends State<ForecastListScreen> {
   final PageController _pageController = PageController();
-  final List<String> _pages = ["Page 1", "Page 2", "Page 3"];
 
-  late WeatherProvider _weatherProvider;
-  late ForecastCardProvider _forecastCardProvider;
-
-  int _currentPage = 0;
-  bool _isDragging = false;
-  double _sliderValue = 0.0;
-  DateTime _selectedTime = DatetimeUtils.startOfHour(DateTime.now());
   bool _showingMenu = false;
+  bool _keyboardIsOpen = false;
 
   @override
   void initState() {
     super.initState();
-
-    _weatherProvider = context.read<WeatherProvider>();
   }
 
   @override
@@ -63,6 +54,12 @@ class _ForecastListScreenState extends State<ForecastListScreen> {
     );
   }
 
+  void _setKeyboardIsOpen(bool isOpen) {
+    setState(() {
+      _keyboardIsOpen = isOpen;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,6 +70,9 @@ class _ForecastListScreenState extends State<ForecastListScreen> {
               PageView.builder(
                 controller: _pageController,
                 scrollDirection: Axis.horizontal,
+                physics: _keyboardIsOpen
+                    ? const NeverScrollableScrollPhysics()
+                    : const PageScrollPhysics(),
                 itemCount: _showingMenu
                     ? state.geocodings.length + 1
                     : state.geocodings.length,
@@ -81,7 +81,9 @@ class _ForecastListScreenState extends State<ForecastListScreen> {
                     animation: _pageController,
                     builder: (context, child) {
                       if (index == state.geocodings.length) {
-                        return const AddGeocodingCard();
+                        return AddGeocodingCard(
+                          setKeyboardIsOpen: _setKeyboardIsOpen,
+                        );
                       } else {
                         return GeocodingCard(
                           state.geocodings[index],
@@ -97,7 +99,6 @@ class _ForecastListScreenState extends State<ForecastListScreen> {
                     },
                   );
                 },
-                onPageChanged: (value) => setState(() => _currentPage = value),
               ),
             ],
           );
