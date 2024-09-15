@@ -70,32 +70,33 @@ class _ForecastListScreenState extends State<ForecastListScreen> {
               PageView.builder(
                 controller: _pageController,
                 scrollDirection: Axis.horizontal,
-                physics: _keyboardIsOpen
-                    ? const NeverScrollableScrollPhysics()
-                    : const PageScrollPhysics(),
-                itemCount: _showingMenu
-                    ? state.geocodings.length + 1
-                    : state.geocodings.length,
+                // physics: _keyboardIsOpen
+                //     ? const NeverScrollableScrollPhysics()
+                //     : const PageScrollPhysics(),
+                // itemCount: _showingMenu
+                //     ? state.geocodings.length + 1
+                //     : state.geocodings.length,
+                itemCount: state.geocodings.length,
                 itemBuilder: (context, index) {
                   return AnimatedBuilder(
                     animation: _pageController,
                     builder: (context, child) {
-                      if (index == state.geocodings.length) {
-                        return AddGeocodingCard(
-                          setKeyboardIsOpen: _setKeyboardIsOpen,
-                        );
-                      } else {
-                        return GeocodingCard(
-                          state.geocodings[index],
-                          pageController: _pageController,
-                          index: index,
-                          isShowingMenu: _showingMenu,
-                          onPressShowMenu: _setShowingMenu,
-                          onPressAdd: () => _goToAddGeocoding(
-                            state.geocodings.length,
-                          ),
-                        );
-                      }
+                      // if (index == state.geocodings.length) {
+                      //   return AddGeocodingCard(
+                      //     setKeyboardIsOpen: _setKeyboardIsOpen,
+                      //   );
+                      // } else {
+                      return GeocodingCard(
+                        state.geocodings[index],
+                        pageController: _pageController,
+                        index: index,
+                        isShowingMenu: _showingMenu,
+                        onPressShowMenu: _setShowingMenu,
+                        onPressAdd: () => _goToAddGeocoding(
+                          state.geocodings.length,
+                        ),
+                      );
+                      // }
                     },
                   );
                 },
