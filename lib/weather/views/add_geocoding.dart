@@ -6,9 +6,7 @@ import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:provider/provider.dart';
 
 class AddGeocodingCard extends StatefulWidget {
-  final ValueSetter<bool> setKeyboardIsOpen;
-
-  const AddGeocodingCard({super.key, required this.setKeyboardIsOpen});
+  const AddGeocodingCard({super.key});
 
   @override
   State<AddGeocodingCard> createState() => _AddGeocodingCardState();
@@ -47,9 +45,7 @@ class _AddGeocodingCardState extends State<AddGeocodingCard> {
     FocusScope.of(context).requestFocus(FocusNode());
   }
 
-  void _onFocusChange() {
-    widget.setKeyboardIsOpen(_focus.hasFocus);
-  }
+  void _onFocusChange() {}
 
   void _onTextFieldValueChange() async {
     print(_editingController.text);
@@ -63,48 +59,69 @@ class _AddGeocodingCardState extends State<AddGeocodingCard> {
   }
 
   void _selectNewGeocoding(Geocoding geocoding) async {
-    int index = _weatherProvider.geocodings.indexOf(geocoding);
+    int index = _weatherProvider.geocodings
+        .indexWhere((element) => element.id == geocoding.id);
 
     if (index == -1) {
       await _weatherProvider.addGeocoding(geocoding);
+      index = _weatherProvider.geocodings
+          .indexWhere((element) => element.id == geocoding.id);
     }
+
+    // Navigator.of(context).pop(index);
+    Navigator.pop(context, index);
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      bottom: false,
       child: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        padding: const EdgeInsets.symmetric(
+          horizontal: NavigationToolbar.kMiddleSpacing,
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Add Geolocation",
+                  style: context.textTheme.displayMedium!.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  visualDensity: VisualDensity.compact,
+                  highlightColor: Colors.white24,
+                  icon: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
             TextField(
-              focusNode: _focus,
               controller: _editingController,
+              focusNode: _focus,
               onTapOutside: _onTapOutsideKeyboard,
-              decoration: const InputDecoration.collapsed(
-                border: OutlineInputBorder(),
-                hintText: "Search...",
+              decoration: InputDecoration(
+                hintText: "Location name",
+                fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-            Builder(
-              builder: (context) {
-                if (_searchedGeocodings.isEmpty) {
-                  return Text("No matching locations",
-                      style: context.textTheme.displayMedium);
-                } else {
-                  return ListView.separated(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: _searchedGeocodings.length,
-                    separatorBuilder: (context, index) => const Divider(),
-                    itemBuilder: (context, index) =>
-                        _searchedGeocodingTile(_searchedGeocodings[index]),
-                  );
-                }
-              },
-            ),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _searchedGeocodings.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 6),
+              itemBuilder: (context, index) =>
+                  _searchedGeocodingTile(_searchedGeocodings[index]),
+            )
           ],
         ),
       ),
@@ -113,6 +130,7 @@ class _AddGeocodingCardState extends State<AddGeocodingCard> {
 
   Widget _searchedGeocodingTile(Geocoding geocoding) {
     return ListTile(
+      tileColor: Colors.white,
       onTap: () => _selectNewGeocoding(geocoding),
       visualDensity: VisualDensity.compact,
       title: Text(geocoding.name),

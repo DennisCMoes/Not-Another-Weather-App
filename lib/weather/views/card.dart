@@ -5,11 +5,13 @@ import 'package:intl/intl.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
+import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
+import 'package:not_another_weather_app/weather/views/add_geocoding.dart';
 import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_thumb.dart';
 import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_track.dart';
 import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_value_indicator.dart';
@@ -124,6 +126,23 @@ class GeocodingCardState extends State<GeocodingCard> {
 
   void _onPressConfirmationDelete() {
     _weatherProvider.removeGeocoding(widget.geocoding);
+  }
+
+  void _openAddGeocoding() async {
+    final int? pageIndex = await Navigator.push<int>(
+      context,
+      ModalOverlay<int>(overlayChild: const AddGeocodingCard()),
+    );
+
+    if (!context.mounted) return;
+
+    if (pageIndex != null && pageIndex != -1) {
+      widget.pageController.animateToPage(
+        pageIndex,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOutQuint,
+      );
+    }
   }
 
   Widget _buildAnimatedAccentColor(
@@ -249,7 +268,7 @@ class GeocodingCardState extends State<GeocodingCard> {
                               type: MaterialType.circle,
                               clipBehavior: Clip.hardEdge,
                               child: InkWell(
-                                onTap: widget.onPressAdd,
+                                onTap: _openAddGeocoding,
                                 child: SizedBox(
                                   width: 56,
                                   height: 56,
