@@ -6,73 +6,186 @@ enum WeatherCode {
   clearSky(0, "Clear Sky", WeatherColorScheme.clear, WeatherClipper.clear),
 
   // Cloudy
-  mainlyClear(1, "Mainly clear", WeatherColorScheme.partlyCloudy,
-      WeatherClipper.partlyClouded),
-  partlyCloudy(2, "Partly clouded", WeatherColorScheme.partlyCloudy,
-      WeatherClipper.partlyClouded),
-  overcast(3, "Overcast", WeatherColorScheme.overcast, WeatherClipper.overcast),
+  mainlyClear(
+    1,
+    "Mainly clear",
+    WeatherColorScheme.partlyCloudy,
+    WeatherClipper.partlyClouded,
+  ),
+  partlyCloudy(
+    2,
+    "Partly clouded",
+    WeatherColorScheme.partlyCloudy,
+    WeatherClipper.partlyClouded,
+  ),
+  overcast(
+    3,
+    "Overcast",
+    WeatherColorScheme.overcast,
+    WeatherClipper.overcast,
+  ),
 
   // Fog
-  fog(45, "Fog", WeatherColorScheme.fog, WeatherClipper.fog),
+  fog(
+    45,
+    "Fog",
+    WeatherColorScheme.fog,
+    WeatherClipper.fog,
+  ),
   rimeFog(
-      48, "Depositing rime fog", WeatherColorScheme.fog, WeatherClipper.fog),
+    48,
+    "Depositing rime fog",
+    WeatherColorScheme.fog,
+    WeatherClipper.fog,
+  ),
 
   // Drizzle
   lightDrizzle(
-      51, "Light drizzle", WeatherColorScheme.drizzle, WeatherClipper.drizzle),
-  moderateDrizzle(53, "Moderate drizzle", WeatherColorScheme.drizzle,
-      WeatherClipper.drizzle),
+    51,
+    "Light drizzle",
+    WeatherColorScheme.drizzle,
+    WeatherClipper.drizzle,
+  ),
+  moderateDrizzle(
+    53,
+    "Moderate drizzle",
+    WeatherColorScheme.drizzle,
+    WeatherClipper.drizzle,
+  ),
   denseDrizzle(
-      55, "Dense drizzle", WeatherColorScheme.drizzle, WeatherClipper.drizzle),
+    55,
+    "Dense drizzle",
+    WeatherColorScheme.drizzle,
+    WeatherClipper.drizzle,
+  ),
 
   // Freezing drizzle
-  lightFreezingDrizzle(56, "Light freezing drizzle", WeatherColorScheme.drizzle,
-      WeatherClipper.drizzle),
-  heavyFreezingDrizzle(57, "Heavy freezing drizzle", WeatherColorScheme.drizzle,
-      WeatherClipper.drizzle),
+  lightFreezingDrizzle(
+    56,
+    "Light freezing drizzle",
+    WeatherColorScheme.drizzle,
+    WeatherClipper.drizzle,
+  ),
+  heavyFreezingDrizzle(
+    57,
+    "Heavy freezing drizzle",
+    WeatherColorScheme.drizzle,
+    WeatherClipper.drizzle,
+  ),
 
   // Rain
-  slightRain(61, "Slight rain", WeatherColorScheme.rain, WeatherClipper.rain),
+  slightRain(
+    61,
+    "Slight rain",
+    WeatherColorScheme.rain,
+    WeatherClipper.rain,
+  ),
   moderateRain(
-      63, "Moderate rain", WeatherColorScheme.rain, WeatherClipper.rain),
-  heavyRain(65, "Heavy rain", WeatherColorScheme.rain, WeatherClipper.rain),
+    63,
+    "Moderate rain",
+    WeatherColorScheme.rain,
+    WeatherClipper.rain,
+  ),
+  heavyRain(
+    65,
+    "Heavy rain",
+    WeatherColorScheme.rain,
+    WeatherClipper.rain,
+  ),
 
   // Freezing rain
   lighFreezingRain(
-      66, "Light freezing rain", WeatherColorScheme.rain, WeatherClipper.rain),
+    66,
+    "Light freezing rain",
+    WeatherColorScheme.rain,
+    WeatherClipper.rain,
+  ),
   heavyFreezingRain(
-      67, "Heavy freezing rain", WeatherColorScheme.rain, WeatherClipper.rain),
+    67,
+    "Heavy freezing rain",
+    WeatherColorScheme.rain,
+    WeatherClipper.rain,
+  ),
 
   // Snow
   slightSnowFall(
-      71, "Slight snow fall", WeatherColorScheme.snow, WeatherClipper.snow),
+    71,
+    "Slight snow fall",
+    WeatherColorScheme.snow,
+    WeatherClipper.snow,
+  ),
   moderateSnowFall(
-      72, "Moderate snow fall", WeatherColorScheme.snow, WeatherClipper.snow),
+    72,
+    "Moderate snow fall",
+    WeatherColorScheme.snow,
+    WeatherClipper.snow,
+  ),
   heavySnowFall(
-      73, "Heavy snow fall", WeatherColorScheme.snow, WeatherClipper.snow),
-  snowGrains(77, "Snow grains", WeatherColorScheme.snow, WeatherClipper.snow),
+    73,
+    "Heavy snow fall",
+    WeatherColorScheme.snow,
+    WeatherClipper.snow,
+  ),
+  snowGrains(
+    77,
+    "Snow grains",
+    WeatherColorScheme.snow,
+    WeatherClipper.snow,
+  ),
 
   // Rain showers
   slightRainShower(
-      80, "Slight rain shower", WeatherColorScheme.rain, WeatherClipper.rain),
+    80,
+    "Slight rain shower",
+    WeatherColorScheme.rain,
+    WeatherClipper.rain,
+  ),
   moderateRainShower(
-      81, "Moderate rain shower", WeatherColorScheme.rain, WeatherClipper.rain),
+    81,
+    "Moderate rain shower",
+    WeatherColorScheme.rain,
+    WeatherClipper.rain,
+  ),
   violentRainShower(
-      82, "Violent rain shower", WeatherColorScheme.rain, WeatherClipper.rain),
+    82,
+    "Violent rain shower",
+    WeatherColorScheme.rain,
+    WeatherClipper.rain,
+  ),
 
   // Snow showers
   slightSnowShower(
-      85, "Slight snow shower", WeatherColorScheme.snow, WeatherClipper.snow),
+    85,
+    "Slight snow shower",
+    WeatherColorScheme.snow,
+    WeatherClipper.snow,
+  ),
   heavySnowShower(
-      86, "Heavy snow shower", WeatherColorScheme.snow, WeatherClipper.snow),
+    86,
+    "Heavy snow shower",
+    WeatherColorScheme.snow,
+    WeatherClipper.snow,
+  ),
 
   // Thunder
-  slightOrModerateThunderstorm(95, "Thunderstorm",
-      WeatherColorScheme.thunderstorm, WeatherClipper.thunder),
-  slightThunderstormWithHail(96, "Thunderstorm",
-      WeatherColorScheme.thunderstorm, WeatherClipper.thunder),
-  moderateThunderstormWithHail(99, "Thunderstorm",
-      WeatherColorScheme.thunderstorm, WeatherClipper.thunder),
+  slightOrModerateThunderstorm(
+    95,
+    "Thunderstorm",
+    WeatherColorScheme.thunderstorm,
+    WeatherClipper.thunder,
+  ),
+  slightThunderstormWithHail(
+    96,
+    "Thunderstorm",
+    WeatherColorScheme.thunderstorm,
+    WeatherClipper.thunder,
+  ),
+  moderateThunderstormWithHail(
+    99,
+    "Thunderstorm",
+    WeatherColorScheme.thunderstorm,
+    WeatherClipper.thunder,
+  ),
 
   unknown(
     -1,

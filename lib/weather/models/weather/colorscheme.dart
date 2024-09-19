@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ColorPair {
-  final Color main;
-  final Color accent;
+  final Color primary;
+  final Color secondary;
 
-  const ColorPair(this.main, this.accent);
+  const ColorPair(this.primary, this.secondary);
 }
 
 enum WeatherColorScheme {

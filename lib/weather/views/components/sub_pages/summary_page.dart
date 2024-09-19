@@ -101,7 +101,7 @@ class _SummaryPageState extends State<SummaryPage> {
                                       delegate: SliverChildBuilderDelegate(
                                         (context, index) => ClipOval(
                                           child: Material(
-                                            color: colorPair.accent,
+                                            color: colorPair.secondary,
                                           ),
                                         ),
                                         childCount: 400, // 20 * 20
@@ -123,7 +123,7 @@ class _SummaryPageState extends State<SummaryPage> {
                             style: Theme.of(context)
                                 .textTheme
                                 .displayMedium!
-                                .copyWith(color: colorPair.accent),
+                                .copyWith(color: colorPair.secondary),
                           ),
                         ],
                       ),
@@ -133,35 +133,32 @@ class _SummaryPageState extends State<SummaryPage> {
               ),
               // Bottom Text
               IntrinsicHeight(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: widget.geocoding.selectedForecastItems
-                              .map((e) => _weatherDetailItem(
-                                  context, state, _forecast, e))
-                              .toList(),
-                        ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: widget.geocoding.selectedForecastItems
+                            .map((e) => _weatherDetailItem(
+                                context, state, _forecast, e))
+                            .toList(),
                       ),
-                      const SizedBox(width: 12),
-                      Text(
-                        "${_forecast.getField(SelectableForecastFields.temperature, widget.forecastHour) ?? "XX"}",
-                        key: ValueKey(_forecast.getField(
-                            SelectableForecastFields.temperature,
-                            widget.forecastHour)),
-                        style: Theme.of(context)
-                            .textTheme
-                            .displayLarge!
-                            .copyWith(fontSize: 128, color: colorPair.accent),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      "${_forecast.getField(SelectableForecastFields.temperature, widget.forecastHour) ?? "XX"}",
+                      key: ValueKey(_forecast.getField(
+                          SelectableForecastFields.temperature,
+                          widget.forecastHour)),
+                      style: Theme.of(context)
+                          .textTheme
+                          .displayLarge!
+                          .copyWith(fontSize: 128, color: colorPair.secondary),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -185,13 +182,13 @@ class _SummaryPageState extends State<SummaryPage> {
       clipBehavior: Clip.hardEdge,
       color: Colors.transparent,
       child: InkWell(
-        splashColor: colorPair.main.darkenColor(0.1),
+        splashColor: colorPair.primary.darkenColor(0.1),
         highlightColor: Colors.transparent,
         onTap: provider.isEditing
             ? () => _showSelectedFieldMenu(field, false)
             : null,
         child: DottedBorder(
-          color: provider.isEditing ? colorPair.accent : Colors.transparent,
+          color: provider.isEditing ? colorPair.secondary : Colors.transparent,
           strokeWidth: 3,
           radius: const Radius.circular(8),
           dashPattern: const [4],
@@ -205,7 +202,7 @@ class _SummaryPageState extends State<SummaryPage> {
               children: [
                 Icon(
                   field.icon,
-                  color: colorPair.accent,
+                  color: colorPair.secondary,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -213,7 +210,7 @@ class _SummaryPageState extends State<SummaryPage> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: colorPair.accent,
+                    color: colorPair.secondary,
                   ),
                 ),
               ],
