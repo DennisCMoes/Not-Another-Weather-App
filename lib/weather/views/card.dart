@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:not_another_weather_app/menu/views/main_menu.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/shared/utilities/datetime_utils.dart';
 import 'package:not_another_weather_app/shared/views/overlays/modal_overlay.dart';
+import 'package:not_another_weather_app/shared/views/routes/fade_slide_route.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
 import 'package:not_another_weather_app/weather/models/logics/selectable_forecast_fields.dart';
 import 'package:not_another_weather_app/weather/models/weather/colorscheme.dart';
 import 'package:not_another_weather_app/weather/models/weather/forecast/hourly_weather.dart';
+import 'package:not_another_weather_app/weather/settings.dart';
 import 'package:not_another_weather_app/weather/views/add_geocoding.dart';
 import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_thumb.dart';
 import 'package:not_another_weather_app/weather/views/components/slider/forecast_slider_track.dart';
@@ -22,7 +25,6 @@ import 'package:provider/provider.dart';
 class GeocodingCard extends StatefulWidget {
   final PageController pageController;
   final Geocoding geocoding;
-  final int index;
   final bool isEditing;
   final ValueSetter<bool> onPressEdit;
 
@@ -30,7 +32,6 @@ class GeocodingCard extends StatefulWidget {
     this.geocoding, {
     super.key,
     required this.pageController,
-    required this.index,
     required this.isEditing,
     required this.onPressEdit,
   });
@@ -101,23 +102,14 @@ class GeocodingCardState extends State<GeocodingCard> {
     }
   }
 
-  void _openAddGeocoding() async {
-    final pageIndex = await Navigator.of(context).push(
-          ModalOverlay(
-            overlayChild: const AddGeocodingCard(),
-          ),
-        ) ??
-        -1;
+  void _openSettings() {
+    Navigator.of(context).push(FadeSlideRoute(page: const SettingsScreen()));
+  }
 
+  void _openMainMenu() {
     widget.onPressEdit(false);
-
-    if (pageIndex != -1) {
-      widget.pageController.animateToPage(
-        pageIndex,
-        duration: transitionDuration,
-        curve: Curves.easeInOutQuint,
-      );
-    }
+    Navigator.of(context)
+        .push(FadeSlideRoute(page: MainMenuScreen(widget.pageController)));
   }
 
   void _onSelectField(
@@ -178,8 +170,12 @@ class GeocodingCardState extends State<GeocodingCard> {
                 // Center clipper
                 Align(
                   alignment: Alignment.center,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 80.0),
+                  child: AnimatedPadding(
+                    duration: transitionDuration,
+                    curve: Curves.easeInOutQuint,
+                    padding: EdgeInsets.only(
+                      bottom: widget.isEditing ? 140.0 : 80.0,
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -306,19 +302,19 @@ class GeocodingCardState extends State<GeocodingCard> {
               Row(
                 children: [
                   IconButton(
-                    onPressed: _openAddGeocoding,
+                    onPressed: () => widget.onPressEdit(!widget.isEditing),
                     visualDensity: VisualDensity.compact,
                     icon: Icon(
-                      Icons.add,
+                      widget.isEditing ? Icons.edit_off : Icons.edit,
                       color:
                           widget.isEditing ? Colors.black : colorPair.secondary,
                     ),
                   ),
                   IconButton(
-                    onPressed: () => widget.onPressEdit(!widget.isEditing),
+                    onPressed: _openMainMenu,
                     visualDensity: VisualDensity.compact,
                     icon: Icon(
-                      widget.isEditing ? Icons.edit_off : Icons.edit,
+                      Icons.more_vert,
                       color:
                           widget.isEditing ? Colors.black : colorPair.secondary,
                     ),
@@ -363,54 +359,48 @@ class GeocodingCardState extends State<GeocodingCard> {
                         children: [
                           widget.geocoding.isCurrentLocation
                               ? const SizedBox.shrink()
-                              : Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    TextButton.icon(
-                                      onPressed: _openDeletionConfirmation,
-                                      style: TextButton.styleFrom(
-                                        backgroundColor:
-                                            colorPair.primary.darkenColor(0.1),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      label: Text(
-                                        "Remove",
-                                        style: context.textTheme.displaySmall!
-                                            .copyWith(
-                                                color: colorPair.secondary),
-                                      ),
-                                      icon: Icon(
-                                        Icons.delete,
-                                        color: colorPair.secondary,
+                              : Expanded(
+                                  child: TextButton.icon(
+                                    onPressed: _openDeletionConfirmation,
+                                    style: TextButton.styleFrom(
+                                      backgroundColor:
+                                          colorPair.primary.darkenColor(0.1),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
-                                  ],
+                                    label: Text(
+                                      "Remove",
+                                      style: context.textTheme.displaySmall!
+                                          .copyWith(color: colorPair.secondary),
+                                    ),
+                                    icon: Icon(
+                                      Icons.delete,
+                                      color: colorPair.secondary,
+                                    ),
+                                  ),
                                 ),
-                          Expanded(
-                            child: TextButton.icon(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(
-                                backgroundColor:
-                                    colorPair.primary.darkenColor(0.1),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              icon: Icon(
-                                Icons.edit,
-                                color: colorPair.secondary,
-                              ),
-                              label: Text(
-                                "Edit",
-                                style: context.textTheme.displaySmall!
-                                    .copyWith(color: colorPair.secondary),
-                              ),
-                            ),
-                          ),
+                          // Expanded(
+                          //   child: TextButton.icon(
+                          //     onPressed: _openSettings,
+                          //     style: TextButton.styleFrom(
+                          //       backgroundColor:
+                          //           colorPair.primary.darkenColor(0.1),
+                          //       shape: RoundedRectangleBorder(
+                          //         borderRadius: BorderRadius.circular(12),
+                          //       ),
+                          //     ),
+                          //     icon: Icon(
+                          //       Icons.settings,
+                          //       color: colorPair.secondary,
+                          //     ),
+                          //     label: Text(
+                          //       "Settings",
+                          //       style: context.textTheme.displaySmall!
+                          //           .copyWith(color: colorPair.secondary),
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       ),
                     )

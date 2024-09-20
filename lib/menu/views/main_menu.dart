@@ -1,20 +1,19 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:not_another_weather_app/main.dart';
 import 'package:not_another_weather_app/shared/extensions/color_extensions.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
-import 'package:not_another_weather_app/weather/controllers/providers/forecast_card_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
 import 'package:not_another_weather_app/weather/models/geocoding.dart';
-import 'package:not_another_weather_app/weather/views/home.dart';
-import 'package:not_another_weather_app/menu/views/geocoding_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainMenuScreen extends StatefulWidget {
-  const MainMenuScreen({super.key});
+  final PageController pageController;
+
+  const MainMenuScreen(this.pageController, {super.key});
 
   @override
   State<MainMenuScreen> createState() => _MainMenuScreenState();
@@ -24,7 +23,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   late FocusNode _focusNode;
   late TextEditingController _textEditingController;
   late WeatherProvider _weatherProvider;
-  late ForecastCardProvider _cardProvider;
 
   final GeocodingRepo _geocodingRepo = GeocodingRepo();
 
@@ -39,7 +37,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     super.initState();
 
     _weatherProvider = context.read<WeatherProvider>();
-    _cardProvider = context.read<ForecastCardProvider>();
 
     _focusNode = FocusNode();
     _textEditingController = TextEditingController();
@@ -76,41 +73,21 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
   void _goToPage(int pageIndex) {
     HapticFeedback.lightImpact();
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 400),
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return HomeScreen(initialIndex: pageIndex);
-        },
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: ScaleTransition(
-              scale: Tween<double>(begin: 0.8, end: 1.0).animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeInOut,
-                ),
-              ),
-              child: child,
-            ),
-          );
-        },
-      ),
-    );
-
-    _cardProvider.setGeocoding(_weatherProvider.geocodings[pageIndex]);
+    widget.pageController.jumpToPage(pageIndex);
+    Navigator.of(context).pop();
   }
 
   void _selectNewGeocoding(Geocoding geocoding) async {
-    int index = _weatherProvider.geocodings.indexOf(geocoding);
+    int index = _weatherProvider.geocodings.indexWhere(
+      (geo) => geo.id == geocoding.id,
+    );
 
     if (index == -1) {
-      await _weatherProvider.addGeocoding(geocoding);
-      _goToPage(_weatherProvider.geocodings.length - 1);
-    } else {
-      _goToPage(index);
+      _weatherProvider.addGeocoding(geocoding);
+      index = _weatherProvider.geocodings.length - 1;
     }
+
+    _goToPage(index);
   }
 
   void _removeGeocoding(Geocoding geocoding) {
@@ -128,21 +105,58 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: RawGestureDetector(
-          gestures: {
-            SerialTapGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                SerialTapGestureRecognizer>(
-              SerialTapGestureRecognizer.new,
-              (instance) {
-                instance.onSerialTapDown = (details) {
-                  if (details.count == 3) {
-                    context.read<WeatherProvider>().addDummyData();
-                  }
-                };
-              },
-            )
-          },
-          child: const Text("Yet Another Weather App"),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          visualDensity: VisualDensity.compact,
+          icon: const Icon(TablerIcons.chevron_down),
+        ),
+        title: Container(
+          height: 30,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _textEditingController,
+                  focusNode: _focusNode,
+                  onTapOutside: (event) =>
+                      FocusScope.of(context).requestFocus(FocusNode()),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Search...",
+                  ),
+                ),
+              ),
+              _hasValue
+                  ? const SizedBox.shrink()
+                  : GestureDetector(
+                      onTapDown: (details) => _setEditing(true),
+                      onTapCancel: () => _setEditing(false),
+                      onTapUp: (details) => _setEditing(false),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() {
+                          _isEditing = !_isEditing;
+                        });
+                      },
+                      child: Text(
+                        _isEditing ? "Done" : "Edit",
+                        style:
+                            Theme.of(context).textTheme.displaySmall!.copyWith(
+                                  color: _isPressingEdit
+                                      ? Colors.black45
+                                      : Colors.black,
+                                ),
+                      ),
+                    ),
+            ],
+          ),
         ),
       ),
       body: GestureDetector(
@@ -150,68 +164,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           builder: (context, state, child) {
             return SafeArea(
               bottom: false,
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ColoredBox(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.6,
-                            child: TextField(
-                              controller: _textEditingController,
-                              focusNode: _focusNode,
-                              textInputAction: TextInputAction.newline,
-                              onTapOutside: (event) => FocusScope.of(context)
-                                  .requestFocus(FocusNode()),
-                              decoration: const InputDecoration.collapsed(
-                                border: InputBorder.none,
-                                hintText: "Search...",
-                              ),
-                            ),
-                          ),
-                          _hasValue
-                              ? const SizedBox.shrink()
-                              : GestureDetector(
-                                  onTapDown: (details) => _setEditing(true),
-                                  onTapCancel: () => _setEditing(false),
-                                  onTapUp: (details) => _setEditing(false),
-                                  onTap: () {
-                                    HapticFeedback.lightImpact();
-                                    setState(() {
-                                      _isEditing = !_isEditing;
-                                    });
-                                  },
-                                  child: Text(
-                                    _isEditing ? "Done" : "Edit",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .displaySmall!
-                                        .copyWith(
-                                          color: _isPressingEdit
-                                              ? Colors.black45
-                                              : Colors.black,
-                                        ),
-                                  ),
-                                ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child:
-                        _hasValue ? _searchingLayout() : _nonSearchingLayout(),
-                  )
-                ],
-              ),
+              child: _hasValue ? _searchingLayout() : _nonSearchingLayout(),
             );
           },
         ),
@@ -219,63 +172,58 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     );
   }
 
-  Widget _geocodingTile2(Geocoding geocoding, int index) {
+  Widget _geocodingTile(Geocoding geocoding, int index) {
     final colorPair = geocoding.forecast.getColorPair();
 
-    return Hero(
-      tag: 'geocoding-${geocoding.id}',
+    return ListTile(
       key: ValueKey(geocoding),
-      child: Material(
-        child: ListTile(
-          onTap: () => _goToPage(index),
-          dense: true,
-          tileColor: colorPair.main,
-          splashColor: colorPair.main.lightenColor(0.1),
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Flexible(
-                child: Text(
-                  geocoding.name,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context)
-                      .textTheme
-                      .displayMedium!
-                      .copyWith(color: colorPair.accent),
-                ),
-              ),
-              const SizedBox(width: 6),
-              geocoding.isCurrentLocation
-                  ? Icon(Icons.near_me, color: colorPair.accent)
-                  : const SizedBox.shrink(),
-            ],
+      onTap: () => _goToPage(index),
+      dense: true,
+      tileColor: colorPair.primary,
+      splashColor: colorPair.primary.lightenColor(0.1),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Flexible(
+            child: Text(
+              geocoding.name,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context)
+                  .textTheme
+                  .displayMedium!
+                  .copyWith(color: colorPair.secondary),
+            ),
           ),
-          subtitle: Text(
-            geocoding.forecast.getCurrentHourData().weatherCode.description,
-            style: Theme.of(context)
-                .textTheme
-                .displaySmall!
-                .copyWith(color: colorPair.accent.withOpacity(0.6)),
-          ),
-          leading: _isEditing && !geocoding.isCurrentLocation
-              ? Icon(Icons.drag_indicator, color: colorPair.accent)
-              : null,
-          trailing: _isEditing && !geocoding.isCurrentLocation
-              ? IconButton(
-                  onPressed: () => _removeGeocoding(geocoding),
-                  visualDensity: VisualDensity.compact,
-                  icon: Icon(Icons.delete, color: colorPair.accent),
-                )
-              : Text(
-                  "${geocoding.forecast.getCurrentHourData().temperature.round()}º",
-                  style: Theme.of(context)
-                      .textTheme
-                      .displayMedium!
-                      .copyWith(color: colorPair.accent),
-                ),
-        ),
+          const SizedBox(width: 6),
+          geocoding.isCurrentLocation
+              ? Icon(Icons.near_me, color: colorPair.secondary)
+              : const SizedBox.shrink(),
+        ],
       ),
+      subtitle: Text(
+        geocoding.forecast.getCurrentHourData().weatherCode.description,
+        style: Theme.of(context)
+            .textTheme
+            .displaySmall!
+            .copyWith(color: colorPair.secondary.withOpacity(0.6)),
+      ),
+      leading: _isEditing && !geocoding.isCurrentLocation
+          ? Icon(Icons.drag_indicator, color: colorPair.secondary)
+          : null,
+      trailing: _isEditing && !geocoding.isCurrentLocation
+          ? IconButton(
+              onPressed: () => _removeGeocoding(geocoding),
+              visualDensity: VisualDensity.compact,
+              icon: Icon(Icons.delete, color: colorPair.secondary),
+            )
+          : Text(
+              "${geocoding.forecast.getCurrentHourData().temperature.round()}º",
+              style: Theme.of(context)
+                  .textTheme
+                  .displayMedium!
+                  .copyWith(color: colorPair.secondary),
+            ),
     );
   }
 
@@ -292,33 +240,111 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     final state = context.read<WeatherProvider>();
 
     return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.only(bottom: context.padding.bottom),
-      child: GridView.builder(
-        shrinkWrap: true,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        itemCount: state.geocodings.length,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-        ),
-        itemBuilder: (context, index) => GeocodingTile(
-          pageIndex: index,
-          geocoding: state.geocodings[index],
-          isEditing: _isEditing,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Column(
+            children: [
+              ReorderableListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                header: _geocodingTile(state.geocodings[0], 0),
+                onReorder: (oldIndex, newIndex) {
+                  if (newIndex > oldIndex) {
+                    newIndex -= 1;
+                  }
+
+                  state.moveGeocodings(oldIndex + 1, newIndex + 1);
+                },
+                buildDefaultDragHandles: _isEditing,
+                children: [
+                  for (int i = 1; i < state.geocodings.length; i++)
+                    _geocodingTile(state.geocodings[i], i)
+                ],
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                width: MediaQuery.of(context).size.width - 200,
+                child: const Text(
+                  "Use the searchbar to search for more locations",
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _searchingLayout() {
+    String label = _textEditingController.text.isEmpty
+        ? "Type the name of an location"
+        : "No locations found";
+
     if (_searchedGeocodings.isEmpty) {
-      return Center(
-        child: Text(
-          "No matching locations",
-          style: context.textTheme.displayMedium,
+      return Padding(
+        padding: const EdgeInsets.only(top: 64.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Column(
+              children: [
+                Material(
+                  color: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(
+                      width: 1,
+                      color: Colors.grey[400]!,
+                    ),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Icon(
+                      TablerIcons.map_x,
+                      size: 32,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    label,
+                    style: context.textTheme.displaySmall,
+                  ),
+                ),
+                _textEditingController.text.isEmpty
+                    ? const SizedBox.shrink()
+                    : Text(
+                        "\"${_textEditingController.text}\" did not match any location.\nPlease try again",
+                        textAlign: TextAlign.center,
+                      ),
+                _textEditingController.text.isEmpty
+                    ? const SizedBox.shrink()
+                    : TextButton(
+                        onPressed: () {
+                          _textEditingController.clear();
+                        },
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            side:
+                                const BorderSide(width: 1, color: Colors.grey),
+                          ),
+                        ),
+                        child: const Text(
+                          "Clear search",
+                          style: TextStyle(
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
+              ],
+            ),
+          ],
         ),
       );
     } else {
