@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-class ModalOverlay extends ModalRoute<void> {
+class ModalOverlay<T> extends ModalRoute<T> {
   final Widget overlayChild;
   final bool isDismissible;
   final Duration durationOfTransition;
@@ -32,8 +32,12 @@ class ModalOverlay extends ModalRoute<void> {
   Duration get transitionDuration => durationOfTransition;
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     return FadeTransition(
       opacity: animation,
       child: BackdropFilter(
@@ -47,8 +51,11 @@ class ModalOverlay extends ModalRoute<void> {
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
     return Material(
       type: MaterialType.transparency,
       child: overlayChild,

@@ -34,14 +34,6 @@ class _ForecastListScreenState extends State<ForecastListScreen> {
     });
   }
 
-  void _goToAddGeocoding(int pageIndex) {
-    _pageController.animateToPage(
-      pageIndex,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOutQuint,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<WeatherProvider>(
@@ -63,20 +55,13 @@ class _ForecastListScreenState extends State<ForecastListScreen> {
                       _pageIndex = value;
                     });
                   },
-                  itemBuilder: (context, index) {
-                    return AnimatedBuilder(
-                      animation: _pageController,
-                      builder: (context, child) {
-                        return GeocodingCard(
-                          state.geocodings[index],
-                          pageController: _pageController,
-                          index: index,
-                          isEditing: _isShowingEditMenu,
-                          onPressEdit: _setShowingMenu,
-                        );
-                      },
-                    );
-                  },
+                  itemBuilder: (context, index) => GeocodingCard(
+                    state.geocodings[index],
+                    pageController: _pageController,
+                    index: index,
+                    isEditing: _isShowingEditMenu,
+                    onPressEdit: _setShowingMenu,
+                  ),
                 ),
               ],
             ),

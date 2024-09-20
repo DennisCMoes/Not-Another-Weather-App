@@ -10,8 +10,11 @@ class SelectableWidgetGrid extends StatefulWidget {
   final Geocoding geocoding;
   final SelectableForecastFields fieldToReplace;
 
-  const SelectableWidgetGrid(
-      {required this.fieldToReplace, required this.geocoding, super.key});
+  const SelectableWidgetGrid({
+    required this.fieldToReplace,
+    required this.geocoding,
+    super.key,
+  });
 
   @override
   State<SelectableWidgetGrid> createState() => _SelectableWidgetGridState();
@@ -110,18 +113,23 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
                         child: _fieldCard(state, forecastField),
                         builder: (context, child) {
                           final animation = Tween<Offset>(
-                                  begin: const Offset(0, 0.1), end: Offset.zero)
-                              .animate(CurvedAnimation(
-                            parent: _animationController,
-                            curve: Interval(
-                              index / SelectableForecastFields.values.length,
-                              1.0,
-                              curve: Curves.easeOut,
+                            begin: const Offset(0, 0.1),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _animationController,
+                              curve: Interval(
+                                index / SelectableForecastFields.values.length,
+                                1.0,
+                                curve: Curves.easeOut,
+                              ),
                             ),
-                          ));
+                          );
 
-                          final opacity = Tween<double>(begin: 0.0, end: 1.0)
-                              .animate(CurvedAnimation(
+                          final opacity = Tween<double>(
+                            begin: 0.0,
+                            end: 1.0,
+                          ).animate(CurvedAnimation(
                             parent: _animationController,
                             curve: Interval(
                               (index / SelectableForecastFields.values.length),
@@ -151,16 +159,14 @@ class _SelectableWidgetGridState extends State<SelectableWidgetGrid>
   }
 
   Widget _fieldCard(
-      ForecastCardProvider provider, SelectableForecastFields forecastField) {
+    ForecastCardProvider provider,
+    SelectableForecastFields forecastField,
+  ) {
     int index = widget.geocoding.selectedForecastItems.indexOf(forecastField);
     bool isCurrentField = forecastField == widget.fieldToReplace;
 
     void onClick() {
       HapticFeedback.lightImpact();
-      provider.replaceSecondaryField(
-          widget.geocoding, widget.fieldToReplace, forecastField);
-
-      provider.setIsEditing(false);
       Navigator.of(context).pop(forecastField);
     }
 
