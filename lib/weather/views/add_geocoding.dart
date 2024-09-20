@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:not_another_weather_app/shared/extensions/context_extensions.dart';
 import 'package:not_another_weather_app/weather/controllers/providers/weather_provider.dart';
 import 'package:not_another_weather_app/weather/controllers/repositories/geocoding_repo.dart';
@@ -68,61 +69,141 @@ class _AddGeocodingCardState extends State<AddGeocodingCard> {
           .indexWhere((element) => element.id == geocoding.id);
     }
 
-    // Navigator.of(context).pop(index);
-    Navigator.pop(context, index);
+    _popNavigator(index);
+  }
+
+  void _popNavigator(int index) {
+    Navigator.of(context).pop(index);
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: NavigationToolbar.kMiddleSpacing,
         ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            child: Column(
               children: [
-                Text(
-                  "Add Geolocation",
-                  style: context.textTheme.displayMedium!.copyWith(
-                    color: Colors.white,
+                // Search Input
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _editingController,
+                          focusNode: _focus,
+                          onTapOutside: _onTapOutsideKeyboard,
+                          decoration: const InputDecoration(
+                            icon: Icon(TablerIcons.search),
+                            // hintText: "Type a name of an location",
+                            hintText: "Search",
+                            border: InputBorder.none,
+                            isCollapsed: true,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
                   ),
                 ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  visualDensity: VisualDensity.compact,
-                  highlightColor: Colors.white24,
-                  icon: const Icon(
-                    Icons.close,
-                    color: Colors.white,
+                const Divider(),
+                // List of locations
+                Expanded(
+                  child: Builder(
+                    builder: (context) {
+                      String label = _editingController.text.isEmpty
+                          ? "Type a name of an location"
+                          : "No locations found";
+
+                      if (_searchedGeocodings.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 64.0),
+                          child: Column(
+                            children: [
+                              Material(
+                                color: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: BorderSide(
+                                    width: 1,
+                                    color: Colors.grey[400]!,
+                                  ),
+                                ),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(12.0),
+                                  child: Icon(
+                                    TablerIcons.map_2,
+                                    size: 32,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(
+                                  label,
+                                  style: context.textTheme.displaySmall,
+                                ),
+                              ),
+                              _editingController.text.isEmpty
+                                  ? const SizedBox.shrink()
+                                  : Text(
+                                      "\"${_editingController.text}\" did not match any location.\nPlease try again",
+                                      textAlign: TextAlign.center,
+                                    ),
+                              _editingController.text.isEmpty
+                                  ? const SizedBox.shrink()
+                                  : TextButton(
+                                      onPressed: () {
+                                        _editingController.clear();
+                                      },
+                                      style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                          side: const BorderSide(
+                                              width: 1, color: Colors.grey),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        "Clear search",
+                                        style: TextStyle(
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                    ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          shrinkWrap: true,
+                          itemCount: _searchedGeocodings.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 6),
+                          itemBuilder: (context, index) =>
+                              _searchedGeocodingTile(
+                                  _searchedGeocodings[index]),
+                        );
+                      }
+                    },
                   ),
                 ),
               ],
             ),
-            TextField(
-              controller: _editingController,
-              focusNode: _focus,
-              onTapOutside: _onTapOutsideKeyboard,
-              decoration: InputDecoration(
-                hintText: "Location name",
-                fillColor: Colors.white,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _searchedGeocodings.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 6),
-              itemBuilder: (context, index) =>
-                  _searchedGeocodingTile(_searchedGeocodings[index]),
-            )
-          ],
+          ),
         ),
       ),
     );
